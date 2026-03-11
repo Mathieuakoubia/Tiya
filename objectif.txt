@@ -1,0 +1,100 @@
+Routines 21 Janvier 2025 
+
+J’aime bien le nom de « Protocoles de Resilience » pour qualifier le mot Routine ; ou l’on peut utiliser les deux. le Routines de TIYIA dont les seuls a interagir quand on compare a ce qui existe pour le moment fin 2025
+Déblocage progressif : Il faudrait Commencer avec 3 routines simples accessibles gratuitement. Les autre routines de Squad ou de Twin qui sont en théorie plus avancées ne se débloquent qu'après 10 jours de pratique
+Il faut créer des paliers ("Maîtresse de l'Aura", "Gardienne du Squad" etc..). Il faudrait réaliser le Design des variantes visuelles de l'Aura que seules les utilisatrices fidèles possèdent
+Il faut prevoir que tous les 3 mois, Lucile/Victor/ ou Josephine ? change l’enveloppe des 12 routines (Aura hivernale, Aura printanière etc ;;, ) seront différentes
+
+Idées de routines novatrices :
+N.B. il faut refaire un selfie (le "Post-Check") juste après chaque routine
+Si l'utilisatrice fournit un effort (respiration, nettoyage d'aura), elle a besoin de voir que son score a baissé. Passer de 85/100 (Rouge ?) à 40/100 (Bleu ?)( Ici Lucile il faudra voir ave Josephine ?) en 3 minutes est le moteur de l'addiction positive à TIYIA ;
+Par conséquent il faut déclencher un appel API léger vers Hume automatiquement à la fin de chaque routine pour realiser un nouveau selfie. Il faudrait afficher le comparatif "Avant/Après" avec une animation de célébration si le score a baissé de plus de 20 points. 
+Aussi a noter : C'est le selfie de fin qui déclenche la notification aux amies ; « Martine vient de finir sa routine, son stress a baissé de 30%. Bravo ! »
+Le "Check du lendemain" : objectif different
+Le selfie du lendemain (ou du matin suivant) ne remplace pas celui d'après-routine
+I)	Post-Routine : Mesure l'efficacité de l'exercice (a court terme)
+II)	Le Matin : Mesure l'état de base et définit la couleur de l'Aura pour la journée (pour le long terme)
+Concernent le Post routine :il faudrait un pop up de victoire ; par exemple une explosion de particules (couleurs apaisantes) ; Mission réussie, [Prénom] ! ✨Votre énergie s'est stabilisée. Vous avez réduit votre indicateur de stress de X %
+Message d'IA /ARIA : "Votre système est désormais recalibré pour la suite de votre journée. Le Guardian Mode a validé votre disponibilité
+Il faut un lien avec le Squad : créer un gros bouton : "Partager ma réussite au Squad 🛡️" et automatiser une notification aux 4 amies : Félicitez Veronique ! Elle vient de terminer son Reset et son Aura est de nouveau au vert
+Pour que ce pop-up soit parfait, il doit apparaître exactement après le second selfie ; assurer que le calcul de la différence entre le score "Avant" et "Après" est prêt en moins d'une seconde pour ne pas optimiser l'émotion.
+
+Point de départ dès que l'appli s'ouvre.
+-L'utilisatrice fait son "Selfie Flash" via Hume
+-L'appli reçoit un chiffre (ex: 85/100).
+-L'écran affiche une Aura rouge et agitée
+Tiyia ( L’IA) je propose de faire entre ARIA en tant que nom definitif de L’IA de TIYIA et  dit : "Score élevé. Prenons 3 minutes pour un Reset Flash."
+
+
+RESET FLASH (utilisé en 12)) et potentiellement en test gratuit
+Le design et le developpement doivent avancer sur le meme ecran.
+Parcour de l’utilisatrice 
+a)	L'utilisatrice fait son "Selfie Flash". 
+b)	L'appli reçoit un chiffre (exemple : 85/100)
+c)	L'écran affiche une Aura rouge et agitée
+d)	Tiyia dit « Score élevé. Prenons 3 minutes pour un Reset Flash »
+e)	Par exemple Lucile affiche les deux ronds (que l’on a défini pour l’Aura il y a 1 mois donc a revoir ?) qui gonfle et dégonfle au milieu de l’écran (pour marquer la respiration), Victor active la caméra du téléphone ( via MLKit)
+f)	Il faut que Victor regarde juste si l'utilisatrice respire bien en suivant la bulle de Lucile. Si Victor détecte que l’utilisatrice respire au bon rythme tu envoies un signal visuel a Lucile
+g)	Immédiatement, l'Aura de Lucile devient plus lumineuse, plus bleue par exemple
+L’idée est que l'utilisatrice voit en temps réel que son effort "répare" son Aura
+
+La routine de 3 minutes est fini .
+h) L’utilisatrice refait une analyse selfie rapide 
+I) L'écran affiche : "Bravo, votre score est passé de 85 à 40"
+J) L’Aura est devenue bleu ?/calme, l’utilsatrice voit sa reussite
+K) le Squad ( les 4 autres alies) reçoit une petite notification : "Martine a retrouvé son calme". 
+.
+Exemple Routine Seule : L'Aura de Lucile change de couleur quand Victor voit que l'utilisatrice s'apaise
+Exemple Routine Twin : Si Victor voit que Martine et son amie respirent en même temps, Lucile fait fusionner leurs deux Auras à l'écran ( du coup il faudrait reflechir avec Josephine si l’on utilise deux cercles disctincts pour definir l’Aura pour avoir la possibilité de les entrecroisés lorsuqe deux utilisatrices respirent en meme temps)
+
+1)	Routines pour Utilisatrice Seule (Focus : ARIA & Bio-feedback)
+4 routines pour se soigner soi-même
+Ces routines utilisent l'IA ARIA comme guide. Elles sont disponibles immédiatement, même si le réseau social n'est pas encore actif.
+Donc ici il faut suivre l’exemple de « flow » et « wild journey »
+1.	L’Aura-Cleaning (Réalité Augmentée) : L'utilisatrice voit son visage entouré d'une "brume" colorée (son score de stress). Elle doit utiliser ses mains pour pousser ou frotter la brume hors de l'écran. La caméra détecte les mouvements et nettoie l'Aura en temps réel. On active la caméra en local avec MLKit/OpenCV pour surveiller si l'utilisatrice bouge ou respire. Il faut regarder « Spline Design » ou les « Mesh Gradients » sur Framer. Ce sont des fonds d'écran "liquides" qui bougent. Parait-il que l’on peut piloter la vitesse de ce liquide. Il faut regarder la démo de "Google MLKit Face Detection". On peut voir que le téléphone sait tracer des points sur le visage en temps réel sans envoyer de données sur un serveur. C'est ce tracé qui va piloter l'Aura.
+Victor si tu vois la main de l'utilisatrice passer sur la zone X, alors ton code doit effacer 10% de la brume rouge à cet endroit précis par exemple ; il faut suivre les coordonnées (X,Y) des mains via la caméra. Et Il faut envoyer un signal "Zone nettoyée" dès qu'une zone est balayée
+
+2.	Saccadic Reset (Nettoyage Oculaire ou balayage oculaire EMDR) : Inspiré de l'EMDR (Eye Movement Desensitization and Reprocessing est une méthode thérapeutique reconnue mondialement, initialement conçue pour traiter les traumatismes). Une bille lumineuse parcourt l'écran de gauche a droite, à une vitesse calculée par l'IA selon le score de stress. L'utilisatrice suit la bille du regard. La caméra vérifie la précision de la poursuite oculaire pour valider le "reset" cognitif. Il faut utiliser l'Eye-Tracking. Si les yeux quittent la bille, il stoppe la bille. Si le regard est fixe, il augmente progressivement la vitesse ; il faut animer la trajectoire de la bille. Plus l'utilisatrice est précise, plus la bille laisse une traînée lumineuse apaisante derrière elle.
+On peut ajouter un petit son spatialisé (gauche/droite) dans les écouteurs pour renforcer l'effet. A verifier .
+3.	Vagal-Haptic (Résonance Corporelle ou Le pouce apaisant) : possibilité 1) L'utilisatrice pose son pouce sur une "Zone de Contact" virtuelle au bas de l'écran. L'utilisatrice pose son pouce sur une zone circulaire a définir. Il faut dessiner un cercle organique (type onde de choc) qui part du point où le pouce est posé. Le téléphone émet des vibrations à une fréquence précise (7-10 Hz). Il active le moteur haptique (vibrations) à 6 cycles par minute. le Haptic Engine de l'iPhone pour générer des micro-vibrations (Taptic Engine). Ces vibrations imitent la sensation d'un battement de cœur directement sous le pouce. Elle doit calquer son souffle sur une vibration. Si le pouce quitte l'écran, la routine se met en pause, avec un pop up ? « contact rompu » ?
+Possibilité 2 : Le Capteur de Proximité : On demande à l'utilisatrice de porter le téléphone contre sa poitrine (au niveau du sternum). Il faut utilise l'accéléromètre pour capter les micro-mouvements de la respiration, et envoyer des sons apaisants.
+Possibilité 3 : La Caméra Arrière (PPG) : L'utilisatrice pose son doigt sur l'objectif de la caméra arrière. Il faut analyser les changements de couleur de la pulpe du doigt (flux sanguin) pour mesurer le rythme cardiaque. Et du coup faire battre toute l'Aura à l'écran au rythme exact du cœur.
+4.	Cognitive Sorting (Décharge Mentale ou Le vide-poubelle mental) : Une pluie d'icônes symbolisant le stress (tâches, emails, bruits) tombe sur l'écran. Il faut les jeter hors de l'écran. L'utilisatrice les "balaye" vers une corbeille virtuelle. L'IA analyse la force et la rapidité du balayage pour ajuster la fin de la séance. Chaque icône jetée déclenche une petite étincelle « pop » et l'Aura globale s'éclaircit de 5% à chaque objet supprimé. Il faut gèrer la physique des objets (drag & drop) et calculer la vitesse d'éjection.
+________________________________________
+2)	Routines pour Twin (Focus : Synchronisation & Match)
+4 routines pour se connecter à sa Twin
+Ces routines nécessitent deux personnes connectées simultanément (Amie du Squad ou membre de la communauté).
+le défi est de faire ressentir la présence de l'autre sans passer par la vidéo
+exemple : locket widget pour la synchronisation ; digital Touch sur apple watch
+https://www.youtube.com/shorts/ym-u0BNuTJ8
+
+5.	Twin-Coherence (Respiration Miroir ou fusion des souffles) : Les deux Twins voient un cercle qui gonfle. Si elles respirent au même rythme (mesuré via le micro ou le doigt sur l'objectif), leurs deux Auras fusionnent à l'écran pour devenir une seule grosse sphère lumineuse dorée ( ou autre couleur). Il faut synchroniser les données de respiration des deux téléphones via WebSocket. Et calculer l'écart de phase (si elles sont en même temps)
+6.	The High-Five (Feedback Haptique Synchrone ou Le contact à distance) : Un compte à rebours : 3, 2, 1... Touchez ! ; À la fin d'une séance difficile, les deux Twins doivent toucher une zone précise de l'écran en même temps. Si le timing est parfait (au millième de seconde), les deux téléphones vibrent de façon identique, créant un lien tactile à distance et déclenche une animation de "fusion" qui donne l'impression que l'écran explose de lumière chez les deux. Il faut détecter le "Tap" à la milliseconde près sur les deux appareils
+7.	Aura-Exchange (Le Don d'Énergie ou Le transfert d'énergie) : Si une Twin a un score "Orange" et l'autre "Vert", la Twin sereine peut "envoyer" de la lumière vers l'autre en glissant son doigt vers le haut. L'Aura de la Twin stressée change de couleur instantanément sur son propre écran. Une traînée de lumière quitte l'écran de l'une pour entrer dans l'écran de l'autre et colorer son Aura ;
+8.	Bio-Ambient Duo (Musique Générative ou Le silence partagé) : L'IA crée une mélodie dont les instruments dépendent des scores combinés des deux Twins. Si elles se calment ensemble, la musique s'enrichit de nouvelles harmonies en temps réel. Et/Ou bien on pourrait en rajouter une autre :Rester en silence ensemble pendant 1 minute. Analyse le micro des deux téléphones. Si le niveau de décibels monte, le chrono s'arrête. En fond d’ecran, une mer calme. Si quelqu'un parle, des vagues agitées apparaissent. Si le silence dure, l'image devient un miroir parfait
+________________________________________
+3)	Routines pour SQUAD (Focus : Unité de Performance & Support)
+4 routines pour protéger son groupe
+Le Squad n'est pas un chat, c'est un Statut.
+Ces routines impliquent tout le groupe (5 personnes) de manière asynchrone ou semi-synchrone.
+9.	Squad-Pulse (Le Cœur du Groupe ou Le battement du Cœur) : objectif : Voir l'état de son groupe sans texte. Nous utilisons un widget ou un tableau de bord qui montre les 5 pulsations lumineuses. Chaque membre "pulse" selon son niveau d'énergie actuel. Plus une amie est stressée, plus son impulsion est rapide et rouge. C'est pour une visualisation silencieuse du bien-être du groupe qui incite à l'entraide sans message texte. Il faut Récupèrer les scores Hume récents des 5 membres
+10.	The Intention Wheel (La roue des succès) : Chaque membre choisit un mot-clé de résilience pour la journée (ex: "Calme", "Force"etc). Les mots s'affichent sur une roue commune. Quand une utilisatrice réussit une routine, son mot "brille" sur le téléphone de tout le Squad. Quand les 5 sections brillent, le logo TIYIA au centre devient étincelant
+11.	Audio-Capsule (Le Murmure de Sécurité ou Le message de secours) : Une utilisatrice peut enregistrer 10 secondes de "soutien vocal"(ex: "Respire, je pense à toi, tu es capable de gérer ça)". L'IA ARIA ne débloque ce message pour les autres membres du Squad que lorsque le TIYIA détecte un pic de stress majeur chez elles et/ou il faudrait déverrouiller le fichier audio que si le score Hume actuel est > 70 et / ou si Le Guardian Mode voit un agenda surchargé et une fréquence cardiaque qui monte. La capsule apparaît comme une bulle lumineuse qui palpite au centre de l'Aura. Quand l'utilisatrice l'écoute, l'Aura change de texture pour devenir plus protectrice visuellement.
+12.	The Collective Shield (Défi de Résilience) : Si le stress moyen du Squad est trop élevé (période de rush) sup a 60 (par exemple), l'IA lance un "Bouclier". Le Squad gagne des points si chaque membre effectue au moins un "Reset Flash" dans la journée. Un dôme protecteur au-dessus des avatars du Squad qui se solidifie à chaque routine terminée par un membre. Un badge "Squad Invincible/collective shield" est débloqué.
+
+Il faudrait créer  les animations de l'Aura sur After Effects se exporter sur les animations Lottie  (fichiers d'animation ultra-légers pour mobile) et utiliser « Canvas » pour que l'Aura soit fluide ? Il faut gérer la latence du temps réel pour les routines Twin (WebSockets) et l'analyse des capteurs.
+Temps moyen des routines, sachant qu’il faut integrer le selfie flash ( 10sec) +routines +Post check ( 10 sec)
+Catégorie	Nom de la Routine	Durée	Objectif
+SEULE	1. Saccadic Reset (EMDR)	1 min 30	Débloquer une pensée stressante.
+	2. Vagal-Haptic (Souffle)	2 min	Calmer le rythme cardiaque (nerf vague).
+	3. Aura-Cleaning (Visuel)	1 min	Reset visuel et émotionnel rapide.
+	4. Bio-Ambient (Sonore)	3 min	Immersion pour une déconnexion totale.
+TWIN	5. Twin-Coherence	3 min	Synchroniser les souffles à distance.
+	6. Mirror-Aura	2 min	Calage visuel sur l'énergie de sa Twin.
+	7. Silent-Presence	5 min	Connexion sans paroles, juste la présence. Ici il faut que ce soit et tres doux pour ne pas fatiguer les yeux 
+	8. Pulse-Match	1 min 30	Envoyer ses battements de cœur à sa Twin.
+SQUAD	9. Collective Shield	2 min	Protection groupée lors d'un pic de stress.
+	10. Audio-Capsule	30 sec	Écoute d'un message de soutien 
+	11. Squad-Pulse	1 min	Partage d'énergie collective
+	12. Morning Ritual	2 min	Alignement du groupe avant la journée.
+
