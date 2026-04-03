@@ -2,13 +2,11 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 
-// ─── Design tokens (identiques aux autres routines) ───────────────────────────
 const _darkBg = Color(0xFF141414);
 const _lightBg = Color(0xFFF5F3FF);
 const _primaryPurple = Color(0xFF82667F);
 const _accentPurple = Color(0xFF735983);
 
-// ─── Item model ───────────────────────────────────────────────────────────────
 class _Item {
   final IconData icon;
   final String label;
@@ -28,7 +26,6 @@ class _Item {
 
 enum _Phase { intro, countdown, exercise, complete }
 
-// ─── Stressors catalogue ─────────────────────────────────────────────────────
 const _stressors = [
   (Icons.email_outlined, "Email"),
   (Icons.notifications_outlined, "Notif"),
@@ -44,7 +41,6 @@ const _stressors = [
   (Icons.fitness_center, "Sport"),
 ];
 
-// ─── Widget ───────────────────────────────────────────────────────────────────
 class CognitiveSorting extends StatefulWidget {
   final VoidCallback? onComplete;
 
@@ -57,8 +53,8 @@ class CognitiveSorting extends StatefulWidget {
 class _CognitiveSortingState extends State<CognitiveSorting> {
   static const _itemSize = 68.0;
   static const _totalSec = 90;
-  static const _maxItems = 40;   // objectif à atteindre
-  static const _poolSize = 16;   // items simultanés à l'écran
+  static const _maxItems = 40; // objectif à atteindre
+  static const _poolSize = 16; // items simultanés à l'écran
 
   _Phase _phase = _Phase.intro;
   int _countdownValue = 3;
@@ -88,7 +84,6 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
     super.dispose();
   }
 
-  // ── Phase transitions ─────────────────────────────────────────────────────
   void _goToCountdown() {
     // Capture screen size now while context is available
     final size = MediaQuery.of(context).size;
@@ -101,7 +96,10 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
     });
 
     _cdTimer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) { t.cancel(); return; }
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
       setState(() {
         if (_countdownValue > 1) {
           _countdownValue--;
@@ -118,15 +116,17 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
     setState(() => _phase = _Phase.exercise);
 
     // Game loop ~30fps
-    _gameLoopTimer =
-        Timer.periodic(const Duration(milliseconds: 33), (_) {
+    _gameLoopTimer = Timer.periodic(const Duration(milliseconds: 33), (_) {
       if (_phase != _Phase.exercise || !mounted) return;
       setState(_updatePositions);
     });
 
     // Countdown timer
     _exTimer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) { t.cancel(); return; }
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
       setState(() {
         if (_remainingSec > 0) {
           _remainingSec--;
@@ -179,7 +179,6 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
     widget.onComplete?.call();
   }
 
-  // ── Drag ─────────────────────────────────────────────────────────────────
   void _onPanStart(int index, DragStartDetails d) {
     if (index < 0 || index >= _items.length) return;
     setState(() {
@@ -205,8 +204,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
         _cleared++;
         _items[index].grabbed = false;
         _items[index].y = -_itemSize - _rng.nextDouble() * 300;
-        _items[index].x =
-            _rng.nextDouble() * (_screenW - _itemSize - 40) + 20;
+        _items[index].x = _rng.nextDouble() * (_screenW - _itemSize - 40) + 20;
       });
       if (_cleared >= _maxItems) _endExercise();
     } else {
@@ -216,7 +214,6 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
     _dragIndex = null;
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -241,7 +238,6 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
     }
   }
 
-  // ── INTRO ─────────────────────────────────────────────────────────────────
   Widget _buildIntro() {
     return SafeArea(
       key: const ValueKey('intro'),
@@ -331,8 +327,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
                     text: "Balayez-les rapidement hors de l'écran"),
                 const SizedBox(height: 14),
                 const _IntroStep(
-                    number: "3",
-                    text: "Chaque icône jetée libère votre Aura"),
+                    number: "3", text: "Chaque icône jetée libère votre Aura"),
                 const Spacer(),
                 SizedBox(
                   width: double.infinity,
@@ -360,7 +355,6 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
     );
   }
 
-  // ── COUNTDOWN ─────────────────────────────────────────────────────────────
   Widget _buildCountdown() {
     return Center(
       key: const ValueKey('countdown'),
@@ -390,7 +384,6 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
     );
   }
 
-  // ── EXERCISE ──────────────────────────────────────────────────────────────
   Widget _buildExercise() {
     return Stack(
       key: const ValueKey('exercise'),
@@ -407,8 +400,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
               color: _primaryPurple.withValues(alpha: 0.03 + _aura * 0.1),
               boxShadow: [
                 BoxShadow(
-                  color:
-                      _primaryPurple.withValues(alpha: 0.06 + _aura * 0.28),
+                  color: _primaryPurple.withValues(alpha: 0.06 + _aura * 0.28),
                   blurRadius: 50 + _aura * 80,
                   spreadRadius: 8,
                 ),
@@ -423,8 +415,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
           right: 0,
           child: SafeArea(
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -485,7 +476,6 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
     );
   }
 
-  // ── COMPLETE ──────────────────────────────────────────────────────────────
   Widget _buildComplete() {
     return Container(
       key: const ValueKey('complete'),
@@ -562,7 +552,6 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
   }
 }
 
-// ─── Stress chip ──────────────────────────────────────────────────────────────
 class _StressChip extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -618,7 +607,6 @@ class _StressChip extends StatelessWidget {
   }
 }
 
-// ─── Top badge ────────────────────────────────────────────────────────────────
 class _TopBadge extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -654,7 +642,6 @@ class _TopBadge extends StatelessWidget {
   }
 }
 
-// ─── Intro step ───────────────────────────────────────────────────────────────
 class _IntroStep extends StatelessWidget {
   final String number;
   final String text;

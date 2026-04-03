@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +6,6 @@ import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-// ─── Design tokens (identiques à soothing_thumb) ─────────────────────────────
 const _darkBg = Color(0xFF141414);
 const _lightBg = Color(0xFFF5F3FF);
 const _primaryPurple = Color(0xFF82667F);
@@ -15,7 +13,6 @@ const _accentPurple = Color(0xFF735983);
 
 enum _Phase { intro, loading, countdown, exercise, complete }
 
-// ─── Widget ───────────────────────────────────────────────────────────────────
 class EyeMovementEMDR extends StatefulWidget {
   final int baseSpeedDuration;
   final VoidCallback? onComplete;
@@ -32,33 +29,28 @@ class EyeMovementEMDR extends StatefulWidget {
 
 class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     with TickerProviderStateMixin {
-  // ── Camera / ML ──────────────────────────────────────────────────────────
   CameraController? _cameraController;
   final FaceDetector _faceDetector = FaceDetector(
-    options: FaceDetectorOptions(
-        enableContours: true, enableClassification: true),
+    options:
+        FaceDetectorOptions(enableContours: true, enableClassification: true),
   );
   bool _isDetecting = false;
 
-  // ── Ball animation ────────────────────────────────────────────────────────
   late AnimationController _animController;
   late Animation<Alignment> _ballAnim;
   final List<Alignment> _trail = [];
   int _trailLength = 3;
 
-  // ── Phase / timers ────────────────────────────────────────────────────────
   _Phase _phase = _Phase.intro;
   int _countdownValue = 3;
   static const int _totalSec = 90;
   int _remainingSec = _totalSec;
   Timer? _mainTimer;
 
-  // ── Status ────────────────────────────────────────────────────────────────
   bool _isPaused = false;
   String _statusMessage = "Suivez la bille des yeux";
   int _successCombo = 0;
 
-  // ── Orientations helper ───────────────────────────────────────────────────
   final _orientations = {
     DeviceOrientation.portraitUp: 0,
     DeviceOrientation.landscapeLeft: 90,
@@ -72,7 +64,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     _setupBallAnimation();
   }
 
-  // ── Ball animation setup ──────────────────────────────────────────────────
   void _setupBallAnimation() {
     _animController = AnimationController(
       duration: Duration(milliseconds: widget.baseSpeedDuration),
@@ -92,7 +83,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     });
   }
 
-  // ── Phase transitions ─────────────────────────────────────────────────────
   Future<void> _startLoading() async {
     setState(() => _phase = _Phase.loading);
     await _initCamera();
@@ -106,7 +96,10 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
 
   void _runCountdown() {
     Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) { t.cancel(); return; }
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
       setState(() {
         if (_countdownValue > 1) {
           _countdownValue--;
@@ -123,7 +116,10 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
 
   void _startMainTimer() {
     _mainTimer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) { t.cancel(); return; }
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
       if (!_isPaused && _phase == _Phase.exercise) {
         if (_remainingSec > 0) {
           setState(() => _remainingSec--);
@@ -143,7 +139,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     widget.onComplete?.call();
   }
 
-  // ── Camera ────────────────────────────────────────────────────────────────
   Future<void> _initCamera() async {
     final status = await Permission.camera.request();
     if (status.isDenied || !mounted) return;
@@ -226,7 +221,9 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   @override
   void dispose() {
     // Stopper le stream avant de disposer pour éviter les callbacks orphelins
-    try { _cameraController?.stopImageStream(); } catch (_) {}
+    try {
+      _cameraController?.stopImageStream();
+    } catch (_) {}
     _cameraController?.dispose();
     _faceDetector.close();
     _animController.dispose();
@@ -234,7 +231,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     super.dispose();
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -261,7 +257,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     }
   }
 
-  // ── INTRO ─────────────────────────────────────────────────────────────────
   Widget _buildIntro() {
     return SafeArea(
       key: const ValueKey('intro'),
@@ -345,17 +340,14 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                 ),
                 const SizedBox(height: 32),
                 const _IntroStep(
-                    number: "1",
-                    text: "Placez votre visage face à la caméra"),
+                    number: "1", text: "Placez votre visage face à la caméra"),
                 const SizedBox(height: 14),
                 const _IntroStep(
-                    number: "2",
-                    text: "Suivez la bille lumineuse des yeux"),
+                    number: "2", text: "Suivez la bille lumineuse des yeux"),
                 const SizedBox(height: 14),
                 const _IntroStep(
                     number: "3",
-                    text:
-                        "Si vous détournez le regard, la bille s'arrête"),
+                    text: "Si vous détournez le regard, la bille s'arrête"),
                 const Spacer(),
                 SizedBox(
                   width: double.infinity,
@@ -383,7 +375,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     );
   }
 
-  // ── LOADING ───────────────────────────────────────────────────────────────
   Widget _buildLoading() {
     return Center(
       key: const ValueKey('loading'),
@@ -395,8 +386,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
             height: 48,
             child: CircularProgressIndicator(
               strokeWidth: 3,
-              valueColor:
-                  AlwaysStoppedAnimation<Color>(_primaryPurple),
+              valueColor: AlwaysStoppedAnimation<Color>(_primaryPurple),
             ),
           ),
           const SizedBox(height: 24),
@@ -413,7 +403,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     );
   }
 
-  // ── COUNTDOWN ─────────────────────────────────────────────────────────────
   Widget _buildCountdown() {
     return Center(
       key: const ValueKey('countdown'),
@@ -443,7 +432,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     );
   }
 
-  // ── EXERCISE ──────────────────────────────────────────────────────────────
   Widget _buildExercise() {
     return Stack(
       key: const ValueKey('exercise'),
@@ -460,8 +448,8 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
                       color: _isPaused
                           ? Colors.red.withValues(alpha: 0.2)
@@ -476,15 +464,13 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                     child: Row(
                       children: [
                         Icon(Icons.timer,
-                            color:
-                                _isPaused ? Colors.red : Colors.white60,
+                            color: _isPaused ? Colors.red : Colors.white60,
                             size: 16),
                         const SizedBox(width: 6),
                         Text(
                           _formatTime(_remainingSec),
                           style: TextStyle(
-                            color:
-                                _isPaused ? Colors.red : Colors.white,
+                            color: _isPaused ? Colors.red : Colors.white,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -575,7 +561,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     );
   }
 
-  // ── COMPLETE ──────────────────────────────────────────────────────────────
   Widget _buildComplete() {
     return Container(
       key: const ValueKey('complete'),
@@ -600,8 +585,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                     shape: BoxShape.circle,
                     color: Colors.white.withValues(alpha: 0.18),
                   ),
-                  child:
-                      const Icon(Icons.check, color: Colors.white, size: 48),
+                  child: const Icon(Icons.check, color: Colors.white, size: 48),
                 ),
                 const SizedBox(height: 28),
                 const Text(
@@ -651,7 +635,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     );
   }
 
-  // ── Camera helper ─────────────────────────────────────────────────────────
   InputImage? _inputImageFromCameraImage(CameraImage image) {
     if (_cameraController == null) return null;
     final camera = _cameraController!.description;
@@ -660,8 +643,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       rotation = InputImageRotationValue.fromRawValue(sensorOrientation);
     } else if (defaultTargetPlatform == TargetPlatform.android) {
-      var comp =
-          _orientations[_cameraController!.value.deviceOrientation];
+      var comp = _orientations[_cameraController!.value.deviceOrientation];
       if (comp == null) return null;
       comp = camera.lensDirection == CameraLensDirection.front
           ? (sensorOrientation + comp) % 360
@@ -669,8 +651,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
       rotation = InputImageRotationValue.fromRawValue(comp);
     }
     if (rotation == null) return null;
-    final format =
-        InputImageFormatValue.fromRawValue(image.format.raw);
+    final format = InputImageFormatValue.fromRawValue(image.format.raw);
     if (format == null) return null;
     final buf = WriteBuffer();
     for (final p in image.planes) {
@@ -688,7 +669,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   }
 }
 
-// ─── Step indicator (partagé avec soothing_thumb) ─────────────────────────────
 class _IntroStep extends StatelessWidget {
   final String number;
   final String text;

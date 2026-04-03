@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
 const _darkBg = Color(0xFF141414);
 const _lightBg = Color(0xFFF5F3FF);
 const _primaryPurple = Color(0xFF82667F);
@@ -25,7 +24,6 @@ const _blobCount   = 58;     // nombre de blobs de brume
 
 enum _Phase { intro, loading, exercise, complete }
 
-// ─── Modèle de brume (ChangeNotifier pour repaint efficace) ──────────────────
 class _Blob {
   final double x;      // normalisé 0.0–1.0
   final double y;
@@ -95,7 +93,6 @@ class _MistModel extends ChangeNotifier {
   }
 }
 
-// ─── Painter (n'utilise que le modèle comme Listenable) ───────────────────────
 class _MistPainter extends CustomPainter {
   final _MistModel model;
   final double breathScale;
@@ -166,7 +163,6 @@ class _MistPainter extends CustomPainter {
       old.breathScale != breathScale || old.auraProgress != auraProgress;
 }
 
-// ─── Widget principal ─────────────────────────────────────────────────────────
 class AuraCleaning extends StatefulWidget {
   final VoidCallback? onComplete;
 
@@ -215,7 +211,6 @@ class _AuraCleaningState extends State<AuraCleaning>
     super.dispose();
   }
 
-  // ── Phase transitions ─────────────────────────────────────────────────────
   Future<void> _startLoading() async {
     setState(() => _phase = _Phase.loading);
     await _initCamera();
@@ -263,7 +258,6 @@ class _AuraCleaningState extends State<AuraCleaning>
     widget.onComplete?.call();
   }
 
-  // ── Touch ─────────────────────────────────────────────────────────────────
   void _onTouch(Offset localPos) {
     if (_phase != _Phase.exercise) return;
     _mist.clearAt(localPos);
@@ -274,7 +268,6 @@ class _AuraCleaningState extends State<AuraCleaning>
     }
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -300,7 +293,6 @@ class _AuraCleaningState extends State<AuraCleaning>
     }
   }
 
-  // ── LOADING ───────────────────────────────────────────────────────────────
   Widget _buildLoading() {
     return Center(
       key: const ValueKey('loading'),
@@ -329,7 +321,6 @@ class _AuraCleaningState extends State<AuraCleaning>
     );
   }
 
-  // ── INTRO ─────────────────────────────────────────────────────────────────
   Widget _buildIntro() {
     return SafeArea(
       key: const ValueKey('intro'),
@@ -448,7 +439,6 @@ class _AuraCleaningState extends State<AuraCleaning>
     );
   }
 
-  // ── EXERCISE ──────────────────────────────────────────────────────────────
   Widget _buildExercise() {
     final cam = _cameraController;
     return GestureDetector(
@@ -533,7 +523,6 @@ class _AuraCleaningState extends State<AuraCleaning>
     );
   }
 
-  // ── COMPLETE ──────────────────────────────────────────────────────────────
   Widget _buildComplete() {
     return Container(
       key: const ValueKey('complete'),
@@ -610,7 +599,6 @@ class _AuraCleaningState extends State<AuraCleaning>
   }
 }
 
-// ─── Helpers partagés ─────────────────────────────────────────────────────────
 class _TopBadge extends StatelessWidget {
   final IconData icon;
   final String label;
