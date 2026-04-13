@@ -53,8 +53,8 @@ class HomePage extends StatelessWidget {
               label: "Saccadic Reset",
               sublabel: "1 min 30  •  Nettoyage oculaire EMDR",
               color: Colors.blueAccent,
-              onTap: () => _push(context,
-                  const EyeMovementEMDR(baseSpeedDuration: 2000)),
+              onTap: () => _push(
+                  context, const EyeMovementEMDR(baseSpeedDuration: 2000)),
             ),
             _RoutineButton(
               icon: Icons.fingerprint,
@@ -77,9 +77,7 @@ class HomePage extends StatelessWidget {
               color: const Color(0xFF82667F),
               onTap: () => _push(context, const AuraCleaning()),
             ),
-
             const SizedBox(height: 28),
-
             _SectionHeader(label: "TWIN", color: const Color(0xFFD4A853)),
             const SizedBox(height: 14),
             _RoutineButton(
@@ -110,9 +108,7 @@ class HomePage extends StatelessWidget {
               color: const Color(0xFFFF5722),
               onTap: () => _push(context, const PulseMatch()),
             ),
-
             const SizedBox(height: 28),
-
             _SectionHeader(label: "SQUAD", color: const Color(0xFF3F51B5)),
             const SizedBox(height: 14),
             _RoutineButton(
@@ -143,7 +139,6 @@ class HomePage extends StatelessWidget {
               color: const Color(0xFF9C27B0),
               onTap: () => _push(context, const MorningRitual()),
             ),
-
             const SizedBox(height: 32),
           ],
         ),
@@ -164,16 +159,17 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(children: [
       Container(
-        width: 4, height: 20,
-        decoration: BoxDecoration(
-            color: color, borderRadius: BorderRadius.circular(2))),
+          width: 4,
+          height: 20,
+          decoration: BoxDecoration(
+              color: color, borderRadius: BorderRadius.circular(2))),
       const SizedBox(width: 10),
       Text(label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 2.5)),
+          style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 2.5)),
     ]);
   }
 }
@@ -206,10 +202,11 @@ class _RoutineButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
             child: Row(children: [
               Container(
-                width: 44, height: 44,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: color.withValues(alpha: 0.15)),
+                    shape: BoxShape.circle,
+                    color: color.withValues(alpha: 0.15)),
                 child: Icon(icon, color: color, size: 22),
               ),
               const SizedBox(width: 16),
@@ -218,15 +215,15 @@ class _RoutineButton extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(label,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600)),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600)),
                     const SizedBox(height: 2),
                     Text(sublabel,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.4),
-                        fontSize: 12)),
+                        style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.4),
+                            fontSize: 12)),
                   ],
                 ),
               ),
