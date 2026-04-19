@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'widgets/routine_intro_screen.dart';
 import 'package:flutter/services.dart';
 
 const _darkBg = Color(0xFF141414);
-const _lightBg = Color(0xFFF5F3FF);
 const _primaryPurple = Color(0xFF82667F);
 const _accentPurple = Color(0xFF735983);
 
@@ -127,7 +128,8 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _phase == _Phase.intro ? _lightBg : _darkBg,
+      backgroundColor:
+          _phase == _Phase.intro ? Colors.transparent : const Color(0xFF5B242F),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 400),
         child: _buildPhase(),
@@ -151,105 +153,19 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
   }
 
   Widget _buildIntro() {
-    return SafeArea(
+    return RoutineIntroScreen(
       key: const ValueKey('intro'),
-      child: Stack(children: [
-        Positioned(
-          bottom: -80,
-          right: -80,
-          child: Container(
-            width: 380,
-            height: 380,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: _primaryPurple.withValues(alpha: 0.12), width: 48)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                style: IconButton.styleFrom(
-                  foregroundColor: _accentPurple,
-                  backgroundColor: _accentPurple.withValues(alpha: 0.1),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 28),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _accentPurple.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text("1 min 30  •  Twin  •  Contact à Distance",
-                    style: TextStyle(
-                        color: _accentPurple,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600)),
-              ),
-              const SizedBox(height: 14),
-              const Text("Pulse\nMatch",
-                  style: TextStyle(
-                      fontSize: 42,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF141414),
-                      height: 1.1)),
-              const SizedBox(height: 28),
-              const Text("Fondement scientifique :",
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF141414))),
-              const SizedBox(height: 8),
-              Text(
-                "La synchronisation temporelle précise entre deux personnes active les circuits de récompense et génère une sensation de connexion physique réelle. Ce \"high-five\" à distance crée un lien tactile mémorable.",
-                style: TextStyle(
-                    fontSize: 15,
-                    color: const Color(0xFF141414).withValues(alpha: 0.6),
-                    height: 1.65),
-              ),
-              const SizedBox(height: 32),
-              _IntroStep(number: "1", text: "Un compte à rebours : 3, 2, 1…"),
-              const SizedBox(height: 14),
-              _IntroStep(
-                  number: "2",
-                  text: "Touchez l'écran exactement quand le cercle explose"),
-              const SizedBox(height: 14),
-              _IntroStep(
-                  number: "3",
-                  text: "Moins de 200ms d'écart = synchronisation parfaite"),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _startRound,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _accentPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
-                    elevation: 0,
-                  ),
-                  child: const Text("Commencer",
-                      style:
-                          TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-                ),
-              ),
-              const SizedBox(height: 36),
-            ],
-          ),
-        ),
-      ]),
+      title: 'Pulse\nMatch',
+      badgeLabel: '1 min 30  •  Twin  •  Contact à Distance',
+      scienceText: 'La synchronisation temporelle précise entre deux personnes active les circuits de récompense et génère une sensation de connexion physique réelle.',
+      steps: const [
+        'Un compte à rebours : 3, 2, 1…',
+        'Touchez l\'écran exactement quand le cercle explose',
+        'Moins de 200ms d\'écart = synchronisation parfaite',
+      ],
+      onStart: _startRound,
+      buttonLabel: 'Commencer',
+      accentColor: _accentPurple,
     );
   }
 
@@ -258,20 +174,23 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
       key: const ValueKey('countdown'),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Text("Manche ${_round + 1} / $_rounds",
-            style: TextStyle(
+            style: GoogleFonts.poppins(
                 color: Colors.white.withValues(alpha: 0.4),
                 fontSize: 16,
+                fontWeight: FontWeight.w600,
                 letterSpacing: 0.5)),
         const SizedBox(height: 24),
         Text("$_countdownVal",
-            style: const TextStyle(
+            style: GoogleFonts.poppins(
                 color: Colors.white,
                 fontSize: 110,
-                fontWeight: FontWeight.bold)),
+                fontWeight: FontWeight.w600)),
         const SizedBox(height: 16),
         Text("Préparez-vous",
-            style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.3), fontSize: 16)),
+            style: GoogleFonts.poppins(
+                color: Colors.white.withValues(alpha: 0.3),
+                fontSize: 16,
+                fontWeight: FontWeight.w600)),
       ]),
     );
   }
@@ -281,7 +200,7 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
       key: const ValueKey('waiting'),
       onTapDown: (_) => _onTap(),
       child: Stack(fit: StackFit.expand, children: [
-        const ColoredBox(color: _darkBg),
+        const ColoredBox(color: Color(0xFF5B242F)),
         Center(
           child: AnimatedBuilder(
             animation: _pulseAnim,
@@ -294,20 +213,24 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
                 height: 180 * v,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _primaryPurple.withValues(alpha: 0.08 + v * 0.06),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFBCAE3A), Color(0xFFF4F3F2)],
+                  ),
                   boxShadow: [
                     BoxShadow(
-                        color: _primaryPurple.withValues(alpha: 0.3 + v * 0.3),
+                        color: const Color(0xFFBCAE3A).withOpacity(0.35),
                         blurRadius: 40 + v * 60,
                         spreadRadius: 5 + v * 15)
                   ],
                 ),
                 child: Center(
                   child: Text("TOUCHEZ",
-                      style: TextStyle(
-                          color: Colors.white.withValues(alpha: v),
+                      style: GoogleFonts.poppins(
+                          color: Colors.white.withOpacity(v),
                           fontSize: 18 + v * 6,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           letterSpacing: 2)),
                 ),
               ),
@@ -351,7 +274,7 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
       key: const ValueKey('result'),
       fit: StackFit.expand,
       children: [
-        const ColoredBox(color: _darkBg),
+        const ColoredBox(color: Color(0xFF5B242F)),
         // Flash on success
         if (perfect)
           AnimatedBuilder(
@@ -370,14 +293,13 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
                 height: 100 * _pulseAnim.value.clamp(1.0, 1.6),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: (perfect
-                          ? Colors.green
-                          : (missed ? Colors.grey : _primaryPurple))
-                      .withValues(alpha: 0.18),
+                  gradient: const RadialGradient(
+                    colors: [Color(0xFFFF5B1F), Color(0xFFFF96B9)],
+                    stops: [0.0, 1.0],
+                  ),
                   boxShadow: [
                     BoxShadow(
-                        color: (perfect ? Colors.green : _primaryPurple)
-                            .withValues(alpha: 0.5),
+                        color: const Color(0xFFFF5B1F).withOpacity(0.45),
                         blurRadius: 50)
                   ],
                 ),
@@ -398,17 +320,18 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
                       : delta < 400
                           ? "Proche !"
                           : "Essayez encore",
-              style: const TextStyle(
+              style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontSize: 28,
-                  fontWeight: FontWeight.bold),
+                  fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             if (!missed)
               Text("${delta}ms d'écart",
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                       color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 16)),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600)),
             const SizedBox(height: 40),
             ElevatedButton(
               onPressed: _startRound,
@@ -423,7 +346,7 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
               ),
               child: Text(
                   _round >= _rounds ? "Voir le résultat" : "Manche suivante",
-                  style: const TextStyle(
+                  style: GoogleFonts.poppins(
                       fontSize: 16, fontWeight: FontWeight.w600)),
             ),
           ]),
@@ -498,35 +421,6 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
         ),
       ),
     );
-  }
-}
-
-class _IntroStep extends StatelessWidget {
-  final String number;
-  final String text;
-  const _IntroStep({required this.number, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _accentPurple.withValues(alpha: 0.12)),
-        child: Center(
-            child: Text(number,
-                style: const TextStyle(
-                    color: _accentPurple,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold))),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-          child: Text(text,
-              style: const TextStyle(fontSize: 15, color: Color(0xFF141414)))),
-    ]);
   }
 }
 

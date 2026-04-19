@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'widgets/routine_intro_screen.dart';
 import 'package:flutter/services.dart';
 
 const _darkBg = Color(0xFF141414);
-const _lightBg = Color(0xFFF5F3FF);
 const _primaryPurple = Color(0xFF82667F);
 const _accentPurple = Color(0xFF735983);
 
@@ -128,7 +128,7 @@ class _MorningRitualState extends State<MorningRitual>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _phase == _Phase.intro ? _lightBg : _darkBg,
+      backgroundColor: _phase == _Phase.intro ? Colors.transparent : _darkBg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
@@ -150,106 +150,19 @@ class _MorningRitualState extends State<MorningRitual>
   }
 
   Widget _buildIntro() {
-    return SafeArea(
+    return RoutineIntroScreen(
       key: const ValueKey('intro'),
-      child: Stack(children: [
-        Positioned(
-          bottom: -80,
-          right: -80,
-          child: Container(
-            width: 380,
-            height: 380,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: _primaryPurple.withValues(alpha: 0.12), width: 48)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                style: IconButton.styleFrom(
-                  foregroundColor: _accentPurple,
-                  backgroundColor: _accentPurple.withValues(alpha: 0.1),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 28),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _accentPurple.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text("2 min  •  Squad  •  Alignement du Groupe",
-                    style: TextStyle(
-                        color: _accentPurple,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600)),
-              ),
-              const SizedBox(height: 14),
-              const Text("Morning\nRitual",
-                  style: TextStyle(
-                      fontSize: 42,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF141414),
-                      height: 1.1)),
-              const SizedBox(height: 28),
-              const Text("Fondement scientifique :",
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF141414))),
-              const SizedBox(height: 8),
-              Text(
-                "Choisir une intention matinale active le cortex préfrontal et oriente l'attention sélective de la journée. Partager cette intention au groupe crée une motivation collective mesurable.",
-                style: TextStyle(
-                    fontSize: 15,
-                    color: const Color(0xFF141414).withValues(alpha: 0.6),
-                    height: 1.65),
-              ),
-              const SizedBox(height: 32),
-              _IntroStep(
-                  number: "1",
-                  text: "Choisissez un mot d'intention pour votre journée"),
-              const SizedBox(height: 14),
-              _IntroStep(
-                  number: "2", text: "Votre mot brille sur la Roue du Squad"),
-              const SizedBox(height: 14),
-              _IntroStep(
-                  number: "3",
-                  text: "5 respirations conscientes pour ancrer l'intention"),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => setState(() => _phase = _Phase.choose),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _accentPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
-                    elevation: 0,
-                  ),
-                  child: const Text("Commencer le Rituel",
-                      style:
-                          TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-                ),
-              ),
-              const SizedBox(height: 36),
-            ],
-          ),
-        ),
-      ]),
+      title: 'Morning\nRitual',
+      badgeLabel: '2 min  •  Squad  •  Alignement du Groupe',
+      scienceText: 'Choisir une intention matinale active le cortex préfrontal et oriente l\'attention sélective de la journée. Partager cette intention au groupe crée une motivation collective mesurable.',
+      steps: const [
+        'Choisissez un mot d\'intention pour votre journée',
+        'Votre mot brille sur la Roue du Squad',
+        '5 respirations conscientes pour ancrer l\'intention',
+      ],
+      onStart: () => setState(() => _phase = _Phase.choose),
+      buttonLabel: 'Commencer le Rituel',
+      accentColor: _accentPurple,
     );
   }
 
@@ -550,35 +463,6 @@ class _MorningRitualState extends State<MorningRitual>
         ),
       ),
     );
-  }
-}
-
-class _IntroStep extends StatelessWidget {
-  final String number;
-  final String text;
-  const _IntroStep({required this.number, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _accentPurple.withValues(alpha: 0.12)),
-        child: Center(
-            child: Text(number,
-                style: const TextStyle(
-                    color: _accentPurple,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold))),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-          child: Text(text,
-              style: const TextStyle(fontSize: 15, color: Color(0xFF141414)))),
-    ]);
   }
 }
 

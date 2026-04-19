@@ -1,0 +1,901 @@
+﻿Interdits contextuels généraux : conduite, utilisation en réunion professionnelle, situations publiques où le selfie flash est inapproprié. Prévoir un écran "Where are you?" au lancement d'une routine majeure pour filtrer.
+
+
+ RÉSUMÉ - ARIA 3 PHASES:
+Phase
+	Période
+	Aria fait
+	Utilisatrice vit
+	Sensation
+	1:Découverte
+	J1-30
+	Teste les 28 routines standard
+	"Je découvre ce qui marche"
+	Exploration
+	2:Génération
+	J31-365
+	Crée variantes + combos + challenges
+	"Chaque jour = surprises"
+	Innovation
+	3:Expert
+	M13-24
+	Prédit + génère 10+ versions + combos magiques
+	"C'est créé POUR moi"
+	Intimité
+	
+
+RÉSULTAT:
+* Jour 1: Reset Flash (basique)
+* Jour 31: Reset Flash v2 (adapté)
+* Jour 90: Reset Flash Rapide (spécifique)
+* Jour 180: Reset Flash Duet (combo Twin)
+* Jour 365: "Lundi Champion Reset Flash" (magique perso)
+CHAQUE JOUR = UNIQUE
+28 routines × 10 variantes × 10 combos = ILLUSION de 2800+ routines
+
+
+
+
+Point de départ dès que l'appli s'ouvre.
+-L'utilisatrice fait son "Selfie Flash" via Hume.AI
+-L'appli reçoit un chiffre (ex: 85/100).
+-L'écran affiche une Aura rouge et agitée
+ARIA (l’ IA) dit : "Score élevé. Prenons 3 minutes pour un Reset Flash."
+
+
+N.B. Aura = design du score energie
+ Aria = nom donné a l’IA de TIYIA
+
+
+
+
+RESET FLASH (utilisé en 12)) et potentiellement en test gratuit
+Le design et le developpement doivent avancer sur le meme ecran.
+Parcours de l’utilisatrice 
+1. L'utilisatrice fait son "Selfie Flash". 
+2. L'appli reçoit un chiffre (exemple : 85/100)
+3. L'écran affiche une Aura rouge et agitée
+4. Tiyia dit « Score élevé. Prenons 3 minutes pour un Reset Flash »
+5. Par exemple Lucile affiche les deux ronds (que l’on a défini pour l’Aura il y a 1 mois donc a revoir ?) qui gonfle et dégonfle au milieu de l’écran 
+6. Immédiatement, l'Aura de Lucile devient plus lumineuse, plus bleue par exemple
+L’idée est que l'utilisatrice voit en temps réel que son effort a "réparé" son « Aura »
+
+
+La routine de 3 minutes est fini.
+h) L’utilisatrice refait une analyse selfie rapide 
+I) L'écran affiche : "Bravo, votre score est passé de 85 à 40"
+J) L’»Aura » est devenue bleu ?/calme, l’utilisatrice voit sa réussite
+K) le Squad (les 4 autres alliés) reçoit une petite notification : "Martine a retrouvé son calme". 
+.
+
+
+1. Routines pour Utilisatrice Seule (Focus : ARIA & Bio-feedback)
+4 routines pour se soigner soi-même
+Ces routines utilisent l'IA ARIA comme guide. Elles sont disponibles immédiatement, même si le réseau social n'est pas encore actif.
+Donc ici il faut suivre l’exemple de « flow » et « wild journey »
+1. L’Aura-Cleaning (Réalité Augmentée) : L'utilisatrice voit son visage entouré d'une "brume" colorée (son score de stress). Elle doit utiliser ses mains pour pousser ou frotter la brume hors de l'écran. La caméra détecte les mouvements et nettoie l'Aura en temps réel. Ce sont des fonds d'écran "liquides" qui bougent. 
+
+
+Consequences sur l’utilisatrice de cette « Routine » :
+Impact : Catharsis visuelle et engagement kinesthésique
+En visualisant le stress sous forme de "brume" colorée (score de stress objectivé), l'utilisatrice ne "ressent" plus seulement le stress, elle le "voit". Cela permet une dissociation thérapeutique : le stress devient un objet extérieur que l'on peut manipuler. Le mouvement physique de "nettoyer" ou "frotter" l'écran engage la motricité globale. Cela redonne un sentiment de contrôle à l'utilisatrice. Résultat : Une baisse immédiate du cortisol grâce à la satisfaction visuelle de voir la « zone nettoyée », couplée à une respiration plus consciente surveillée par l'IA.
+
+
+Lien scientifique : https://www.coaching-sante.net/blog/l-art-a-un-effet-puissant-sur-le-corps-et-les-emotions.html
+
+
+
+
+2. Saccadic Reset (Nettoyage Oculaire ou balayage oculaire EMDR) : Inspiré de l'EMDR (Eye Movement Desensitization and Reprocessing est une méthode thérapeutique reconnue mondialement, initialement conçue pour traiter les traumatismes). Une bille lumineuse parcourt l'écran de gauche a droite, à une vitesse calculée par l'IA selon le score de stress. L'utilisatrice suit la bille du regard. La caméra vérifie la précision de la poursuite oculaire pour valider le "reset" cognitif. Il faut utiliser l'Eye-Tracking. Si les yeux quittent la bille, il stoppe la bille. Si le regard est fixe, il augmente progressivement la vitesse ; il faut animer la trajectoire de la bille. Plus l'utilisatrice est précise, plus la bille laisse une traînée lumineuse apaisante derrière elle.
+On peut ajouter un petit son spatialisé (gauche/droite) dans les écouteurs pour renforcer l'effet. A verifier . Nécessite absolument un casque stéréo. Sans casque, la routine ne fonctionne pas (les fréquences se mélangent dans les haut-parleurs). Il faut coder une détection de casque branché au lancement, avec blocage et message explicite si absent
+Prévoir un écran de consentement éclairé à la première utilisation ("Cette routine peut faire remonter des émotions fortes, ne l'utilisez pas si vous êtes seule en détresse aiguë")
+un bouton STOP permanent très visible pendant l'exercice
+Consequences sur l’utilisatrice de cette « Routine » :
+Impact : Retraitement neurologique et apaisement du système nerveux central
+Inspirée de l'EMDR, cette routine utilise des mouvements oculaires bilatéraux pour forcer le cerveau à traiter les informations émotionnelles bloquées. Cela réduit l'activation de l'amygdale (le centre de la peur). L'obligation de suivre la bille (Eye-Tracking) interrompt les pensées "ruminatives". Si l'utilisatrice quitte la bille du regard, l'exercice s'arrête, ce qui force un ancrage total dans le moment présent. Résultat : Un "reset" cognitif qui diminue l'hyper-vigilance et induit un état de calme profond, renforcé par le son spatialisé qui synchronise les deux hémisphères cérébraux.
+Lien scientifique : https://www.ifemdr.fr/etat-de-la-science-therapie-de-desensibilisation-et-de-retraitement-par-le-mouvement-oculaire-emdr/
+
+
+
+
+
+
+3. Vagal-Haptic (Résonance Corporelle ou Le pouce apaisant) : possibilité 1) L'utilisatrice pose son pouce sur une "Zone de Contact" virtuelle au bas de l'écran. L'utilisatrice pose son pouce sur une zone circulaire a définir. Il faut dessiner un cercle organique (type onde de choc) qui part du point où le pouce est posé. Le téléphone émet des vibrations à une fréquence précise (7-10 Hz). Il active le moteur haptique (vibrations) à 6 cycles par minute. le Haptic Engine de l'iPhone pour générer des micro-vibrations (Taptic Engine). Ces vibrations imitent la sensation d'un battement de cœur directement sous le pouce. L’utilisatrice doit calquer son souffle sur une vibration. Si le pouce quitte l'écran, la routine se met en pause, avec un pop up ? « contact rompu » ?
+Possibilité 2 : Le Capteur de Proximité : On demande à l'utilisatrice de porter le téléphone contre sa poitrine (au niveau du sternum). Il faut utilise l'accéléromètre pour capter les micro-mouvements de la respiration, et envoyer des sons apaisants.
+Possibilité 3 : La Caméra Arrière (PPG) : L'utilisatrice pose son doigt sur l'objectif de la caméra arrière. Il faut analyser les changements de couleur de la pulpe du doigt (flux sanguin) pour mesurer le rythme cardiaque. Et du coup faire battre toute l'Aura à l'écran au rythme exact du cœur.
+Consequences sur l’utilisatrice de cette « Routine » :
+Impact : Stimulation du nerf vague et cohérence cardiaque
+Les vibrations à basse fréquence (7-10 Hz) et le rythme de 6 cycles par minute sont conçus pour entrer en résonance avec le système nerveux parasympathique. C'est le rythme optimal pour induire la cohérence cardiaque. La sensation de battement de cœur sous le pouce (Haptic Engine) simule un contact humain ou une présence apaisante. Cela rassure le cerveau primitif par une sensation de sécurité physique. Résultat : Une baisse rapide de la fréquence cardiaque et une régulation de la tension artérielle. C'est la routine la plus "physique" pour stopper une crise d'angoisse naissante.
+Lien scientifique : 
+https://www.stenup.com/fr/content/56-stimulation-du-nerf-vague-et-anxiete
+
+
+
+
+4. Cognitive Sorting (Décharge Mentale ou Le vide-poubelle mental) : Une pluie d'icônes symbolisant le stress (tâches, emails, bruits) tombe sur l'écran. Il faut les jeter hors de l'écran. L'utilisatrice les "balaye" vers une corbeille virtuelle. L'IA analyse la force et la rapidité du balayage pour ajuster la fin de la séance. Chaque icône jetée déclenche une petite étincelle « pop » et l'Aura globale s'éclaircit de 5% à chaque objet supprimé. Il faut gèrer la physique des objets (drag & drop) et calculer la vitesse d'éjection.
+Consequences sur l’utilisatrice de cette « Routine » :
+ Le simple fait de voir l'avatar de sa "Twin" (jumelle) respirer calmement en temps réel crée un ancrage. Le cerveau de l'utilisatrice finit par se synchroniser sur ce calme extérieur. Résultat : Une chute du sentiment d'isolement (souvent lié au stress chronique) et une préparation du corps à un état de repos profond ou au sommeil.
+
+
+Lien scientifique : 
+
+
+2. Routines pour Twin (Focus : Synchronisation & Match)
+4 routines pour se connecter à sa Twin
+Ces routines nécessitent deux personnes connectées simultanément (Amie du Squad ou membre de la communauté).
+le défi est de faire ressentir la présence de l'autre sans passer par la vidéo
+exemple : locket widget pour la synchronisation ; digital Touch sur apple watch
+https://www.youtube.com/shorts/ym-u0BNuTJ8
+
+
+5. Twin-Coherence (Respiration Miroir ou fusion des souffles) : Les deux Twins voient un cercle qui gonfle. Si elles respirent au même rythme (mesuré via le micro ou le doigt sur l'objectif), leurs deux Auras fusionnent à l'écran pour devenir une seule grosse sphère lumineuse dorée ( ou autre couleur). Il faut synchroniser les données de respiration des deux téléphones via WebSocket. et calculer l'écart de phases (si elles sont en même temps) ;
+Consequences sur l’utilisatrice de cette « Routine » :
+Cette routine de 3 minutes permet à deux utilisatrices de synchroniser leurs souffles via des WebSockets. Le stress diminue par le sentiment de ne pas être seule. Le cerveau de l'utilisatrice s'aligne sur le calme de sa partenaire (ou vice-versa), créant un phénomène de résonance émotionnelle. Résultat : Une libération d'ocytocine (l'hormone du lien social), qui est l'antidote naturel au cortisol.
+Lien scientifique : https://www.pasteur.fr/fr/journal-recherche/actualites/quand-se-tenir-main-soulage-douleur-synchronisation-ondes-cerebrales
+https://pubmed.ncbi.nlm.nih.gov/17201784/
+La recherche prouve que plus deux personnes sont synchronisées physiquement (rythme cardiaque, respiration), plus leur niveau d'empathie et de compréhension mutuelle augmente. En "calant" l'Aura ou le pouls d'une utilisatrice sur sa Twin, vous créez un lien émotionnel profond à travers l'interface
+https://www.researchgate.net/publication/376855183_Shared_Hearts_and_Minds_Physiological_Synchrony_During_Empathy
+
+
+6. The High-Five (Feedback Haptique Synchrone ou Le contact à distance) : Un compte à rebours : 3, 2, 1... Touchez ! ; À la fin d'une séance difficile, les deux Twins doivent toucher une zone précise de l'écran en même temps. Si le timing est parfait (au millième de seconde), les deux téléphones vibrent de façon identique, créant un lien tactile à distance et déclenche une animation de "fusion" qui donne l'impression que l'écran explose de lumière chez les deux. Il faut détecter le "Tap" à la milliseconde près sur les deux appareils
+Consequences sur l’utilisatrice de cette « Routine » :
+Pendant 2 minutes, l'utilisatrice ajuste sa propre énergie (son aura visuelle) sur celle de sa "Twin". C'est un exercice de mimétisme apaisant. Resultat: Réduit l'anxiété de performance ou d'isolement en créant une harmonie esthétique entre les deux avatars.
+
+
+7. Aura-Exchange (Le Don d'Énergie ou Le transfert d'énergie) : Si une Twin a un score "Orange" et l'autre "Vert", la Twin sereine peut "envoyer" de la lumière vers l'autre en glissant son doigt vers le haut. L'Aura de la Twin stressée change de couleur instantanément sur son propre écran. Une traînée de lumière quitte l'écran de l'une pour entrer dans l'écran de l'autre et colorer son Aura 
+Consequences sur l’utilisatrice de cette « Routine » :
+Impact : Ancrage profond et présence non-intrusive. Connexion sans paroles
+C'est la routine la plus longue (5 minutes). Le document insiste sur une interface "très douce" pour ne pas fatiguer les yeux. L'impact repose sur la simple conscience de la présence de l'autre.Resultat : Le cerveau quitte le mode "alerte" pour passer en mode "veille sécurisée"
+
+
+
+
+8. Bio-Ambient Duo (Musique Générative ou Le silence partagé) : L'IA crée une mélodie dont les instruments dépendent des scores combinés des deux Twins. Si elles se calment ensemble, la musique s'enrichit de nouvelles harmonies en temps réel. Et/Ou bien on pourrait en rajouter une autre : Rester en silence ensemble pendant 1 minute. Analyse le micro des deux téléphones. Si le niveau de décibels monte, le chrono s'arrête. En fond d’ecran, une mer calme. Si quelqu'un parle, des vagues agitées apparaissent. Si le silence dure, l'image devient un miroir parfait.
+Consequences sur l’utilisatrice de cette « Routine » :
+Immersion sensorielle et isolation cognitive. En utilisant des fréquences sonores spécifiques (sons binauraux ou bruits bruns) couplées à l'ambiance visuelle de l'Aura, le cerveau entre en état « Alpha ». Cela permet de couper court aux stimuli extérieurs stressants et de saturer les canaux sensoriels avec des informations apaisantes. Résultat : Une déconnexion totale du mode « Résolution de problèmes » vers un mode « Récupération profonde »
+Lien scientifique : https://www.lakeforest.edu/academics/student-honors-and-research/student-publications/eukaryon/the-science-behind-binaural-beats-can-sound-ease-anxiety-and-boost-your-brain#:~:text=Patients%20who%20listened%20to%20binaural,to%20ease%20pre%2Dsurgery%20anxiety.
+
+
+
+
+
+
+3. Routines pour SQUAD (Focus : Unité de Performance & Support)
+4 routines pour protéger son groupe
+Le Squad n'est pas un chat, c'est un Statut.
+Ces routines impliquent tout le groupe (5 personnes) de manière asynchrone ou semi-synchrone.
+9. Squad-Pulse (Le Cœur du Groupe ou Le battement du Cœur) : objectif : Voir l'état de son groupe sans texte. Nous utilisons un widget ou un tableau de bord qui montre les 5 pulsations lumineuses. Chaque membre "pulse" selon son niveau d'énergie actuel. Plus une amie est stressée, plus son impulsion est rapide et rouge. C'est pour une visualisation silencieuse du bien-être du groupe qui incite à l'entraide sans message texte. Il faut Récupèrer les scores Hume récents des 5 utilisatrices
+Consequences sur l’utilisatrice de cette « Routine » :
+Résultat : Une réactivité accrue du réseau de soutien : l'entraide devient proactive plutôt que réactive. Un climat de bienveillance "invisible" mais omniprésent, où le stress est détecté avant même qu'il ne devienne ingérable
+Lien scientifique : https://www.sciencesetavenir.fr/sante/cerveau-et-psy/neurosciences-la-communication-emotionnelle-joyeuse-synchronise-l-activite-cerebrale_159371
+
+
+10. The Intention Wheel (La roue des succès) : Chaque membre choisit un mot-clé de résilience pour la journée (ex: "Calme", "Force"etc). Les mots s'affichent sur une roue commune. Quand une utilisatrice réussit une routine, son mot "brille" sur le téléphone de tout le Squad. Quand les 5 sections brillent, le logo TIYIA au centre devient étincelant
+Consequences sur l’utilisatrice de cette « Routine » :
+Une synergie de groupe renforcée : le succès de l'une devient la célébration de toutes. L'atteinte d'un état de "Flow" collectif où l'effort individuel est soutenu par l'énergie globale du "Squad"
+Lien scientifique : https://greatergood.berkeley.edu/article/item/nine_steps_to_achieving_flow_in_your_work
+
+
+
+
+11. Audio-Capsule (Le Murmure de Sécurité ou Le message de secours) : Une utilisatrice peut enregistrer 10 secondes de "soutien vocal"(ex: "Respire, je pense à toi, tu es capable de gérer ça)". L'IA ARIA ne débloque ce message pour les autres membres du Squad que lorsque le TIYIA détecte un pic de stress majeur chez elles et/ou il faudrait déverrouiller le fichier audio que si le score Hume actuel est > 70 et / ou si Le Guardian Mode voit un agenda surchargé et une fréquence cardiaque qui monte. La capsule apparaît comme une bulle lumineuse qui palpite au centre de l'Aura. Quand l'utilisatrice l'écoute, l'Aura change de texture pour devenir plus protectrice visuellement.
+Consequences sur l’utilisatrice de cette « Routine » :
+Désamorçage des pics de stress : En combinant l'audio (le murmure) et le visuel (la bulle lumineuse et la texture de l'Aura), la routine permet de faire redescendre la pression avant que l'utilisatrice ne perde le contrôle.
+Lien scientifique : https://royalsocietypublishing.org/rspb/article-abstract/277/1694/2661/73270/Social-vocalizations-can-release-oxytocin-in?redirectedFrom=fulltext
+
+
+12. The Collective Shield (Défi de Résilience) : Si le stress moyen du Squad est trop élevé (période de rush) sup a 60 (par exemple), l'IA lance un "Bouclier". Le Squad gagne des points si chaque membre effectue au moins un "Reset Flash" dans la journée. Un dôme protecteur au-dessus des avatars du Squad qui se solidifie à chaque routine terminée par un membre. Un badge "Squad Invincible/collective shield" est débloqué.
+Consequences sur l’utilisatrice de cette « Routine » :
+Dans l'interface, un dôme visuel apparaît au-dessus des avatars de votre groupe (le Squad). À chaque fois qu'une utilisatrice termine une routine, le dôme se solidifie, devient plus brillant ou plus opaque. Contrairement au stress de la performance, ici le stress est réduit par l'effort des autres. Si vous ne pouvez pas faire votre routine, vous voyez que vos amies "protègent" le groupe pour vous. Cela transforme la culpabilité en gratitude. Un badge est débloqué une fois le bouclier est complet. C'est une récompense psychologique puissante qui crée un sentiment de victoire commune.
+Résultat : Une baisse de l'insécurité. Le cerveau de l'utilisatrice passe d'un mode « Survie individuelle » à un mode « Protection tribale ». Physiologiquement, cela stabilise le système nerveux grâce au sentiment de soutien social (même virtuel).
+
+
+
+
+Il faudrait créer les animations de l'Aura sur After Effects et exporter sur les animations Lottie  (fichiers d'animation ultra-légers pour mobile) et utiliser « Canvas » pour que l'Aura soit fluide ? Il faut gérer la latence du temps réel pour les routines Twin (WebSockets) et l'analyse des capteurs.
+Temps moyen des routines, sachant qu’il faut intégrer le selfie flash ( 10sec) +routines +Post check ( 10 sec)
+Catégorie
+	Nom de la Routine
+	Durée
+	Objectif
+	SEULE
+	1. Saccadic Reset (EMDR)
+	1 min 30
+	Débloquer une pensée stressante.
+	
+
+	2. Vagal-Haptic (Souffle)
+	2 min
+	Calmer le rythme cardiaque (nerf vague).
+	
+
+	3. Aura-Cleaning (Visuel)
+	1 min
+	Reset visuel et émotionnel rapide.
+	
+
+	4. Bio-Ambient (Sonore)
+	3 min
+	Immersion pour une déconnexion totale.
+	TWIN
+	5. Twin-Coherence
+	3 min
+	Synchroniser les souffles à distance.
+	
+
+	6. Mirror-Aura
+	2 min
+	Calage visuel sur l'énergie de sa Twin.
+	
+
+	7. Silent-Presence
+	5 min
+	Connexion sans paroles, juste la présence. Ici il faut que ce soit et tres doux pour ne pas fatiguer les yeux 
+	
+
+	8. Pulse-Match
+	1 min 30
+	Envoyer ses battements de cœur à sa Twin.
+	SQUAD
+	9. Collective Shield
+	2 min
+	Protection groupée lors d'un pic de stress.
+	
+
+	10. Audio-Capsule
+	30 sec
+	Écoute d'un message de soutien 
+	
+
+	11. Squad-Pulse
+	1 min
+	Partage d'énergie collective
+	
+
+	12.Defi de Resilience
+	2 min
+	Alignement du groupe avant la journée.
+	
+
+12 autres Routines a rajouter ; dit «  bloc avancé » ou « routines avancées »
+
+
+13. Routine "Tap-Sync" (Anti-Rumination)
+
+
+L'Écran : Un fond sombre et épuré. Des points lumineux (type néon) apparaissent de manière aléatoire et rapide à différents endroits de l'écran. UX/Interactions : L'utilisatrice doit tapoter chaque point pour le faire disparaître. Dès qu'un point est touché, un autre apparaît ailleurs immédiatement. La vitesse doit être calculée pour saturer l'attention visuo-spatiale. Prévoir une animation "pop" légère à chaque réussite.
+
+
+* Impact Clinique : Saturation de la mémoire de travail.
+* Preuve : Des études sur le traitement de l'information montrent que solliciter l'attention visuo-spatiale rapide (comme le "tapping" sur des points mobiles) empêche le cerveau de maintenir des images ou des pensées stressantes. Cela "court-circuite" les boucles de rumination du cortex préfrontal.
+* Objectif TIYIA : Stopper net une montée d'angoisse en 60 secondes.
+14. Routine "OLED-Therapy" (Pulsation Lumineuse)
+
+
+L'Écran : L'écran entier devient une source de lumière colorée (selon le score d'Aura) qui pulse très lentement ; UX/Interactions : Aucune interaction requise. L'utilisatrice doit simplement tenir le téléphone face à elle ou le poser à proximité ; La fréquence doit être fixée à 0,1 Hz pour l'entraînement cérébral. Ajouter impérativement l'écran d'avertissement pour les épileptiques avant le lancement
+
+
+
+
+* Impact Clinique : Entraînement cérébral (Brainwave Entrainment).
+* Preuve : Il est prouvé que l'exposition à des fréquences lumineuses spécifiques (photobiomodulation) peut influencer les ondes cérébrales. Une lumière pulsée à 0,1 Hz force le système nerveux à se caler sur le rythme de la cohérence cardiaque.
+* Objectif TIYIA : Abaisser la tension artérielle sans que l'utilisatrice ait à faire un effort conscient de respiration.
+Contre-indication absolue pour les épileptiques photosensibles. C'est la seule contre-indication médicale majeure de toute ta liste. Il te faut un écran de santé à la première ouverture de l'app demandant "Avez-vous été diagnostiquée épileptique ou avez-vous des antécédents de crises ?", et si oui masquer OLED-Therapy entièrement du catalogue. Pas de choix, c'est obligatoire légalement.
+15. Routine "Audio-Binaurale" (Sons fréquencés)
+
+
+L'Écran : Une onde sonore stylisée, très fluide et lente, qui réagit subtilement au volume. UX/Interactions : Affichage d'un message "Casque requis" avec détection automatique du branchement avant de démarrer. Générer deux fréquences distinctes (une par oreille) pour créer le battement binaural dans le cerveau
+
+
+
+
+* Impact Clinique : Induction d'ondes Alpha et Thêta.
+* Preuve : La recherche clinique sur les "battements binauraux" montre qu'en envoyant deux fréquences légèrement différentes dans chaque oreille, le cerveau génère une troisième fréquence (la différence) qui favorise soit la relaxation profonde (Alpha), soit le sommeil (Thêta).
+* Objectif TIYIA : Créer un "cocon d'isolation" immédiat dans un environnement bruyant (bureau, transports).
+16. Routine "Écriture/Dessin Infini" (Grapho-motricité)
+L'Écran : Une toile vide avec un tracé lumineux qui suit le doigt. Le symbole de l'infini (♾️) est pré-dessiné en transparence comme guide ; UX/Interactions : L'utilisatrice suit le tracé de l'infini en boucle sans lever le doigt. Intégrer une résistance haptique : si le mouvement est trop brusque ou rapide, le téléphone émet des vibrations de "friction" pour forcer le ralentissement.
+
+
+
+
+* Impact Clinique : Régulation sensorimotrice.
+* Preuve : Le mouvement répétitif et fluide (comme le signe de l'infini ♾️)stimule la coordination des deux hémisphères cérébraux. Associé à une résistance haptique (vibrations si le geste est trop rapide), cela oblige le cervelet à ralentir, ce qui calme par ricochet le système limbique (le siège des émotions).
+* Objectif TIYIA : Décharger la colère ou la frustration physique par le geste tactile.
+17. Routine "Lullaby Haptique" (Twin - Impact : Régression apaisante)
+L'Écran : Un visuel de berceau ou d'ondes de sable qui basculent doucement. UX/Interactions : La Twin A incline physiquement son téléphone de gauche à droite. Utiliser le gyroscope de la Twin A pour envoyer des données d'inclinaison à la Twin B via WebSocket. Le téléphone de la Twin B doit vibrer en suivant exactement ce balancement.
+
+
+* Le concept : Une Twin "berce" l'autre à distance.
+* L'action : L'amie A incline son téléphone lentement de gauche à droite (utilisant le gyroscope). L'amie B, les yeux fermés, tient son téléphone contre sa poitrine et ressent une vibration balancée qui suit exactement le mouvement de A.
+* Impact Clinique : Stimulation du système vestibulaire. Le balancement est le signal universel d'apaisement du cerveau mammalien. Cela déclenche une baisse immédiate du tonus sympathique (stress).
+* Objectif : Créer un sentiment de protection physique réelle entre deux "piliers".
+18. Routine "Co-Gaze Alpha" (Twin - Impact : Synchronie cérébrale)
+
+
+L'Écran : Un point central unique pour les deux utilisatrices. UX/Interactions : Les deux Twins doivent fixer ce point sans détourner le regard (vérifié par eye-tracking) ; La fréquence de pulsation du point doit être la moyenne exacte des deux rythmes cardiaques captés par rPPG
+
+
+* Le concept : Synchronisation par le regard et la lumière.
+* L'action : Aria demande aux deux Twins de fixer un point qui pulse sur l'écran. La fréquence de pulsation lumineuse est calculée par Aria pour être la moyenne exacte des deux rythmes cardiaques (rPPG).
+* Impact Clinique : Hyper-scanning neurologique. Il est prouvé que lorsque deux personnes partagent un stimulus visuel rythmique lié à leur physiologie, leurs ondes cérébrales se synchronisent.
+* Objectif : Réduire le sentiment de solitude profonde par une "fusion" sensorielle.
+19. Routine "Squad-Resonance" (Squad - Impact : Sommation de soutien)
+
+
+L'Écran : L'Aura de la personne en crise (rouge/sombre) est visible par tout le groupe.
+UX/Interactions : Les 4 alliés tapotent leur écran en rythme. Chaque "tap" des alliés doit être envoyé instantanément sous forme de micro-vibrations haptiques synchronisées sur le téléphone de la personne en stress.
+* Le concept : Le groupe "porte" celle qui va mal.
+* L'action : Quand une amie est en crise (Aura rouge sombre), les 4 autres ouvrent TIYIA. Aria leur demande de tapoter l'écran ensemble sur un rythme lent. Chaque "tap" des amies envoie une micro-vibration haptique synchronisée sur le téléphone de l'amie en crise.
+* Impact Clinique : Soutien social perçu. Le cerveau reçoit des signaux tactiles (haptiques) provenant de plusieurs sources, ce qui s'apparente à une "étreinte numérique". Cela sature l'amygdale de signaux de sécurité.
+* Objectif : Transformer le Squad en un véritable bouclier biologique collectif.
+20. Routine "Breath-Drawing" (Twin - Impact : Entraînement moteur)
+L'Écran : Une ligne lumineuse qui se dessine verticalement (monte à l'inspiration, descend à l'expiration) UX/Interactions : La Twin A respire, la Twin B suit la ligne générée avec son doigt sur son propre écran. Couplage en temps réel entre la caméra faciale de A (flux respiratoire) et l'affichage de B
+* Le concept : Dessiner le souffle de l'autre.
+* L'action : L'amie A respire (Aria capte son flux via la caméra). L'amie B voit une ligne se dessiner en temps réel sur son écran au rythme du souffle de A et doit la suivre avec son doigt.
+* Impact Clinique : Couplage moteur-respiratoire. En forçant la main à suivre le rythme respiratoire d'un proche, le cerveau de l'amie B adopte naturellement la fréquence de A. C'est une forme de "coaching invisible".
+* Objectif : Permettre à l'amie calme de "tirer" l'amie stressée vers le haut sans dire un mot.
+21. Routine "Vagus-Ear" (Solo - Impact : Stimulation du Tragus)
+* L'Écran : Un schéma simple montrant où placer le téléphone contre l'oreille (tragus) UX/Interactions : L'écran devient noir une fois le capteur de proximité activé pour économiser la batterie et éviter les touches accidentelles. Activer le moteur haptique à une fréquence de 40-60 Hz. Brider le volume vibratoire pour éviter tout inconfort acoustique.
+* Le concept : Utiliser les vibrations du téléphone pour stimuler physiquement le nerf vague.
+* L'action : L'utilisatrice place le bord supérieur du téléphone (près du haut-parleur) contre le cartilage de l'oreille (le tragus).
+* Impact Clinique : Une branche du nerf vague affleure à cet endroit. Une vibration à basse fréquence (40-60 Hz) envoyée par Mathieu active le système parasympathique.
+* Objectif : Faire baisser le rythme cardiaque sans même avoir à respirer consciemment.
+* * (vibrations près de l'oreille) : si les vibrations sont trop fortes ou prolongées, risque de sensibilisation acoustique. Il faut  fixer le volume vibratoire et bloquer si l'utilisatrice augmente au-delà d'un seuil.
+
+
+22. Routine "Oculo-Cardiaque" (Solo - Impact : Réflexe de ralentissement)
+L'Écran : Un point qui part du haut et descend lentement vers le centre-bas de l'écran, forçant les yeux à converger (loucher légèrement) UX/Interactions : L'utilisatrice doit suivre le point tout en expirant longuement ; Utiliser l'eye-tracking pour vérifier la convergence oculaire et valider l'exercice.
+* Le concept : Utiliser la convergence des yeux pour forcer le cœur à ralentir.
+* L'action : Aria affiche un point qui descend lentement au milieu de l'écran, forçant l'utilisatrice à loucher légèrement tout en expirant.
+* Impact Clinique : La tension des muscles oculaires déclenche le réflexe oculo-cardiaque, qui envoie un signal immédiat au cerveau pour ralentir les battements du cœur.
+* Objectif : Stopper une crise d'angoisse physique (palpitations) de manière mécanique.
+23. Routine "Mirror-Breath" (Twin - Impact : Neurones Miroirs)
+* L'Écran : Une onde lumineuse fluide qui traverse l'écran de gauche à droite. UX/Interactions : La Twin B doit simplement "caler" sa respiration sur le mouvement de cette onde envoyée par la Twin A ; Transformer les données de la caméra de A en une animation visuelle douce sur l'appareil de B.
+
+
+* Le concept : L'amie qui va bien "donne" son souffle à celle qui va mal.
+* L'action : L'amie A respire normalement. Aria capte son rythme et le transforme en une onde lumineuse sur l'écran de l'amie B. L'amie B doit simplement "suivre" la lumière.
+* Impact Clinique : Utilisation de la synchronie inter-cérébrale. Le cerveau de l'amie stressée s'aligne automatiquement sur le rythme de l'amie calme par mimétisme inconscient.
+* Objectif : Une aide réelle entre "piliers" sans avoir besoin de se parler.
+24. Routine "Plexus-Weight" (Solo - Impact : Pression Profonde)
+L'Écran : Une interface très sombre, presque noire, avec une impulsion centrale très lenteUX/Interactions : L'utilisatrice pose le téléphone à plat sur son plexus solaire (allongée) Générer des vibrations de type "Deep Pressure" : lourdes, profondes et très lentes. Sécurité : Intégrer un timer automatique de 5 minutes maximum.
+* Le concept : Simuler l'effet d'une couverture lestée contre l'insomnie de stress.
+* L'action : L'utilisatrice s'allonge et pose le téléphone sur son plexus solaire (creux de l'estomac).
+* Impact Clinique : Aria génère des vibrations très lourdes, profondes et lentes. Ces stimuli proprioceptifs calment l'amygdale en simulant une présence physique ou un poids rassurant.
+* Objectif : Apaisement profond pour les moments de "vide" ou de grande fatigue émotionnelle.
+routine en position allongée avec téléphone sur le plexus. Quid de la sécurité du téléphone (chute sur le visage si la personne s'endort) et de la surchauffe prolongée de batterie au contact de la peau ? Il faut  prévoir un timer maximum (5 minutes) et un message "Pas de conduite, pas de contexte dangereux"
+
+
+exclusivement dédiées au Squad et aux Twins.
+
+
+25. Routine "Vocal- Sync" (Twin - Impact : Tonus Vagal)
+* L'Écran : Un cercle central organique qui ondule selon l'intensité sonore détectée par le micro. UX / Interaction : Aria demande aux deux amies de fredonner un son grave ("Hmmmm") simultanément. Le téléphone vibre au rythme de la voix de l'amie distante.
+
+
+* Le concept : Utiliser la résonance de la voix pour synchroniser les systèmes nerveux.
+* Impact Clinique : Les vibrations vocales couplées à l'haptique stimulent le nerf vague par voie osseuse et auditive. Faire cela à deux crée une "résonance sympathique".
+* Objectif : Créer une bulle sonore et vibratoire commune qui abaisse instantanément le cortisol.
+26. Routine "Squad-Pulse Heartbeat" (Squad - Impact : Sécurité Sociale)
+L'Écran : Une zone de contact spécifique en bas de l'écran, entourée des avatars du Squad qui palpitent doucement. UX / Interaction : L'amie en stress pose son pouce sur la zone de contact. Récupérer les dernières données de fréquence cardiaque des 4 autres membres. Les fusionner en une seule pulsation haptique harmonieuse sous le pouce de l'utilisatrice ; L'effet doit simuler une "étreinte numérique" via le toucher
+* Le concept : Ressentir la force du groupe par le rythme.
+* L'action : L'amie en stress pose son pouce sur l'écran. Aria récupère les battements de cœur des 4 autres amies du Squad (via leurs dernières données) et les transforme en une seule pulsation haptique harmonieuse sous le pouce de l'utilisatrice.
+* Impact Clinique : C'est la "sommation des signaux de sécurité". Le cerveau de l'utilisatrice interprète ces 4 pulsations comme une présence physique protectrice, ce qui désactive le mode "alerte" de l'amygdale.
+* Objectif : Ne plus se sentir seule face à une crise grâce à la matérialisation physique du groupe.
+27. Routine "Gaze-Lock Coherence" (Twin - Impact : Ocytocine)
+L'Écran : Un point lumineux précis situé à l'emplacement exact de l'œil de la Twin distante sur l'écran ; UX / Interaction : Les deux Twins doivent fixer ce point sans bouger les yeux. Utiliser l'Eye-tracking pour analyser la stabilité du regard. Dès que les regards sont fixés, déclencher une fusion visuelle des Auras et une vibration haptique douce ; Durée de l'exercice : moins de 2 minutes pour passer à un état d'attachement sécurisé.
+* Le concept : Un "contact visuel" numérique synchronisé.
+* L'action : Les deux Twins fixent un point précis sur leur écran (l'endroit où se trouve l'œil de l'autre). Aria analyse la stabilité du regard. Quand les deux regards sont fixés, les deux Auras fusionnent à l'écran dans une vibration douce.
+* Impact Clinique : Le contact visuel, même médiatisé, déclenche la libération d'ocytocine. Cette routine force la "synchronie inter-cérébrale" (les ondes cérébrales des deux amies s'alignent).
+* Objectif : Passer d'un état de détresse à un état d'attachement sécurisé en moins de 2 minutes.
+28. Routine "Thermal-Touch Illusion" (Twin - Impact : Réconfort tactile)
+Concept : Simuler la chaleur humaine d'une main tenue à distance ; L'Écran : Une interface "thermique" où les empreintes digitales laissent des traînées de couleurs chaudes (orangé/doré). UX / Interaction : La Twin A caresse lentement son écran ; Coder une vibration très spécifique : haute fréquence et basse amplitude. Le but est d'utiliser l'illusion de Weber pour que le cerveau interprète la vibration comme une sensation de chaleur ; Cette routine cible les fibres tactiles C liées au calme et au plaisir.
+
+
+* Le concept : Simuler la chaleur d'une main tenue.
+* L'action : L'amie A "caresse" son écran lentement. L'amie B reçoit une vibration haptique très spécifique (haute fréquence, basse amplitude) que Mathieu peut coder pour simuler une sensation de chaleur (illusion de Weber).
+* Impact Clinique : Le cerveau associe cette fréquence vibratoire à la chaleur humaine. Cela stimule les fibres tactiles C qui sont directement reliées aux centres du plaisir et du calme dans le cerveau.
+* Objectif : Apporter un réconfort physique immédiat à distance quand les mots ne suffisent plus.
+Mathieu doit s'assurer que la latence (via WebSockets) est minimale pour que la synchronisation haptique entre deux téléphones soit instantanée, renforçant ainsi l'illusion de présence physique
+
+
+Résumé
+Routines 1 à 12 : Fondamentaux (EMDR, Vagal, Bio-ambient).
+Routines 13 à 16 : Numérique/ Technologie pur (OLED, Binaural, Grapho-motricité). 
+Routines 17 à 20 : Connexion Twin/Squad (Resonance, Breath-drawing). Routines avancées
+Routines 21 à 24 : Haute Technologie Twin (Gaze-lock, Thermal-touch, Pulse-match). 
+Routines 25 à 28 : Réflexes Biologiques Numeriques(Vagal-Ear, Oculo-cardiaque, Plexus-weight, Vocal-humming).
+
+
+Compiled comprehensive 28-routine table with detailed specifications
+#
+	Routine
+	Écran
+	Haptique
+	Caméra
+	Son
+	Deux appareils
+	1
+	Aura-Cleaning
+	✅
+	❌
+	✅
+	❌
+	❌
+	2
+	Saccadic Reset
+	✅
+	❌
+	✅
+	❌
+	❌
+	3
+	Vagal-Haptic
+	✅
+	✅
+	✅
+	❌
+	❌
+	4
+	Cognitive Sorting
+	✅
+	❌
+	❌
+	❌
+	❌
+	5
+	Twin-Coherence
+	✅
+	❌
+	✅
+	❌
+	✅
+	6
+	The High-Five
+	✅
+	✅
+	❌
+	❌
+	✅
+	7
+	Aura-Exchange
+	✅
+	❌
+	❌
+	❌
+	✅
+	8
+	Bio-Ambient Duo
+	❌
+	❌
+	❌
+	✅
+	✅
+	9
+	Squad-Pulse
+	✅
+	❌
+	❌
+	❌
+	✅
+	10
+	Intention Wheel
+	✅
+	❌
+	❌
+	❌
+	✅
+	11
+	Audio-Capsule
+	✅
+	❌
+	❌
+	✅
+	✅
+	12
+	Collective Shield
+	✅
+	✅
+	❌
+	❌
+	✅
+	13
+	Tap-Sync
+	✅
+	❌
+	❌
+	❌
+	❌
+	14
+	OLED-Therapy
+	✅
+	❌
+	❌
+	❌
+	❌
+	15
+	Audio-Binaurale
+	❌
+	❌
+	❌
+	✅
+	❌
+	16
+	Écriture/Dessin Infini
+	✅
+	✅
+	❌
+	❌
+	❌
+	17
+	Lullaby Haptique
+	✅
+	✅
+	✅
+	❌
+	✅
+	18
+	Co-Gaze Alpha
+	✅
+	✅
+	✅
+	❌
+	✅
+	19
+	Squad-Resonance
+	❌
+	✅
+	❌
+	❌
+	✅
+	20
+	Breath-Drawing
+	✅
+	❌
+	✅
+	❌
+	✅
+	21
+	Vagus-Ear
+	❌
+	✅
+	❌
+	❌
+	❌
+	22
+	Oculo-Cardiaque
+	✅
+	❌
+	❌
+	❌
+	❌
+	23
+	Mirror-Breath
+	✅
+	❌
+	✅
+	❌
+	✅
+	24
+	Plexus-Weight
+	✅
+	✅
+	❌
+	❌
+	❌
+	25
+	Vocal-Humming Sync
+	✅
+	✅
+	✅
+	✅
+	✅
+	26
+	Squad-Pulse Heartbeat
+	✅
+	✅
+	✅
+	❌
+	✅
+	27
+	Gaze-Lock Coherence
+	✅
+	✅
+	✅
+	❌
+	✅
+	28
+	Thermal-Touch Illusion
+	✅
+	✅
+	❌
+	❌
+	✅
+	
+
+
+
+
+
+
+
+
+
+#
+	Nom Routine
+	Catégorie
+	Durée
+	Impact Clinique
+	Technologie
+	Description
+	1
+	Reset Flash
+	SOLO
+	2 min
+	Baisse immédiate cortisol
+	Selfie Hume + Respiration guidée + Haptique
+	
+
+EMDR haptique synchronisé. Barres verticales montent (4-5sec inspiration), descendent (5-6sec expiration). Micro-vibrations 7-10Hz continu. Aura devient bleue progressivement.
+	2
+	Aura-Cleaning
+	SOLO
+	3 min
+	Catharsis visuelle + Reset émotionnel
+	Caméra faciale + Détection mouvements
+	
+
+Utilisatrice frotte l'écran pour disperser la "brume" du stress. Fond liquide qui bouge. Stress = objet extérieur manipulable.
+	3
+	Saccadic Reset
+	SOLO
+	1.5 min
+	Retraitement neurologique (EMDR)
+	Eye-tracking + Bille lumineuse
+	Bille parcourt écran gauche-droite. 
+
+
+Utilisatrice suit du regard. Si regard quitte = bille s'arrête. Interrompt pensées ruminatives. Réflexe oculo-cardiaque.
+	4
+	Vagal-Haptic
+	SOLO
+	2 min
+	Stimulation nerf vague + Cohérence cardiaque
+	Moteur haptique iPhone + rPPG (caméra)
+	
+
+Pouce sur écran = cercles concentriques + vibrations 7-10Hz. Imite battement cœur. Rythme 6 cycles/min (optimal vagal).
+	5
+	Cognitive Sorting
+	SOLO
+	2 min
+	Décharge mentale + Ancrage
+	Détection doigt + Physique objets
+	
+
+Icônes stress tombent. Utilisatrice balaye vers corbeille. Chaque geste = étincelle. Force motricité pour interrompre rumination.
+	6
+	Bio-Ambient
+	SOLO
+	3 min
+	Immersion sensorielle totale
+	Audio spatilialisé (binaurale) + Bruits bruns
+	
+
+Musique génère selon score utilisatrice. Fréquences alpha. Isolation cognitive du stress. Déconnexion mode "résolution".
+	7
+	Twin-Coherence
+	TWIN
+	3 min
+	Libération ocytocine (lien social)
+	WebSocket temps réel + Respiration captée
+	
+
+Deux cercles gonflent ensemble. Synchronisation respiratoire = fusion en sphère dorée. Résonnance émotionnelle. Mesure écart phases respiratoires.
+	8
+	The High-Five
+	TWIN
+	2 min
+	Harmonie esthétique + Feedback synchrone
+	Détection tap simultané (miliseconde)
+	
+
+Deux utilisatrices tapent au même moment. Si timing parfait = explosion lumière chez les deux. Lien tactile créé.
+	9
+	Aura-Exchange
+	TWIN
+	5 min
+	Ancrage profond + Connexion sans paroles
+	Dashboard Aura partagé temps réel
+	
+
+Une Twin "envoie" de la lumière à l'autre (geste haut). Aura change couleur instantanément. Trace lumière d'un écran à l'autre.
+	10
+	Bio-Ambient Duo
+	TWIN
+	3-5 min
+	Immersion + Synchronie sensorielle
+	Audio génératif + Micro détection bruit
+	
+
+Musique s'enrichit si les deux se calment. OU silence partagé: vagues calmes si silence, agitées si quelqu'un parle. Miroir parfait = victoire.
+	11
+	Squad-Pulse
+	SQUAD
+	2 min
+	Communication silencieuse du bien-être
+	Widget pulsations 5 personnes temps réel
+	
+
+5 pulsations lumineuses. Chacune représente 1 membre. Rouge rapide = stress. Bleu lent = calme. Visualise santé groupe sans texte.
+	12
+	Intention Wheel
+	SQUAD
+	2 min
+	Synergie groupe + Célébration collective
+	Roue interactive partagée
+	
+
+Chaque membre choisit mot-clé résilience (Calme, Force, etc.). Quand quelqu'un réussit routine = son mot brille. Succès devient célébration groupe.
+	13
+	Audio-Capsule
+	SQUAD
+	1 min
+	Désamorçage pics stress majeurs
+	IA génère message audio (Aria) + Bulle lumineuse
+	
+
+Message de soutien écrit par Aria. Apparaît si score Hume > 70 OU agenda surchargé. Bulle palpitante. Aura devient texture protectrice.
+	14
+	Collective Shield
+	SQUAD
+	2 min
+	Victoire commune + Culpabilité → Fierté
+	Dôme visuel qui se solidifie
+	
+
+Si stress groupe > 60, IA lance défi: chaque membre fait Reset Flash = groupe protège. Dôme se solidifie. Badge "Squad Invincible". Transforme culpabilité en fierté.
+	15
+	Tap-Sync
+	AVANCÉE
+	1 min
+	Saturation mémoire de travail (anti-rumination)
+	Points mobiles rapides + Détection tap
+	
+
+Utilisatrice tape sur points qui se déplacent. Sollicite attention visuo-spatiale rapide. Court-circuite boucles rumination cortex préfrontal.
+	16
+	OLED-Therapy
+	AVANCÉE
+	2 min
+	Entraînement cérébral (brainwave entrainment)
+	Lumière pulsée fréquence spécifique
+	
+
+Lumière pulse à fréquence précise. Photobiomodulation influence ondes cérébrales. Abaisse tension artérielle. Synchronise fréquence cardiaque.
+	17
+	Audio-Binaurale
+	AVANCÉE
+	3 min
+	Induction ondes Alpha/Thêta
+	Deux fréquences différentes par oreille (casque)
+	
+
+Fréquence 1 oreille gauche, fréquence 2 oreille droite. Cerveau génère différence = 3e fréquence. Alpha (relaxation) ou Thêta (sommeil). Cocon isolation imédiat.
+	18
+	Écriture/Dessin Infini
+	AVANCÉE
+	2 min
+	Régulation sensorimotrice
+	Détection doigt + Haptique avec résistance
+	
+
+Utilisatrice dessine le symbole infini. Mouvements fluides et répétitifs. Si trop rapide = vibrations freinent. Coordonne deux hémisphères. Décharge colère/frustration.
+	19
+	Lullaby Haptique
+	TWIN
+	2 min
+	Stimulation vestibulaire + Apaisement régression
+	Détection inclinaison téléphone + Vibrations
+	
+
+
+
+Twin A incline son téléphone lentement, Twin B voit le mouvement et son téléphone suit. Balancement = signal apaisement universel. Protéction physique réelle.
+	20
+	Co-Gaze Alpha
+	TWIN
+	3 min
+	Synchronie cérébrale (hyper-scanning)
+	Point qui pulse synchronisé + rPPG détection
+	
+
+Deux Twins fixent un point. Fréquence pulsation = moyenne exacte deux rythmes cardiaques. Ondes cérébrales se synchronisent. Réduit solitude profonde.
+	21
+	Squad-Resonance
+	SQUAD
+	2 min
+	Support social perçu + "Étreinte numérique"
+	Haptique synchronisé 5 appareils
+	
+
+Quelqu'un est en crise (Aura rouge). Les 4 autres tapent ensemble sur écran. Aria envoie micro-vibrations synchronisées sur téléphone personne stressée. Satura amygdale signaux sécurité.
+	22
+	Breath-Drawing
+	TWIN
+	2 min
+	Coaching invisible + Couplage moteur-respiratoire
+	Caméra détecte respiration + Ligne temps réel
+	
+
+Twin A respire → Twin B voit ligne se dessiner au rythme de A. B suit la ligne avec doigt. Force main à se synchroniser respiratoire de A. Guide inconsciente vers le haut.
+	23
+	Vagus-Ear
+	SOLO
+	1 min
+	Stimulation nerf vague via tragus
+	Vibrations 40-60Hz haut-parleur téléphone
+	
+
+Utilisatrice place bord supérieur téléphone contre tragus (petit cartilage oreille). Branche nerf vague affleure ici. Vibrations 40-60Hz activent système parasympathique. Baisse FC sans effort.
+	24
+	Oculo-Cardiaque
+	SOLO
+	1 min
+	Réflexe oculo-cardiaque (ralentissement mécanique)
+	Point qui descend écran + Détection vergence
+	
+
+Point descend lentement, force vergence yeux (converge). Utilisatrice expire lentement. Tension muscles oculaires déclenche réflexe = ralentissement FC immédiat. Stoppe palpitations.
+	25
+	Mirror-Breath
+	TWIN
+	2 min
+	Neurones miroirs + Synchronie inter-cérébrale
+	Caméra respiration + Onde lumineuse temps réel
+	
+
+
+
+
+
+Twin A respire normalement. Aria capture rythme → transforme en onde lumineuse écran Twin B. Twin B suit simplement la lumière. S'aligne automatiquement par mimétisme inconscient.
+	26
+	Plexus-Weight
+	SOLO
+	3 min
+	Pression profonde + Ancrage corporel
+	Vibrations très lourdes, profondes, lentes
+	
+
+Utilisatrice s'allonge, pose téléphone sur plexus solaire. Aria gère vibrations ultra-lentes (Deep Pressure Input). Stimuli proprioceptifs calment amygdale. Simule présence physique rassurante.
+	27
+	Vocal-Humming Sync
+	TWIN
+	2 min
+	Tonus vagal + Résonance sympathique
+	Détection son (micro) + Vibrations synchronisées
+	
+
+
+
+Deux amies fredonnent "Hmmmm" ensemble. Téléphones detectent vibrations vocales. Envoient vibrations synchronisées haptiques = résonance sympathique double. Bulle sonore commune.
+	28
+	Gaze-Lock Coherence
+	TWIN
+	2 min
+	Ocytocine + Synchronie inter-cérébrale
+	Point pupille qui pulse synchronisé + Eye-tracking
+	
+
+
+
+Deux Twins fixent point précis (endroit où regardent les yeux l'une de l'autre). Fréquence pulsation = moyenne deux FC. Analyse stabilité regard. Auras fusionnent → vibration douce. Contact visuel = ocytocine même en numérique.
+	
+
+
+
+  Solo: 6 routines (durée moyenne: 2 min) 
+  Twin: 8 routines (durée moyenne: 2.3 min) 
+  Squad: 4 routines (durée moyenne: 1.75 min) 
+  Avancées: 10 routines (durée moyenne: 2 min)

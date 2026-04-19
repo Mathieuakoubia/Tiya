@@ -1,21 +1,21 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'widgets/routine_intro_screen.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 const _darkBg = Color(0xFF141414);
-const _lightBg = Color(0xFFF5F3FF);
 const _primaryPurple = Color(0xFF82667F);
 const _accentPurple = Color(0xFF735983);
 
 // Couleurs de stress → disparaissent au nettoyage
 const _mistColors = [
-  Color(0xFFE53935),
-  Color(0xFFEF6C00),
-  Color(0xFFAD1457),
-  Color(0xFFD81B60),
-  Color(0xFFFF7043),
+  Color(0xFF5B242F),
+  Color(0xFFFFD7E7),
+  Color(0xFFBCAE3A),
+  Color(0xFFF2631D),
+  Color(0xFFF4F3F2),
 ];
 
 const _clearRadius = 78.0;   // rayon de nettoyage (px)
@@ -116,9 +116,11 @@ class _MistPainter extends CustomPainter {
       Paint()
         ..shader = RadialGradient(
           colors: [
-            _primaryPurple.withValues(alpha: 0.12 + auraProgress * 0.45),
-            _primaryPurple.withValues(alpha: 0.0),
+            const Color(0xFFF2631D).withValues(alpha: 0.10 + auraProgress * 0.35),
+            const Color(0xFF5B242F).withValues(alpha: 0.06 + auraProgress * 0.20),
+            const Color(0xFFFFD7E7).withValues(alpha: 0.0),
           ],
+          stops: const [0.0, 0.55, 1.0],
         ).createShader(Rect.fromCircle(center: center, radius: auraR)),
     );
 
@@ -144,7 +146,7 @@ class _MistPainter extends CustomPainter {
         tp,
         _clearRadius,
         Paint()
-          ..color = _primaryPurple.withValues(alpha: 0.28)
+          ..color = const Color(0xFF5B242F).withValues(alpha: 0.30)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5,
       );
@@ -152,7 +154,7 @@ class _MistPainter extends CustomPainter {
         tp,
         _clearRadius * 0.45,
         Paint()
-          ..color = _primaryPurple.withValues(alpha: 0.09)
+          ..color = const Color(0xFFBCAE3A).withValues(alpha: 0.12)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
       );
     }
@@ -272,7 +274,7 @@ class _AuraCleaningState extends State<AuraCleaning>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          _phase == _Phase.intro ? _lightBg : _darkBg,
+          _phase == _Phase.intro ? Colors.transparent : _darkBg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
@@ -322,120 +324,19 @@ class _AuraCleaningState extends State<AuraCleaning>
   }
 
   Widget _buildIntro() {
-    return SafeArea(
+    return RoutineIntroScreen(
       key: const ValueKey('intro'),
-      child: Stack(
-        children: [
-          Positioned(
-            bottom: -80,
-            right: -80,
-            child: Container(
-              width: 380,
-              height: 380,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: _primaryPurple.withValues(alpha: 0.12),
-                  width: 48,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                  style: IconButton.styleFrom(
-                    foregroundColor: _accentPurple,
-                    backgroundColor: _accentPurple.withValues(alpha: 0.1),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 28),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: _accentPurple.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    "1 min  •  Reset Visuel",
-                    style: TextStyle(
-                        color: _accentPurple,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                const Text(
-                  "Aura\nCleaning",
-                  style: TextStyle(
-                    fontSize: 42,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF141414),
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                const Text(
-                  "Fondement scientifique :",
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF141414)),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Le geste de \"balayage\" combiné à une visualisation colorée active la mémoire procédurale et crée une rupture émotionnelle mesurable. La brume rouge symbolise le stress ; effacer physiquement les taches renforce la sensation de contrôle.",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: const Color(0xFF141414).withValues(alpha: 0.6),
-                    height: 1.65,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                const _IntroStep(
-                    number: "1",
-                    text: "Une brume rouge de stress recouvre l'écran"),
-                const SizedBox(height: 14),
-                const _IntroStep(
-                    number: "2",
-                    text: "Frottez avec votre doigt pour la dissiper"),
-                const SizedBox(height: 14),
-                const _IntroStep(
-                    number: "3",
-                    text: "Votre Aura apparaît au fil du nettoyage"),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _startLoading,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _accentPurple,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 0,
-                    ),
-                    child: const Text("Commencer",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.w600)),
-                  ),
-                ),
-                const SizedBox(height: 36),
-              ],
-            ),
-          ),
-        ],
-      ),
+      title: 'Aura\nCleaning',
+      badgeLabel: '1 min  •  Reset Visuel',
+      scienceText: 'Le geste de balayage combiné à une visualisation colorée active la mémoire procédurale et crée une rupture émotionnelle mesurable. La brume rouge symbolise le stress ; effacer physiquement les taches renforce la sensation de contrôle.',
+      steps: const [
+        'Une brume rouge de stress recouvre l\'écran',
+        'Frottez avec votre doigt pour la dissiper',
+        'Votre Aura apparaît au fil du nettoyage',
+      ],
+      onStart: _startLoading,
+      buttonLabel: 'Commencer',
+      accentColor: _accentPurple,
     );
   }
 
@@ -632,46 +533,6 @@ class _TopBadge extends StatelessWidget {
                   TextStyle(color: color, fontWeight: FontWeight.w600)),
         ],
       ),
-    );
-  }
-}
-
-class _IntroStep extends StatelessWidget {
-  final String number;
-  final String text;
-
-  const _IntroStep({required this.number, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFF735983).withValues(alpha: 0.12),
-          ),
-          child: Center(
-            child: Text(
-              number,
-              style: const TextStyle(
-                color: Color(0xFF735983),
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 15, color: Color(0xFF141414)),
-          ),
-        ),
-      ],
     );
   }
 }

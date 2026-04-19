@@ -1,25 +1,44 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'squad_service.dart';
+import 'widgets/routine_intro_screen.dart';
 
 const _darkBg = Color(0xFF141414);
-const _lightBg = Color(0xFFF5F3FF);
 const _primaryPurple = Color(0xFF82667F);
 const _accentPurple = Color(0xFF735983);
+
+// Palette de couleurs fixe assignée par index de membre
+const _palette = [
+  Color(0xFF4CAF50),
+  Color(0xFF26C6DA),
+  Color(0xFFAB47BC),
+  Color(0xFFFF7043),
+  Color(0xFFFFCA28),
+];
 
 enum _Phase { intro, exercise, complete }
 
 class _Member {
+  final String uid;
   final String name;
   final Color color;
-  double energy; // 0 = stressée, 1 = sereine
-  double pulseSpeed; // secondes par pulsation
+  double energy; // 0.0 = stressée, 1.0 = sereine
+  double pulseSpeed;
 
   _Member({
+    required this.uid,
     required this.name,
     required this.color,
     required this.energy,
-  }) : pulseSpeed = 1.2 + (1.0 - energy) * 1.8; // stressée = rapide
+  }) : pulseSpeed = 1.2 + (1.0 - energy) * 1.8;
+
+  void updateEnergy(double e) {
+    energy = e.clamp(0.0, 1.0);
+    pulseSpeed = 1.2 + (1.0 - energy) * 1.8;
+  }
 }
 
 class SquadPulse extends StatefulWidget {
@@ -37,14 +56,12 @@ class _SquadPulseState extends State<SquadPulse>
   _Phase _phase = _Phase.intro;
   int _remainingSec = _totalSec;
   Timer? _timer;
+  StreamSubscription? _sub;
 
-  final _members = [
-    _Member(name: "Vous", color: const Color(0xFF4CAF50), energy: 0.6),
-    _Member(name: "Alice", color: const Color(0xFF26C6DA), energy: 0.35),
-    _Member(name: "Léa", color: const Color(0xFFAB47BC), energy: 0.75),
-    _Member(name: "Camille", color: const Color(0xFFFF7043), energy: 0.2),
-    _Member(name: "Sofia", color: const Color(0xFFFFCA28), energy: 0.55),
-  ];
+  // Énergie initiale du joueur courant (avant que Firestore ne réponde)
+  double _myEnergy = 0.6;
+  final List<_Member> _members = [];
+  bool _firestoreReady = false;
 
   late AnimationController _masterCtrl;
 
@@ -55,12 +72,63 @@ class _SquadPulseState extends State<SquadPulse>
       duration: const Duration(seconds: 60),
       vsync: this,
     )..repeat();
+
+    _initFirebase();
+  }
+
+  Future<void> _initFirebase() async {
+    await SquadService.ensureSignedIn();
+
+    // Afficher au moins "Vous" immédiatement, sans attendre Firestore
+    if (mounted) {
+      setState(() {
+        _firestoreReady = true;
+        _members
+          ..clear()
+          ..add(_Member(
+            uid: SquadService.currentUid,
+            name: 'Vous',
+            color: _palette[0],
+            energy: _myEnergy,
+          ));
+      });
+    }
+
+    // Écrire l'énergie puis écouter le stream
+    await SquadService.updateMyEnergy(_myEnergy);
+    _sub = SquadService.membersStream().listen(_onMembersUpdate);
+  }
+
+  void _onMembersUpdate(QuerySnapshot<Map<String, dynamic>> snap) {
+    if (!mounted) return;
+    final docs = snap.docs;
+    setState(() {
+      _firestoreReady = true;
+      // Reconstruire la liste en conservant l'ordre stable (uid trié)
+      final sorted = List.of(docs)..sort((a, b) => a.id.compareTo(b.id));
+      _members.clear();
+      for (int i = 0; i < sorted.length; i++) {
+        final doc = sorted[i];
+        final data = doc.data();
+        final uid = doc.id;
+        final isMe = uid == SquadService.currentUid;
+        final energy = (data['energy'] as num?)?.toDouble() ?? 0.5;
+        if (isMe) _myEnergy = energy;
+        _members.add(_Member(
+          uid: uid,
+          name: isMe ? 'Vous' : (data['displayName'] as String? ?? '?'),
+          color: _palette[i % _palette.length],
+          energy: energy,
+        ));
+      }
+    });
   }
 
   @override
   void dispose() {
     _masterCtrl.dispose();
     _timer?.cancel();
+    _sub?.cancel();
     super.dispose();
   }
 
@@ -74,11 +142,6 @@ class _SquadPulseState extends State<SquadPulse>
       setState(() {
         if (_remainingSec > 0) {
           _remainingSec--;
-          // Simulate all members calming down slowly
-          for (final m in _members) {
-            m.energy = (m.energy + 0.006).clamp(0.0, 1.0);
-            m.pulseSpeed = 1.2 + (1.0 - m.energy) * 1.8;
-          }
         } else {
           t.cancel();
           _endExercise();
@@ -87,12 +150,12 @@ class _SquadPulseState extends State<SquadPulse>
     });
   }
 
+  // Tap → boost énergie de l'utilisateur courant et écrire dans Firestore
   void _boostEnergy() {
     if (_phase != _Phase.exercise) return;
-    setState(() {
-      _members[0].energy = (_members[0].energy + 0.15).clamp(0.0, 1.0);
-      _members[0].pulseSpeed = 1.2 + (1.0 - _members[0].energy) * 1.8;
-    });
+    final newEnergy = (_myEnergy + 0.15).clamp(0.0, 1.0);
+    setState(() => _myEnergy = newEnergy);
+    SquadService.updateMyEnergy(newEnergy);
   }
 
   void _endExercise() {
@@ -101,13 +164,14 @@ class _SquadPulseState extends State<SquadPulse>
     widget.onComplete?.call();
   }
 
-  double get _avgEnergy =>
-      _members.fold(0.0, (s, m) => s + m.energy) / _members.length;
+  double get _avgEnergy => _members.isEmpty
+      ? _myEnergy
+      : _members.fold(0.0, (s, m) => s + m.energy) / _members.length;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _phase == _Phase.intro ? _lightBg : _darkBg,
+      backgroundColor: _phase == _Phase.intro ? Colors.transparent : _darkBg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
@@ -127,108 +191,20 @@ class _SquadPulseState extends State<SquadPulse>
   }
 
   Widget _buildIntro() {
-    return SafeArea(
+    return RoutineIntroScreen(
       key: const ValueKey('intro'),
-      child: Stack(children: [
-        Positioned(
-          bottom: -80,
-          right: -80,
-          child: Container(
-            width: 380,
-            height: 380,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: _primaryPurple.withValues(alpha: 0.12), width: 48)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                style: IconButton.styleFrom(
-                  foregroundColor: _accentPurple,
-                  backgroundColor: _accentPurple.withValues(alpha: 0.1),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 28),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _accentPurple.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text("1 min  •  Squad  •  Partage d'Énergie",
-                    style: TextStyle(
-                        color: _accentPurple,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600)),
-              ),
-              const SizedBox(height: 14),
-              const Text("Squad\nPulse",
-                  style: TextStyle(
-                      fontSize: 42,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF141414),
-                      height: 1.1)),
-              const SizedBox(height: 28),
-              const Text("Fondement scientifique :",
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF141414))),
-              const SizedBox(height: 8),
-              Text(
-                "Visualiser l'état émotionnel de son groupe sans texte réduit l'anxiété sociale tout en maintenant la connexion. Cette conscience collective silencieuse favorise l'entraide spontanée.",
-                style: TextStyle(
-                    fontSize: 15,
-                    color: const Color(0xFF141414).withValues(alpha: 0.6),
-                    height: 1.65),
-              ),
-              const SizedBox(height: 32),
-              _IntroStep(
-                  number: "1",
-                  text: "5 sphères lumineuses représentent votre Squad"),
-              const SizedBox(height: 14),
-              _IntroStep(
-                  number: "2",
-                  text: "La vitesse de pulsation indique le niveau de stress"),
-              const SizedBox(height: 14),
-              _IntroStep(
-                  number: "3",
-                  text:
-                      "Touchez l'écran pour partager votre énergie au groupe"),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _startExercise,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _accentPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
-                    elevation: 0,
-                  ),
-                  child: const Text("Voir le Squad",
-                      style:
-                          TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-                ),
-              ),
-              const SizedBox(height: 36),
-            ],
-          ),
-        ),
-      ]),
+      title: 'Squad\nPulse',
+      badgeLabel: '1 min  •  Squad  •  Partage d\'Énergie',
+      scienceText:
+          'Visualiser l\'état émotionnel de son groupe sans texte réduit l\'anxiété sociale tout en maintenant la connexion. Cette conscience collective silencieuse favorise l\'entraide spontanée.',
+      steps: const [
+        '5 sphères lumineuses représentent votre Squad',
+        'La vitesse de pulsation indique le niveau de stress',
+        'Touchez l\'écran pour partager votre énergie au groupe',
+      ],
+      onStart: _startExercise,
+      buttonLabel: 'Commencer',
+      accentColor: _accentPurple,
     );
   }
 
@@ -238,35 +214,39 @@ class _SquadPulseState extends State<SquadPulse>
       key: const ValueKey('exercise'),
       onTapDown: (_) => _boostEnergy(),
       child: Stack(fit: StackFit.expand, children: [
-        const ColoredBox(color: _darkBg),
-        // Pentagon of members
-        ..._buildPentagon(size),
-        // Center energy display
-        Center(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 600),
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _primaryPurple.withValues(alpha: 0.05 + _avgEnergy * 0.1),
-              boxShadow: [
-                BoxShadow(
-                    color: _primaryPurple.withValues(alpha: _avgEnergy * 0.3),
-                    blurRadius: 40,
-                    spreadRadius: 5)
-              ],
-            ),
-            child: Center(
-              child: Text("${(_avgEnergy * 100).toInt()}%",
-                  style: TextStyle(
-                      color: _primaryPurple.withValues(
-                          alpha: 0.6 + _avgEnergy * 0.4),
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold)),
+        Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
+        Container(color: Colors.white.withOpacity(0.12)),
+        if (!_firestoreReady)
+          const Center(child: CircularProgressIndicator(color: Colors.white54))
+        else ...[
+          ..._buildPentagon(size),
+          // Centre : énergie moyenne
+          Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 600),
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _primaryPurple.withValues(alpha: 0.05 + _avgEnergy * 0.1),
+                boxShadow: [
+                  BoxShadow(
+                      color: _primaryPurple.withValues(alpha: _avgEnergy * 0.3),
+                      blurRadius: 40,
+                      spreadRadius: 5)
+                ],
+              ),
+              child: Center(
+                child: Text("${(_avgEnergy * 100).toInt()}%",
+                    style: GoogleFonts.poppins(
+                        color: _primaryPurple.withValues(
+                            alpha: 0.6 + _avgEnergy * 0.4),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500)),
+              ),
             ),
           ),
-        ),
+        ],
         // Top bar
         Positioned(
             top: 0,
@@ -298,10 +278,14 @@ class _SquadPulseState extends State<SquadPulse>
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 28),
-              child: Text("Touchez pour partager votre énergie",
-                  style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.22),
+              child: Text(
+                  _members.length < 2
+                      ? "En attente d'autres membres..."
+                      : "Touchez pour partager votre énergie",
+                  style: GoogleFonts.poppins(
+                      color: Colors.white.withValues(alpha: 0.45),
                       fontSize: 13,
+                      fontWeight: FontWeight.w500,
                       letterSpacing: 0.3)),
             ),
           ),
@@ -314,8 +298,9 @@ class _SquadPulseState extends State<SquadPulse>
     final cx = size.width / 2;
     final cy = size.height / 2;
     const r = 140.0;
+    final count = _members.isEmpty ? 1 : _members.length;
     return List.generate(_members.length, (i) {
-      final angle = (2 * pi * i / _members.length) - pi / 2;
+      final angle = (2 * pi * i / count) - pi / 2;
       final x = cx + r * cos(angle);
       final y = cy + r * sin(angle);
       final m = _members[i];
@@ -325,11 +310,11 @@ class _SquadPulseState extends State<SquadPulse>
         child: AnimatedBuilder(
           animation: _masterCtrl,
           builder: (_, __) {
-            final t = _masterCtrl.value * 60; // seconds elapsed
+            final t = _masterCtrl.value * 60;
             final pulse = 0.85 + 0.15 * sin(2 * pi * t / m.pulseSpeed);
             final stressRatio = 1.0 - m.energy;
-            final glowColor = Color.lerp(
-                _primaryPurple, const Color(0xFFE53935), stressRatio)!;
+            final glowColor =
+                Color.lerp(_primaryPurple, const Color(0xFFE53935), stressRatio)!;
             return Column(mainAxisSize: MainAxisSize.min, children: [
               Transform.scale(
                 scale: pulse,
@@ -350,18 +335,19 @@ class _SquadPulseState extends State<SquadPulse>
                   ),
                   child: Center(
                     child: Text(m.name[0],
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                             color: glowColor,
                             fontSize: 22,
-                            fontWeight: FontWeight.bold)),
+                            fontWeight: FontWeight.w500)),
                   ),
                 ),
               ),
               const SizedBox(height: 6),
               Text(m.name,
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                       color: Colors.white.withValues(alpha: 0.45),
-                      fontSize: 11)),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500)),
             ]);
           },
         ),
@@ -396,21 +382,22 @@ class _SquadPulseState extends State<SquadPulse>
                       const Icon(Icons.favorite, color: Colors.white, size: 44),
                 ),
                 const SizedBox(height: 28),
-                const Text("'Votre Squad est\nen bonne santé'",
+                Text("'Votre Squad est\nen bonne santé'",
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontSize: 22,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         fontStyle: FontStyle.italic,
                         height: 1.45)),
                 const SizedBox(height: 16),
                 Text(
                     "Énergie collective : ${(_avgEnergy * 100).toInt()}%.\nVotre contribution a renforcé le groupe.",
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                         color: Colors.white.withValues(alpha: 0.65),
                         fontSize: 15,
+                        fontWeight: FontWeight.w500,
                         height: 1.55)),
                 const SizedBox(height: 52),
                 SizedBox(
@@ -425,9 +412,9 @@ class _SquadPulseState extends State<SquadPulse>
                           borderRadius: BorderRadius.circular(30)),
                       elevation: 0,
                     ),
-                    child: const Text("Continuer",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.w600)),
+                    child: Text("Continuer",
+                        style: GoogleFonts.poppins(
+                            fontSize: 17, fontWeight: FontWeight.w500)),
                   ),
                 ),
               ],
@@ -436,35 +423,6 @@ class _SquadPulseState extends State<SquadPulse>
         ),
       ),
     );
-  }
-}
-
-class _IntroStep extends StatelessWidget {
-  final String number;
-  final String text;
-  const _IntroStep({required this.number, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _accentPurple.withValues(alpha: 0.12)),
-        child: Center(
-            child: Text(number,
-                style: const TextStyle(
-                    color: _accentPurple,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold))),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-          child: Text(text,
-              style: const TextStyle(fontSize: 15, color: Color(0xFF141414)))),
-    ]);
   }
 }
 
@@ -493,7 +451,8 @@ class _TopBadge extends StatelessWidget {
         Icon(icon, color: color, size: 16),
         const SizedBox(width: 6),
         Text(label,
-            style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+            style:
+                GoogleFonts.poppins(color: color, fontWeight: FontWeight.w500)),
       ]),
     );
   }
