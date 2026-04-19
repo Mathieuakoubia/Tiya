@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'widgets/routine_intro_screen.dart';
 
 const _darkBg        = Color(0xFF141414);
-const _lightBg       = Color(0xFFF5F3FF);
 const _primaryPurple = Color(0xFF82667F);
 const _accentPurple  = Color(0xFF735983);
 
@@ -159,7 +159,7 @@ class _CollectiveShieldState extends State<CollectiveShield>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _phase == _Phase.intro ? _lightBg : _darkBg,
+      backgroundColor: _phase == _Phase.intro ? Colors.transparent : _darkBg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
@@ -176,88 +176,19 @@ class _CollectiveShieldState extends State<CollectiveShield>
   }
 
   Widget _buildIntro() {
-    return SafeArea(
+    return RoutineIntroScreen(
       key: const ValueKey('intro'),
-      child: Stack(children: [
-        Positioned(
-          bottom: -80, right: -80,
-          child: Container(
-            width: 380, height: 380,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                  color: _primaryPurple.withValues(alpha: 0.12), width: 48)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                style: IconButton.styleFrom(
-                  foregroundColor: _accentPurple,
-                  backgroundColor: _accentPurple.withValues(alpha: 0.08),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 28),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _primaryPurple.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text("2 min  •  Squad  •  Protection Groupée",
-                  style: TextStyle(color: _primaryPurple, fontSize: 13,
-                      fontWeight: FontWeight.w600)),
-              ),
-              const SizedBox(height: 14),
-              const Text("Collective\nShield",
-                style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold,
-                    color: Color(0xFF141414), height: 1.1)),
-              const SizedBox(height: 28),
-              const Text("Fondement scientifique :",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
-                    color: Color(0xFF141414))),
-              const SizedBox(height: 8),
-              Text(
-                "Les actions collectives synchronisées renforcent le sentiment d'appartenance et réduisent la charge de stress individuelle. Savoir que son groupe agit ensemble active les mécanismes de sécurité sociale.",
-                style: TextStyle(fontSize: 15,
-                    color: const Color(0xFF141414).withValues(alpha: 0.6), height: 1.65),
-              ),
-              const SizedBox(height: 32),
-              _IntroStep(number: "1", text: "Le stress moyen du Squad est élevé — le Bouclier s'active"),
-              const SizedBox(height: 14),
-              _IntroStep(number: "2", text: "Chaque membre fait un Reset Flash pour renforcer le dôme"),
-              const SizedBox(height: 14),
-              _IntroStep(number: "3", text: "Quand les 5 membres ont contribué, le badge Squad Invincible est débloqué"),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _startExercise,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
-                    elevation: 0,
-                  ),
-                  child: const Text("Activer le Bouclier",
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-                ),
-              ),
-              const SizedBox(height: 36),
-            ],
-          ),
-        ),
-      ]),
+      title: 'Collective\nShield',
+      badgeLabel: '2 min  •  Squad  •  Protection Groupée',
+      scienceText: 'Les actions collectives synchronisées renforcent le sentiment d\'appartenance et réduisent la charge de stress individuelle. Savoir que son groupe agit ensemble active les mécanismes de sécurité sociale.',
+      steps: const [
+        'Le stress moyen du Squad est élevé — le Bouclier s\'active',
+        'Chaque membre fait un Reset Flash pour renforcer le dôme',
+        'Quand les 5 membres ont contribué, le badge Squad Invincible est débloqué',
+      ],
+      onStart: _startExercise,
+      buttonLabel: 'Activer le Bouclier',
+      accentColor: _primaryPurple,
     );
   }
 
@@ -466,30 +397,6 @@ class _CollectiveShieldState extends State<CollectiveShield>
         ),
       ),
     );
-  }
-}
-
-class _IntroStep extends StatelessWidget {
-  final String number;
-  final String text;
-  const _IntroStep({required this.number, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      Container(
-        width: 28, height: 28,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: _primaryPurple.withValues(alpha: 0.12)),
-        child: Center(child: Text(number,
-          style: const TextStyle(color: _primaryPurple, fontSize: 13,
-              fontWeight: FontWeight.bold))),
-      ),
-      const SizedBox(width: 12),
-      Expanded(child: Text(text,
-        style: const TextStyle(fontSize: 15, color: Color(0xFF141414)))),
-    ]);
   }
 }
 

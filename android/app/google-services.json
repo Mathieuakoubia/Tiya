@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "493252079128",
+    "project_id": "tiyia-481310",
+    "storage_bucket": "tiyia-481310.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:493252079128:android:646276f5d2a0e5bb2f9d6d",
+        "android_client_info": {
+          "package_name": "com.example.tiyia_mvp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "493252079128-frkbi5sufk7qnt0dff5jgmrs1g0cuko5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tiyia_mvp",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "493252079128-6cusc72fg2ouqlthch556h0n419g8kht.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDY1T1UCAzl6ayiySBjsJz1bXL0ouGdR7U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "493252079128-489kldika2elir969ka9e0nkj70p60bu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "493252079128-nh2n5egj74iiihtr4jpcj08mtedbri9a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.tiyia_mvp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

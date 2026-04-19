@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'widgets/routine_intro_screen.dart';
 import 'package:vibration/vibration.dart';
 
-const _darkBg = Color(0xFF141414);
-const _lightBg = Color(0xFFF5F3FF);
 const _primaryPurple = Color(0xFF82667F);
 const _accentPurple = Color(0xFF735983);
 
@@ -337,7 +335,7 @@ class _SoothingThumbState extends State<SoothingThumb>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _phase == _Phase.intro ? _lightBg : _darkBg,
+      backgroundColor: Colors.transparent,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
@@ -360,109 +358,19 @@ class _SoothingThumbState extends State<SoothingThumb>
 
   // ── Intro ─────────────────────────────────────────────────────────
   Widget _buildIntro() {
-    return SafeArea(
+    return RoutineIntroScreen(
       key: const ValueKey('intro'),
-      child: Stack(children: [
-        Positioned(
-          bottom: -80,
-          right: -80,
-          child: Container(
-            width: 380,
-            height: 380,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: _primaryPurple.withValues(alpha: 0.12), width: 48)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                style: IconButton.styleFrom(
-                  foregroundColor: _accentPurple,
-                  backgroundColor: _accentPurple.withValues(alpha: 0.1),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 28),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _accentPurple.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text("2 min  •  Nerf Vague",
-                    style: TextStyle(
-                        color: _accentPurple,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600)),
-              ),
-              const SizedBox(height: 14),
-              const Text("Pouce\nApaisant",
-                  style: TextStyle(
-                      fontSize: 42,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF141414),
-                      height: 1.1)),
-              const SizedBox(height: 28),
-              const Text("Fondement scientifique :",
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF141414))),
-              const SizedBox(height: 8),
-              Text(
-                "La stimulation haptique à basse fréquence (7–10 Hz) active le nerf vague et abaisse le rythme cardiaque. En calquant votre souffle sur les barres latérales, vous induisez une cohérence cardiaque en 2 minutes.",
-                style: TextStyle(
-                    fontSize: 15,
-                    color: const Color(0xFF141414).withValues(alpha: 0.6),
-                    height: 1.65),
-              ),
-              const SizedBox(height: 32),
-              const _IntroStep(
-                  number: "1",
-                  text: "Posez et maintenez votre pouce sur le cercle"),
-              const SizedBox(height: 14),
-              const _IntroStep(
-                  number: "2",
-                  text:
-                      "Suivez les barres latérales : montée = inspirez, descente = expirez"),
-              const SizedBox(height: 14),
-              const _IntroStep(
-                  number: "3",
-                  text:
-                      "Des micro-vibrations imitent un cœur sous votre pouce"),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _goToCountdown,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _accentPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
-                    elevation: 0,
-                  ),
-                  child: const Text("Commencer",
-                      style:
-                          TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-                ),
-              ),
-              const SizedBox(height: 36),
-            ],
-          ),
-        ),
-      ]),
+      title: 'Pouce\nApaisant',
+      badgeLabel: '2 min  •  Nerf Vague',
+      scienceText: 'La stimulation haptique à basse fréquence (7–10 Hz) active le nerf vague et abaisse le rythme cardiaque. En calquant votre souffle sur les barres latérales, vous induisez une cohérence cardiaque en 2 minutes.',
+      steps: const [
+        'Posez et maintenez votre pouce sur le cercle',
+        'Suivez les barres latérales : montée = inspirez, descente = expirez',
+        'Des micro-vibrations imitent un cœur sous votre pouce',
+      ],
+      onStart: _goToCountdown,
+      buttonLabel: 'Commencer',
+      accentColor: _accentPurple,
     );
   }
 
@@ -493,22 +401,26 @@ class _SoothingThumbState extends State<SoothingThumb>
       key: const ValueKey('exercise'),
       animation: _breathCtrl,
       builder: (context, _) {
+        const btnColor = Color(0xFF5B242F);
         return Stack(children: [
+          // Fond image
+          Positioned.fill(
+            child: Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
+          ),
           // Barres respiratoires (gauche et droite)
           Positioned.fill(
             child: CustomPaint(
-              painter:
-                  _BarPainter(progress: _barProgress, color: _primaryPurple),
+              painter: _BarPainter(progress: _barProgress, color: btnColor),
             ),
           ),
-          // Ondes de choc depuis le centre (là où est le pouce)
+          // Ondes de choc depuis le centre
           Positioned.fill(
             child: CustomPaint(
               painter: _RipplePainter(
                 breathPhase: _breathCtrl.value,
                 active: _isPressed,
                 isInhaling: _isInhaling,
-                color: _primaryPurple,
+                color: btnColor,
               ),
             ),
           ),
@@ -521,18 +433,18 @@ class _SoothingThumbState extends State<SoothingThumb>
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
                   Text(
                     _phaseLabel,
-                    style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.85),
+                    style: const TextStyle(
+                        color: Color(0xFF3A1018),
                         fontSize: 22,
-                        fontWeight: FontWeight.w300,
+                        fontWeight: FontWeight.w500,
                         letterSpacing: 0.5),
                   ),
                   if (_isPressed) ...[
                     const SizedBox(height: 8),
                     Text(
                       "${_remaining ~/ 60}:${(_remaining % 60).toString().padLeft(2, '0')}",
-                      style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.30),
+                      style: const TextStyle(
+                          color: Color(0x663A1018),
                           fontSize: 14),
                     ),
                   ],
@@ -554,12 +466,11 @@ class _SoothingThumbState extends State<SoothingThumb>
                   child: CircularProgressIndicator(
                     value: _progress,
                     strokeWidth: 4,
-                    backgroundColor: Colors.white.withValues(alpha: 0.08),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        _primaryPurple.withValues(alpha: 0.9)),
+                    backgroundColor: btnColor.withValues(alpha: 0.12),
+                    valueColor: const AlwaysStoppedAnimation<Color>(btnColor),
                   ),
                 ),
-                // Halo respiratoire (s'agrandit avec la respiration)
+                // Halo respiratoire
                 Transform.scale(
                   scale: _isPressed ? _breathHalo.value : 1.0,
                   child: Container(
@@ -567,21 +478,21 @@ class _SoothingThumbState extends State<SoothingThumb>
                     height: 112,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: _primaryPurple.withValues(
-                          alpha: _isPressed ? 0.22 : 0.07),
+                      color: btnColor.withValues(
+                          alpha: _isPressed ? 0.18 : 0.06),
                     ),
                   ),
                 ),
-                // Cercle principal avec empreinte
+                // Cercle principal
                 Container(
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: _primaryPurple,
+                    color: btnColor,
                     boxShadow: [
                       BoxShadow(
-                        color: _primaryPurple.withValues(alpha: 0.45),
+                        color: btnColor.withValues(alpha: 0.40),
                         blurRadius: _isPressed ? 32 : 18,
                         spreadRadius: _isPressed ? 8 : 2,
                       )
@@ -601,7 +512,7 @@ class _SoothingThumbState extends State<SoothingThumb>
                 padding: const EdgeInsets.only(bottom: 60),
                 child: Text("Touchez et maintenez",
                     style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.28),
+                        color: const Color(0xFF3A1018).withValues(alpha: 0.45),
                         fontSize: 14,
                         letterSpacing: 0.3)),
               ),
@@ -677,34 +588,5 @@ class _SoothingThumbState extends State<SoothingThumb>
         ),
       ),
     );
-  }
-}
-
-class _IntroStep extends StatelessWidget {
-  final String number;
-  final String text;
-  const _IntroStep({required this.number, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFF735983).withValues(alpha: 0.12)),
-        child: Center(
-            child: Text(number,
-                style: const TextStyle(
-                    color: Color(0xFF735983),
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold))),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-          child: Text(text,
-              style: const TextStyle(fontSize: 15, color: Color(0xFF141414)))),
-    ]);
   }
 }

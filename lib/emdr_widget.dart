@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'widgets/routine_intro_screen.dart';
 
 const _darkBg = Color(0xFF141414);
-const _lightBg = Color(0xFFF5F3FF);
 const _primaryPurple = Color(0xFF82667F);
 const _accentPurple = Color(0xFF735983);
 
@@ -39,7 +39,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   late AnimationController _animController;
   late Animation<Alignment> _ballAnim;
   final List<Alignment> _trail = [];
-  int _trailLength = 3;
+  int _trailLength = 2;
 
   _Phase _phase = _Phase.intro;
   int _countdownValue = 3;
@@ -210,7 +210,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
 
   void _increaseTrail() {
     _successCombo++;
-    if (_successCombo % 10 == 0 && _trailLength < 25 && mounted) {
+    if (_successCombo % 10 == 0 && _trailLength < 18 && mounted) {
       setState(() => _trailLength++);
     }
   }
@@ -234,7 +234,11 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _phase == _Phase.intro ? _lightBg : _darkBg,
+      backgroundColor: _phase == _Phase.exercise
+          ? const Color(0xFFF4F3F2)
+          : _phase == _Phase.intro
+              ? Colors.transparent
+              : _darkBg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
@@ -258,120 +262,19 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   }
 
   Widget _buildIntro() {
-    return SafeArea(
+    return RoutineIntroScreen(
       key: const ValueKey('intro'),
-      child: Stack(
-        children: [
-          Positioned(
-            bottom: -80,
-            right: -80,
-            child: Container(
-              width: 380,
-              height: 380,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: _primaryPurple.withValues(alpha: 0.12),
-                  width: 48,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                  style: IconButton.styleFrom(
-                    foregroundColor: _accentPurple,
-                    backgroundColor: _accentPurple.withValues(alpha: 0.1),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 28),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: _accentPurple.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    "1 min 30  •  EMDR",
-                    style: TextStyle(
-                      color: _accentPurple,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                const Text(
-                  "Saccadic\nReset",
-                  style: TextStyle(
-                    fontSize: 42,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF141414),
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                const Text(
-                  "Fondement scientifique :",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF141414),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Inspiré de l'EMDR (Eye Movement Desensitization and Reprocessing), cette méthode utilise des mouvements oculaires rythmés pour désactiver la réponse au stress et libérer les pensées bloquées.",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: const Color(0xFF141414).withValues(alpha: 0.6),
-                    height: 1.65,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                const _IntroStep(
-                    number: "1", text: "Placez votre visage face à la caméra"),
-                const SizedBox(height: 14),
-                const _IntroStep(
-                    number: "2", text: "Suivez la bille lumineuse des yeux"),
-                const SizedBox(height: 14),
-                const _IntroStep(
-                    number: "3",
-                    text: "Si vous détournez le regard, la bille s'arrête"),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _startLoading,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _accentPurple,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 0,
-                    ),
-                    child: const Text("Commencer",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.w600)),
-                  ),
-                ),
-                const SizedBox(height: 36),
-              ],
-            ),
-          ),
-        ],
-      ),
+      title: 'Saccadic\nReset',
+      badgeLabel: '1 min 30  •  EMDR',
+      scienceText:
+          "Inspiré de l'EMDR (Eye Movement Desensitization and Reprocessing), cette méthode utilise des mouvements oculaires rythmés pour désactiver la réponse au stress et libérer les pensées bloquées.",
+      steps: const [
+        'Placez votre visage face à la caméra',
+        'Suivez la bille lumineuse des yeux',
+        "Si vous détournez le regard, la bille s'arrête",
+      ],
+      onStart: _startLoading,
+      accentColor: _accentPurple,
     );
   }
 
@@ -452,25 +355,29 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
                       color: _isPaused
-                          ? Colors.red.withValues(alpha: 0.2)
-                          : Colors.white.withValues(alpha: 0.07),
+                          ? Colors.red.withValues(alpha: 0.12)
+                          : const Color(0xFF5B242F).withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: _isPaused
-                            ? Colors.red.withValues(alpha: 0.5)
+                            ? Colors.red.withValues(alpha: 0.4)
                             : Colors.transparent,
                       ),
                     ),
                     child: Row(
                       children: [
                         Icon(Icons.timer,
-                            color: _isPaused ? Colors.red : Colors.white60,
+                            color: _isPaused
+                                ? Colors.red
+                                : const Color(0xFF5B242F),
                             size: 16),
                         const SizedBox(width: 6),
                         Text(
                           _formatTime(_remainingSec),
                           style: TextStyle(
-                            color: _isPaused ? Colors.red : Colors.white,
+                            color: _isPaused
+                                ? Colors.red
+                                : const Color(0xFF5B242F),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -492,46 +399,49 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
             ),
           ),
         ),
-        // Ball + trail
+        // Trail de la bille
         ..._trail.asMap().entries.map((entry) {
           final i = entry.key;
           final pos = entry.value;
-          final opacity = (1.0 - (i / _trailLength)).clamp(0.0, 1.0);
+          final t = (1.0 - (i / _trailLength)).clamp(0.0, 1.0);
+          final trailColor = Color.lerp(
+            const Color(0xFFFF96B9),
+            const Color(0xFFFF5B1F),
+            t,
+          )!.withValues(alpha: t * 0.45);
+          final sz = 32.0 - (i * 1.2);
           return Align(
             alignment: pos,
             child: Container(
-              width: 30.0 - (i * 0.8),
-              height: 30.0 - (i * 0.8),
+              width: sz,
+              height: sz,
               decoration: BoxDecoration(
-                color: _primaryPurple.withValues(alpha: opacity * 0.35),
+                color: trailColor,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: _primaryPurple.withValues(alpha: opacity * 0.5),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
               ),
             ),
           );
         }),
+        // Bille principale — dégradé radial orange → rose
         AnimatedBuilder(
           animation: _ballAnim,
           builder: (context, child) {
             return Align(
               alignment: _ballAnim.value,
               child: Container(
-                width: 30,
-                height: 30,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: _primaryPurple,
                   shape: BoxShape.circle,
+                  gradient: const RadialGradient(
+                    colors: [Color(0xFFFF5B1F), Color(0xFFFF96B9)],
+                    stops: [0.0, 1.0],
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: _primaryPurple.withValues(alpha: 0.85),
-                      blurRadius: 28,
-                      spreadRadius: 6,
+                      color: const Color(0xFFFF5B1F).withValues(alpha: 0.55),
+                      blurRadius: 22,
+                      spreadRadius: 4,
                     ),
                   ],
                 ),
@@ -539,7 +449,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
             );
           },
         ),
-        // Status message
+        // Message de statut
         Align(
           alignment: Alignment.bottomCenter,
           child: SafeArea(
@@ -547,10 +457,10 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
               padding: const EdgeInsets.only(bottom: 44),
               child: Text(
                 _statusMessage,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.55),
+                style: const TextStyle(
+                  color: Color(0xFF5C3A2E),
                   fontSize: 16,
-                  fontWeight: FontWeight.w300,
+                  fontWeight: FontWeight.w500,
                   letterSpacing: 0.3,
                 ),
               ),
@@ -665,49 +575,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
         format: format,
         bytesPerRow: image.planes[0].bytesPerRow,
       ),
-    );
-  }
-}
-
-class _IntroStep extends StatelessWidget {
-  final String number;
-  final String text;
-
-  const _IntroStep({required this.number, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFF735983).withValues(alpha: 0.12),
-          ),
-          child: Center(
-            child: Text(
-              number,
-              style: const TextStyle(
-                color: Color(0xFF735983),
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 15,
-              color: Color(0xFF141414),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

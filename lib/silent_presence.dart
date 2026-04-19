@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'widgets/routine_intro_screen.dart';
 
 const _darkBg = Color(0xFF141414);
-const _lightBg = Color(0xFFF5F3FF);
 const _primaryPurple = Color(0xFF82667F);
 const _accentPurple = Color(0xFF735983);
 
@@ -125,7 +125,7 @@ class _SilentPresenceState extends State<SilentPresence>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _phase == _Phase.intro ? _lightBg : _darkBg,
+      backgroundColor: _phase == _Phase.intro ? Colors.transparent : _darkBg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
@@ -145,107 +145,19 @@ class _SilentPresenceState extends State<SilentPresence>
   }
 
   Widget _buildIntro() {
-    return SafeArea(
+    return RoutineIntroScreen(
       key: const ValueKey('intro'),
-      child: Stack(children: [
-        Positioned(
-          bottom: -80,
-          right: -80,
-          child: Container(
-            width: 380,
-            height: 380,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: _primaryPurple.withValues(alpha: 0.12), width: 48)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                style: IconButton.styleFrom(
-                  foregroundColor: _accentPurple,
-                  backgroundColor: _accentPurple.withValues(alpha: 0.1),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 28),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _accentPurple.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text("5 min  •  Twin  •  Silence Partagé",
-                    style: TextStyle(
-                        color: _accentPurple,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600)),
-              ),
-              const SizedBox(height: 14),
-              const Text("Silent-\nPresence",
-                  style: TextStyle(
-                      fontSize: 42,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF141414),
-                      height: 1.1)),
-              const SizedBox(height: 28),
-              const Text("Fondement scientifique :",
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF141414))),
-              const SizedBox(height: 8),
-              Text(
-                "Le silence partagé réduit les niveaux de cortisol plus efficacement que la conversation. La co-présence silencieuse avec une personne de confiance active le système nerveux parasympathique des deux participants.",
-                style: TextStyle(
-                    fontSize: 15,
-                    color: const Color(0xFF141414).withValues(alpha: 0.6),
-                    height: 1.65),
-              ),
-              const SizedBox(height: 32),
-              _IntroStep(
-                  number: "1",
-                  text:
-                      "Une mer calme apparaît — vous et votre Twin êtes présentes"),
-              const SizedBox(height: 14),
-              _IntroStep(
-                  number: "2", text: "Restez silencieuses pendant 5 minutes"),
-              const SizedBox(height: 14),
-              _IntroStep(
-                  number: "3",
-                  text: "Si un bruit est détecté, les vagues s'agitent"),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _startExercise,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _accentPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
-                    elevation: 0,
-                  ),
-                  child: const Text("Commencer",
-                      style:
-                          TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-                ),
-              ),
-              const SizedBox(height: 36),
-            ],
-          ),
-        ),
-      ]),
+      title: 'Silent-\nPresence',
+      badgeLabel: '5 min  •  Twin  •  Silence Partagé',
+      scienceText: 'Le silence partagé réduit les niveaux de cortisol plus efficacement que la conversation. La co-présence silencieuse avec une personne de confiance active le système nerveux parasympathique des deux participants.',
+      steps: const [
+        'Une mer calme apparaît — vous et votre Twin êtes présentes',
+        'Restez silencieuses pendant 5 minutes',
+        'Si un bruit est détecté, les vagues s\'agitent',
+      ],
+      onStart: _startExercise,
+      buttonLabel: 'Commencer',
+      accentColor: _accentPurple,
     );
   }
 
@@ -419,35 +331,6 @@ class _SilentPresenceState extends State<SilentPresence>
         ),
       ),
     );
-  }
-}
-
-class _IntroStep extends StatelessWidget {
-  final String number;
-  final String text;
-  const _IntroStep({required this.number, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _accentPurple.withValues(alpha: 0.12)),
-        child: Center(
-            child: Text(number,
-                style: const TextStyle(
-                    color: _accentPurple,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold))),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-          child: Text(text,
-              style: const TextStyle(fontSize: 15, color: Color(0xFF141414)))),
-    ]);
   }
 }
 

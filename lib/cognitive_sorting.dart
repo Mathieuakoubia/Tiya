@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'widgets/routine_intro_screen.dart';
 
-const _darkBg = Color(0xFF141414);
-const _lightBg = Color(0xFFF5F3FF);
-const _primaryPurple = Color(0xFF82667F);
+const _bg = Color(0xFF5B242F);
+const _rosePoudre = Color(0xFFFFD7E7);
+const _vertAcide = Color(0xFFBCAE3A);
 const _accentPurple = Color(0xFF735983);
 
 class _Item {
@@ -217,7 +219,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _phase == _Phase.intro ? _lightBg : _darkBg,
+      backgroundColor: _phase == _Phase.intro ? Colors.transparent : _bg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
@@ -239,119 +241,19 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
   }
 
   Widget _buildIntro() {
-    return SafeArea(
+    return RoutineIntroScreen(
       key: const ValueKey('intro'),
-      child: Stack(
-        children: [
-          Positioned(
-            bottom: -80,
-            right: -80,
-            child: Container(
-              width: 380,
-              height: 380,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: _primaryPurple.withValues(alpha: 0.12),
-                  width: 48,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                  style: IconButton.styleFrom(
-                    foregroundColor: _accentPurple,
-                    backgroundColor: _accentPurple.withValues(alpha: 0.1),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 28),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: _accentPurple.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    "1 min 30  •  Décharge Mentale",
-                    style: TextStyle(
-                        color: _accentPurple,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                const Text(
-                  "Vide-Poubelle\nMental",
-                  style: TextStyle(
-                    fontSize: 42,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF141414),
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                const Text(
-                  "Fondement scientifique :",
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF141414)),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Externaliser ses sources de stress par un geste physique (balayage) active le cortex préfrontal et réduit la charge cognitive. Chaque icône jetée symbolise une libération mentale réelle.",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: const Color(0xFF141414).withValues(alpha: 0.6),
-                    height: 1.65,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                const _IntroStep(
-                    number: "1",
-                    text: "Des icônes de stress tombent sur l'écran"),
-                const SizedBox(height: 14),
-                const _IntroStep(
-                    number: "2",
-                    text: "Balayez-les rapidement hors de l'écran"),
-                const SizedBox(height: 14),
-                const _IntroStep(
-                    number: "3", text: "Chaque icône jetée libère votre Aura"),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _goToCountdown,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _accentPurple,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 0,
-                    ),
-                    child: const Text("Commencer",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.w600)),
-                  ),
-                ),
-                const SizedBox(height: 36),
-              ],
-            ),
-          ),
-        ],
-      ),
+      title: 'Vide-Poubelle\nMental',
+      badgeLabel: '1 min 30  •  Décharge Mentale',
+      scienceText:
+          "Externaliser ses sources de stress par un geste physique (balayage) active le cortex préfrontal et réduit la charge cognitive. Chaque icône jetée symbolise une libération mentale réelle.",
+      steps: const [
+        "Des icônes de stress tombent sur l'écran",
+        'Balayez-les rapidement hors de l\'écran',
+        'Chaque icône jetée libère votre Aura',
+      ],
+      onStart: _goToCountdown,
+      accentColor: _accentPurple,
     );
   }
 
@@ -397,11 +299,18 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
             height: 180 + (_aura * 160),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _primaryPurple.withValues(alpha: 0.03 + _aura * 0.1),
+              gradient: RadialGradient(
+                colors: [
+                  Color.lerp(_rosePoudre, _vertAcide, _aura)!
+                      .withValues(alpha: 0.08 + _aura * 0.12),
+                  Colors.transparent,
+                ],
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: _primaryPurple.withValues(alpha: 0.06 + _aura * 0.28),
-                  blurRadius: 50 + _aura * 80,
+                  color: Color.lerp(_rosePoudre, _vertAcide, _aura)!
+                      .withValues(alpha: 0.08 + _aura * 0.30),
+                  blurRadius: 50 + _aura * 90,
                   spreadRadius: 8,
                 ),
               ],
@@ -428,7 +337,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
                   _TopBadge(
                     icon: Icons.delete_sweep_outlined,
                     label: "$_cleared / $_maxItems",
-                    color: _primaryPurple,
+                    color: _rosePoudre,
                     highlighted: true,
                   ),
                 ],
@@ -463,9 +372,10 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
               padding: const EdgeInsets.only(bottom: 28),
               child: Text(
                 "Balayez vite pour libérer",
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.22),
+                style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.45),
                   fontSize: 13,
+                  fontWeight: FontWeight.w500,
                   letterSpacing: 0.3,
                 ),
               ),
@@ -569,18 +479,18 @@ class _StressChip extends StatelessWidget {
         width: 68,
         height: 68,
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1728),
+          color: Colors.white.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: grabbed
-                ? _primaryPurple.withValues(alpha: 0.85)
-                : _primaryPurple.withValues(alpha: 0.18),
+                ? _rosePoudre.withValues(alpha: 0.80)
+                : _rosePoudre.withValues(alpha: 0.22),
             width: grabbed ? 2 : 1,
           ),
           boxShadow: grabbed
               ? [
                   BoxShadow(
-                    color: _primaryPurple.withValues(alpha: 0.45),
+                    color: _rosePoudre.withValues(alpha: 0.35),
                     blurRadius: 20,
                     spreadRadius: 2,
                   ),
@@ -590,12 +500,19 @@ class _StressChip extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: _primaryPurple, size: 26),
+            ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [_rosePoudre, _vertAcide],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ).createShader(bounds),
+              child: Icon(icon, color: Colors.white, size: 26),
+            ),
             const SizedBox(height: 3),
             Text(
               label,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+              style: GoogleFonts.poppins(
+                color: Colors.white.withValues(alpha: 0.75),
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
               ),
@@ -626,7 +543,7 @@ class _TopBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: highlighted
-            ? _primaryPurple.withValues(alpha: 0.14)
+            ? _rosePoudre.withValues(alpha: 0.14)
             : Colors.white.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(20),
       ),
@@ -638,46 +555,6 @@ class _TopBadge extends StatelessWidget {
               style: TextStyle(color: color, fontWeight: FontWeight.w600)),
         ],
       ),
-    );
-  }
-}
-
-class _IntroStep extends StatelessWidget {
-  final String number;
-  final String text;
-
-  const _IntroStep({required this.number, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFF735983).withValues(alpha: 0.12),
-          ),
-          child: Center(
-            child: Text(
-              number,
-              style: const TextStyle(
-                color: Color(0xFF735983),
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 15, color: Color(0xFF141414)),
-          ),
-        ),
-      ],
     );
   }
 }

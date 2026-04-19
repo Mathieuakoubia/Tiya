@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ':*)",
+      "Bash(flutter build:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\mathi\\.claude\\projects\\c--Users-mathi-Documents-Pierre-tiyia-mvp\\memory"
+    ]
+  }
+}
