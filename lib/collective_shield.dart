@@ -3,9 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'widgets/routine_intro_screen.dart';
 
-const _darkBg        = Color(0xFF141414);
-const _primaryPurple = Color(0xFF82667F);
-const _accentPurple  = Color(0xFF735983);
+const _darkBg        = Color(0xFF5B242F);
+const _primaryPurple = Color(0xFFFED7E6);
 
 enum _Phase { intro, exercise, complete }
 
@@ -239,7 +238,7 @@ class _CollectiveShieldState extends State<CollectiveShield>
               children: [
                 _TopBadge(icon: Icons.timer,
                   label: '${_remainingSec ~/ 60}:${(_remainingSec % 60).toString().padLeft(2, '0')}',
-                  color: Colors.white60),
+                  color: const Color(0xFFBCAE3A)),
                 _TopBadge(icon: Icons.shield,
                   label: "${(_shieldSolidity * 100).toInt()}% protégées",
                   color: _primaryPurple, highlighted: true),
@@ -264,7 +263,7 @@ class _CollectiveShieldState extends State<CollectiveShield>
                         label: const Text("Faire mon Reset Flash"),
                         onPressed: _doReset,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _primaryPurple,
+                          backgroundColor: const Color(0xFF232323),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -332,70 +331,78 @@ class _CollectiveShieldState extends State<CollectiveShield>
   }
 
   Widget _buildComplete() {
-    return Container(
+    return Stack(
       key: const ValueKey('complete'),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft, end: Alignment.bottomRight,
-          colors: [Color(0xFF1A237E), Color(0xFF3F51B5), Color(0xFF7986CB)],
-        ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 88, height: 88,
-                  decoration: BoxDecoration(shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.18)),
-                  child: const Icon(Icons.shield, color: Colors.white, size: 44),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(30)),
-                  child: const Text("🏅 Squad Invincible",
-                    style: TextStyle(color: Colors.white, fontSize: 15,
-                        fontWeight: FontWeight.w700)),
-                ),
-                const SizedBox(height: 24),
-                const Text("'Ensemble, vous êtes\nimpénétrables'",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white, fontSize: 22,
-                    fontWeight: FontWeight.w600, fontStyle: FontStyle.italic,
-                    height: 1.45)),
-                const SizedBox(height: 16),
-                Text("Les 5 membres ont contribué au Bouclier.\nVotre Squad est protégée.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.65),
-                    fontSize: 15, height: 1.55)),
-                const SizedBox(height: 52),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: _accentPurple,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 0,
-                    ),
-                    child: const Text("Continuer",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+      fit: StackFit.expand,
+      children: [
+        Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
+        Container(color: Colors.white.withValues(alpha: 0.10)),
+        SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 36),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 88, height: 88,
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                    child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF5B242F).withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(30)),
+                    child: const Text("🏅 Squad Invincible",
+                      style: TextStyle(color: Color(0xFF5B242F), fontSize: 15,
+                          fontWeight: FontWeight.w700)),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text("'Ensemble, vous êtes\nimpénétrables'",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Gelica',
+                        color: Color(0xFF232323),
+                        fontSize: 22,
+                        fontWeight: FontWeight.w200,
+                        fontStyle: FontStyle.italic,
+                        height: 1.45)),
+                  const SizedBox(height: 16),
+                  const Text("Les 5 membres ont contribué au Bouclier.\nVotre Squad est protégée.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Gelica',
+                        color: Color(0xFF232323),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w200,
+                        fontStyle: FontStyle.italic,
+                        height: 1.55)),
+                  const SizedBox(height: 52),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5B242F),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        elevation: 0,
+                      ),
+                      child: const Text("Continuer",
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
