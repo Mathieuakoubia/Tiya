@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'twin_service.dart';
 import 'widgets/routine_intro_screen.dart';
 
 const _darkBg = Color(0xFF141414);
@@ -24,6 +26,11 @@ class _TwinCoherenceState extends State<TwinCoherence>
   int _remainingSec = _totalSec;
   int _syncCount = 0;
   Timer? _timer;
+
+  String? _twinUid;
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _twinSub;
+  double _twinEnergy = 0.5;
+  bool _twinOnline = false;
 
   late AnimationController _breathCtrl;
   late Animation<double> _breathAnim;
@@ -54,11 +61,28 @@ class _TwinCoherenceState extends State<TwinCoherence>
     _breathCtrl.dispose();
     _mergeCtrl.dispose();
     _timer?.cancel();
+    _twinSub?.cancel();
+    TwinService.leaveRoutine();
     super.dispose();
   }
 
-  void _startExercise() {
+  Future<void> _startExercise() async {
     setState(() => _phase = _Phase.exercise);
+
+    _twinUid = await TwinService.getTwinUid();
+    if (_twinUid != null) {
+      _twinSub = TwinService.twinSignalStream(_twinUid!).listen((snap) {
+        if (!mounted) return;
+        final data = snap.data();
+        setState(() {
+          _twinEnergy = (data?['energy'] as num?)?.toDouble() ?? 0.5;
+          _twinOnline = data?['status'] == 'active';
+        });
+      });
+    }
+
+    await TwinService.sendSignal(energy: 0.5, status: 'active');
+
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
@@ -78,11 +102,15 @@ class _TwinCoherenceState extends State<TwinCoherence>
   void _onSync() {
     if (_phase != _Phase.exercise) return;
     final phase = _breathCtrl.value;
-    // Synchronisation valide près du pic de respiration (0.4–0.6)
     final inSync = phase > 0.4 && phase < 0.65;
     if (inSync) {
       setState(() => _syncCount++);
       _mergeCtrl.forward(from: 0.0);
+      TwinService.sendSignal(
+        energy: (_syncCount / 12).clamp(0.0, 1.0),
+        status: 'active',
+        routineData: {'syncCount': _syncCount},
+      );
       if (_syncCount >= 12) _endExercise();
     }
   }
@@ -90,6 +118,7 @@ class _TwinCoherenceState extends State<TwinCoherence>
   void _endExercise() {
     _timer?.cancel();
     setState(() => _phase = _Phase.complete);
+    TwinService.leaveRoutine();
     widget.onComplete?.call();
   }
 
@@ -146,11 +175,12 @@ class _TwinCoherenceState extends State<TwinCoherence>
               final m = _mergeAnim.value;
               final s = _breathAnim.value;
               return Stack(alignment: Alignment.center, children: [
-                // Twin sphere (gauche)
+                // Twin sphere (gauche) — opacity réduite si hors-ligne
                 Transform.translate(
                   offset: Offset(-(90.0 * (1 - m)), 0),
                   child: Opacity(
-                    opacity: (1 - m * 0.8).clamp(0.0, 1.0),
+                    opacity: (1 - m * 0.8).clamp(0.0, 1.0) *
+                        (_twinOnline ? 1.0 : 0.35),
                     child: Container(
                       width: 110 * s,
                       height: 110 * s,
@@ -159,9 +189,12 @@ class _TwinCoherenceState extends State<TwinCoherence>
                         color: _primaryPurple.withValues(alpha: 0.07),
                         boxShadow: [
                           BoxShadow(
-                              color: _primaryPurple.withValues(alpha: 0.4),
+                              color: _primaryPurple.withValues(
+                                  alpha: _twinOnline
+                                      ? 0.2 + _twinEnergy * 0.3
+                                      : 0.15),
                               blurRadius: 50,
-                              spreadRadius: 6)
+                              spreadRadius: 4 + _twinEnergy * 6)
                         ],
                       ),
                     ),
@@ -264,11 +297,16 @@ class _TwinCoherenceState extends State<TwinCoherence>
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 28),
-              child: Text("Touchez au pic pour fusionner",
-                  style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.22),
-                      fontSize: 13,
-                      letterSpacing: 0.3)),
+              child: Text(
+                _twinOnline
+                    ? "Touchez au pic pour fusionner"
+                    : "En attente de votre Twin…",
+                style: TextStyle(
+                    color: Colors.white.withValues(
+                        alpha: _twinOnline ? 0.22 : 0.45),
+                    fontSize: 13,
+                    letterSpacing: 0.3),
+              ),
             ),
           ),
         ),

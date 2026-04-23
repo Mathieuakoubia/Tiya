@@ -18,7 +18,7 @@ class SquadService {
 
   // Stream temps réel de tous les membres du squad
   static Stream<QuerySnapshot<Map<String, dynamic>>> membersStream() => _db
-      .collection('squads')
+      .collection('Squad')
       .doc(squadId)
       .collection('members')
       .snapshots();
@@ -27,7 +27,7 @@ class SquadService {
   static Future<void> updateMyEnergy(double energy,
       {String displayName = 'Moi'}) =>
       _db
-          .collection('squads')
+          .collection('Squad')
           .doc(squadId)
           .collection('members')
           .doc(currentUid)
