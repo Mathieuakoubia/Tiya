@@ -4,9 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'widgets/routine_intro_screen.dart';
 import 'package:flutter/services.dart';
 
-const _darkBg = Color(0xFF141414);
-const _primaryPurple = Color(0xFF82667F);
-const _accentPurple = Color(0xFF735983);
+const _darkBg = Color(0xFF5B242F);
+const _primaryPurple = Color(0xFFFED7E6);
+const _accentPurple = Color(0xFFF5F3F1);
 
 enum _Phase { intro, countdown, waiting, result, complete }
 
@@ -170,28 +170,31 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
   }
 
   Widget _buildCountdown() {
-    return Center(
+    return Container(
       key: const ValueKey('countdown'),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Text("Manche ${_round + 1} / $_rounds",
-            style: GoogleFonts.poppins(
-                color: Colors.white.withValues(alpha: 0.4),
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5)),
-        const SizedBox(height: 24),
-        Text("$_countdownVal",
-            style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 110,
-                fontWeight: FontWeight.w600)),
-        const SizedBox(height: 16),
-        Text("Préparez-vous",
-            style: GoogleFonts.poppins(
-                color: Colors.white.withValues(alpha: 0.3),
-                fontSize: 16,
-                fontWeight: FontWeight.w600)),
-      ]),
+      color: const Color(0xFF5B242F),
+      child: Center(
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text("Manche ${_round + 1} / $_rounds",
+              style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.4),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5)),
+          const SizedBox(height: 24),
+          Text("$_countdownVal",
+              style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 110,
+                  fontWeight: FontWeight.w600)),
+          const SizedBox(height: 16),
+          Text("Préparez-vous",
+              style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600)),
+        ]),
+      ),
     );
   }
 
@@ -336,7 +339,7 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
             ElevatedButton(
               onPressed: _startRound,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _primaryPurple,
+                backgroundColor: const Color(0xFF232323),
                 foregroundColor: Colors.white,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
@@ -356,70 +359,69 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
   }
 
   Widget _buildComplete() {
-    return Container(
+    return Stack(
       key: const ValueKey('complete'),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFBF360C), Color(0xFFFF5722), Color(0xFFFF8A65)],
-        ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.18)),
-                  child:
-                      const Icon(Icons.flash_on, color: Colors.white, size: 44),
-                ),
-                const SizedBox(height: 28),
-                const Text("'Vos rythmes\nse sont rencontrés'",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        fontStyle: FontStyle.italic,
-                        height: 1.45)),
-                const SizedBox(height: 16),
-                Text("$_score / $_rounds synchronisations parfaites.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.65),
-                        fontSize: 15,
-                        height: 1.55)),
-                const SizedBox(height: 52),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: _accentPurple,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 0,
-                    ),
-                    child: const Text("Continuer",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.w600)),
+      fit: StackFit.expand,
+      children: [
+        Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
+        Container(color: Colors.white.withValues(alpha: 0.10)),
+        SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 36),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                    child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 28),
+                  const Text("'Vos rythmes\nse sont rencontrés'",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: 'Gelica',
+                          color: Color(0xFF232323),
+                          fontSize: 22,
+                          fontWeight: FontWeight.w200,
+                          fontStyle: FontStyle.italic,
+                          height: 1.45)),
+                  const SizedBox(height: 16),
+                  Text("$_score / $_rounds synchronisations parfaites.",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontFamily: 'Gelica',
+                          color: Color(0xFF232323),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w200,
+                          fontStyle: FontStyle.italic,
+                          height: 1.55)),
+                  const SizedBox(height: 52),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5B242F),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        elevation: 0,
+                      ),
+                      child: const Text("Continuer",
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

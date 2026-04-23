@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'widgets/routine_intro_screen.dart';
 
-const _darkBg = Color(0xFF141414);
-const _primaryPurple = Color(0xFF82667F);
-const _accentPurple = Color(0xFF735983);
+const _darkBg = Color(0xFF5B242F);
+const _primaryPurple = Color(0xFFFED7E6);
+const _accentPurple = Color(0xFFF5F3F1);
 
 enum _Phase { intro, exercise, complete }
 
@@ -177,10 +177,10 @@ class _TwinCoherenceState extends State<TwinCoherence>
                       height: 110 * s,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: const Color(0xFF9B7EA8).withValues(alpha: 0.07),
+                        color: const Color(0xFFF5F3F1).withValues(alpha: 0.07),
                         boxShadow: [
                           BoxShadow(
-                              color: const Color(0xFF9B7EA8)
+                              color: const Color(0xFFF5F3F1)
                                   .withValues(alpha: 0.4),
                               blurRadius: 50,
                               spreadRadius: 6)
@@ -227,7 +227,7 @@ class _TwinCoherenceState extends State<TwinCoherence>
                       letterSpacing: 0.5)),
               Text("Vous",
                   style: TextStyle(
-                      color: const Color(0xFF9B7EA8).withValues(alpha: 0.55),
+                      color: const Color(0xFFF5F3F1).withValues(alpha: 0.55),
                       fontSize: 13,
                       letterSpacing: 0.5)),
             ],
@@ -249,7 +249,7 @@ class _TwinCoherenceState extends State<TwinCoherence>
                         icon: Icons.timer,
                         label:
                             '${_remainingSec ~/ 60}:${(_remainingSec % 60).toString().padLeft(2, '0')}',
-                        color: Colors.white60),
+                        color: const Color(0xFFBCAE3A)),
                     _TopBadge(
                         icon: Icons.favorite,
                         label: "$_syncCount / 12 fusions",
@@ -277,71 +277,70 @@ class _TwinCoherenceState extends State<TwinCoherence>
   }
 
   Widget _buildComplete() {
-    return Container(
+    return Stack(
       key: const ValueKey('complete'),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF7A5200), Color(0xFFD4A853), Color(0xFFE8C87A)],
-        ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.18)),
-                  child:
-                      const Icon(Icons.favorite, color: Colors.white, size: 44),
-                ),
-                const SizedBox(height: 28),
-                const Text("'Vos souffles n'ont\nfait qu'un seul instant'",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        fontStyle: FontStyle.italic,
-                        height: 1.45)),
-                const SizedBox(height: 16),
-                Text(
-                    "$_syncCount fusions réalisées.\nVotre connexion est renforcée.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.65),
-                        fontSize: 15,
-                        height: 1.55)),
-                const SizedBox(height: 52),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: _accentPurple,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 0,
-                    ),
-                    child: const Text("Continuer",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.w600)),
+      fit: StackFit.expand,
+      children: [
+        Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
+        Container(color: Colors.white.withValues(alpha: 0.10)),
+        SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 36),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                    child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 28),
+                  const Text("'Vos souffles n'ont\nfait qu'un seul instant'",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: 'Gelica',
+                          color: Color(0xFF232323),
+                          fontSize: 22,
+                          fontWeight: FontWeight.w200,
+                          fontStyle: FontStyle.italic,
+                          height: 1.45)),
+                  const SizedBox(height: 16),
+                  Text(
+                      "$_syncCount fusions réalisées.\nVotre connexion est renforcée.",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontFamily: 'Gelica',
+                          color: Color(0xFF232323),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w200,
+                          fontStyle: FontStyle.italic,
+                          height: 1.55)),
+                  const SizedBox(height: 52),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5B242F),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        elevation: 0,
+                      ),
+                      child: const Text("Continuer",
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

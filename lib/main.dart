@@ -13,6 +13,7 @@ import 'collective_shield.dart';
 import 'audio_capsule.dart';
 import 'squad_pulse.dart';
 import 'morning_ritual.dart';
+import 'widgets/aura_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,8 +23,19 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    precacheImage(const AssetImage('assets/images/Fonds-02.png'), context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +157,16 @@ class HomePage extends StatelessWidget {
               color: const Color(0xFF9C27B0),
               onTap: () => _push(context, const MorningRitual()),
             ),
+            const SizedBox(height: 28),
+            _SectionHeader(label: "DESIGN", color: Color(0xFFBCAE3A)),
+            const SizedBox(height: 14),
+            _RoutineButton(
+              icon: Icons.bubble_chart,
+              label: "Aura Widget",
+              sublabel: "Preview — bulle irisée animée",
+              color: Color(0xFFBCAE3A),
+              onTap: () => _push(context, const _AuraPreviewPage()),
+            ),
             const SizedBox(height: 32),
           ],
         ),
@@ -152,8 +174,59 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  void _push(BuildContext ctx, Widget w) =>
-      Navigator.push(ctx, MaterialPageRoute(builder: (_) => w));
+  void _push(BuildContext ctx, Widget w) => Navigator.push(
+        ctx,
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => w,
+          transitionDuration: const Duration(milliseconds: 350),
+          reverseTransitionDuration: const Duration(milliseconds: 280),
+          transitionsBuilder: (_, anim, __, child) => FadeTransition(
+            opacity: CurvedAnimation(parent: anim, curve: Curves.easeOut),
+            child: child,
+          ),
+        ),
+      );
+}
+
+class _AuraPreviewPage extends StatelessWidget {
+  const _AuraPreviewPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF232323),
+        elevation: 0,
+        title: const Text("Aura Widget"),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text("équilibre", style: TextStyle(fontSize: 12, color: Color(0xFFBCAE3A))),
+            SizedBox(height: 8),
+            AuraWidget(size: 220, emotion: AuraEmotion.equilibre),
+            SizedBox(height: 24),
+            Text("apaisement profond", style: TextStyle(fontSize: 12, color: Color(0xFF5170FF))),
+            SizedBox(height: 8),
+            AuraWidget(size: 180, emotion: AuraEmotion.apaisement),
+            SizedBox(height: 24),
+            Text("tension", style: TextStyle(fontSize: 12, color: Color(0xFFFFDE59))),
+            SizedBox(height: 8),
+            AuraWidget(size: 180, emotion: AuraEmotion.tension),
+            SizedBox(height: 24),
+            Text("surcharge", style: TextStyle(fontSize: 12, color: Color(0xFFF2631D))),
+            SizedBox(height: 8),
+            AuraWidget(size: 180, emotion: AuraEmotion.surcharge),
+            SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _SectionHeader extends StatelessWidget {
