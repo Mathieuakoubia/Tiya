@@ -335,7 +335,9 @@ class _SoothingThumbState extends State<SoothingThumb>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: _phase == _Phase.countdown
+          ? const Color(0xFF5B242F)
+          : Colors.transparent,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
