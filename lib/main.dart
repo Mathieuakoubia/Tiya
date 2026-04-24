@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'auth_screen.dart';
 import 'emdr_widget.dart';
 import 'soothing_thumb.dart';
 import 'cognitive_sorting.dart';
@@ -35,7 +36,10 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF121212),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const AuthGate(),
+      routes: {
+        '/home': (_) => const HomePage(),
+      },
     );
   }
 }

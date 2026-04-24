@@ -77,8 +77,6 @@ class _SquadPulseState extends State<SquadPulse>
   }
 
   Future<void> _initFirebase() async {
-    await SquadService.ensureSignedIn();
-
     // Afficher au moins "Vous" immédiatement, sans attendre Firestore
     if (mounted) {
       setState(() {
