@@ -52,7 +52,8 @@ class RoutineIntroScreen extends StatelessWidget {
                           icon: const Icon(Icons.arrow_back_ios_new, size: 18),
                           style: IconButton.styleFrom(
                             foregroundColor: accentColor,
-                            backgroundColor: accentColor.withValues(alpha: 0.12),
+                            backgroundColor:
+                                accentColor.withValues(alpha: 0.12),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),
                           ),
@@ -73,7 +74,7 @@ class RoutineIntroScreen extends StatelessWidget {
                             style: GoogleFonts.poppins(
                               color: _btnColor,
                               fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
@@ -82,26 +83,17 @@ class RoutineIntroScreen extends StatelessWidget {
                           title.toUpperCase(),
                           style: GoogleFonts.poppins(
                             fontSize: 40,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w700,
                             color: _titleColor,
                             height: 1.1,
                           ),
                         ),
-                        const SizedBox(height: 28),
-                        Text(
-                          'FONDEMENT SCIENTIFIQUE :',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: _titleColor,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
                         Text(
                           scienceText,
                           style: GoogleFonts.poppins(
                             fontSize: 15,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w300,
                             color: _bodyColor.withValues(alpha: 0.72),
                             height: 1.40,
                           ),
@@ -127,7 +119,7 @@ class RoutineIntroScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _btnColor,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30)),
                       elevation: 0,
@@ -170,17 +162,15 @@ class _IntroStep extends StatelessWidget {
         Container(
           width: 28,
           height: 28,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.transparent,
-            border: Border.all(
-                color: _btnColor.withValues(alpha: 0.40), width: 1.5),
+            color: Color(0xFFBCAE3A),
           ),
           child: Center(
             child: Text(
               number,
               style: const TextStyle(
-                color: _btnColor,
+                color: Color(0xFFF4F3F2),
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),

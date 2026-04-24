@@ -5,9 +5,9 @@ import 'widgets/routine_intro_screen.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-const _darkBg = Color(0xFF141414);
-const _primaryPurple = Color(0xFF82667F);
-const _accentPurple = Color(0xFF735983);
+const _darkBg = Color(0xFF5B242F);
+const _primaryPurple = Color(0xFFFED7E6);
+const _accentPurple = Color(0xFFF5F3F1);
 
 // Couleurs de stress → disparaissent au nettoyage
 const _mistColors = [
@@ -384,7 +384,7 @@ class _AuraCleaningState extends State<AuraCleaning>
                     icon: Icons.timer,
                     label:
                         '${_remainingSec ~/ 60}:${(_remainingSec % 60).toString().padLeft(2, '0')}',
-                    color: Colors.white60,
+                    color: const Color(0xFFBCAE3A),
                   ),
                   // Progress aura nettoyée
                   ListenableBuilder(
@@ -425,77 +425,75 @@ class _AuraCleaningState extends State<AuraCleaning>
   }
 
   Widget _buildComplete() {
-    return Container(
+    return Stack(
       key: const ValueKey('complete'),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF735983), Color(0xFF82667F), Color(0xFF9B7EA8)],
-        ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.18),
+      fit: StackFit.expand,
+      children: [
+        Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
+        Container(color: Colors.white.withValues(alpha: 0.10)),
+        SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 36),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                    child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
-                  child: const Icon(Icons.auto_awesome,
-                      color: Colors.white, size: 44),
-                ),
-                const SizedBox(height: 28),
-                const Text(
-                  "'Félicitez-vous d'avoir\npris ce temps pour vous'",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    fontStyle: FontStyle.italic,
-                    height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  "Votre Aura est nettoyée.\n1 minute de reset visuel complétée.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.65),
-                    fontSize: 15,
-                    height: 1.55,
-                  ),
-                ),
-                const SizedBox(height: 52),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: _accentPurple,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 0,
+                  const SizedBox(height: 28),
+                  const Text(
+                    "'Félicitez-vous d'avoir\npris ce temps pour vous'",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Gelica',
+                      color: Color(0xFF232323),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w200,
+                      fontStyle: FontStyle.italic,
+                      height: 1.45,
                     ),
-                    child: const Text("Continuer",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.w600)),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Votre Aura est nettoyée.\n1 minute de reset visuel complétée.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Gelica',
+                      color: Color(0xFF232323),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w200,
+                      fontStyle: FontStyle.italic,
+                      height: 1.55,
+                    ),
+                  ),
+                  const SizedBox(height: 52),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5B242F),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        elevation: 0,
+                      ),
+                      child: const Text("Continuer",
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
