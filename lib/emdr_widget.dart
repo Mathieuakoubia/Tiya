@@ -7,9 +7,8 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'widgets/routine_intro_screen.dart';
 
-const _darkBg = Color(0xFF141414);
-const _primaryPurple = Color(0xFF82667F);
-const _accentPurple = Color(0xFF735983);
+const _darkBg = Color(0xFF5B242F);
+const _accentPurple = Color(0xFFF5F3F1);
 
 enum _Phase { intro, loading, countdown, exercise, complete }
 
@@ -39,7 +38,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   late AnimationController _animController;
   late Animation<Alignment> _ballAnim;
   final List<Alignment> _trail = [];
-  int _trailLength = 2;
+  int _trailLength = 25;
 
   _Phase _phase = _Phase.intro;
   int _countdownValue = 3;
@@ -73,7 +72,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
     ).animate(
-        CurvedAnimation(parent: _animController, curve: Curves.easeInOut));
+        CurvedAnimation(parent: _animController, curve: Curves.easeInOutSine));
 
     _animController.addListener(() {
       setState(() {
@@ -210,7 +209,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
 
   void _increaseTrail() {
     _successCombo++;
-    if (_successCombo % 10 == 0 && _trailLength < 18 && mounted) {
+    if (_successCombo % 10 == 0 && _trailLength < 50 && mounted) {
       setState(() => _trailLength++);
     }
   }
@@ -235,7 +234,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _phase == _Phase.exercise
-          ? const Color(0xFFF4F3F2)
+          ? const Color(0xFF5B242F)
           : _phase == _Phase.intro
               ? Colors.transparent
               : _phase == _Phase.countdown
@@ -281,58 +280,65 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   }
 
   Widget _buildLoading() {
-    return Center(
+    return Container(
       key: const ValueKey('loading'),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 48,
-            height: 48,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              valueColor: AlwaysStoppedAnimation<Color>(_primaryPurple),
+      color: const Color(0xFF5B242F),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              width: 36,
+              height: 36,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            "Initialisation caméra...",
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 16,
-              fontWeight: FontWeight.w300,
+            const SizedBox(height: 24),
+            Text(
+              "Initialisation caméra...",
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.55),
+                fontSize: 16,
+                fontWeight: FontWeight.w300,
+                letterSpacing: 0.5,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildCountdown() {
-    return Center(
+    return Container(
       key: const ValueKey('countdown'),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "Préparez-vous",
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 18,
-              fontWeight: FontWeight.w300,
-              letterSpacing: 0.5,
+      color: const Color(0xFF5B242F),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Préparez-vous",
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.55),
+                fontSize: 18,
+                fontWeight: FontWeight.w300,
+                letterSpacing: 0.5,
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            "$_countdownValue",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 100,
-              fontWeight: FontWeight.bold,
+            const SizedBox(height: 24),
+            Text(
+              "$_countdownValue",
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 100,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -357,12 +363,12 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
                       color: _isPaused
-                          ? Colors.red.withValues(alpha: 0.12)
-                          : const Color(0xFF5B242F).withValues(alpha: 0.08),
+                          ? const Color(0xFFFF5B1F).withValues(alpha: 0.12)
+                          : const Color(0xFFBCAE3A).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: _isPaused
-                            ? Colors.red.withValues(alpha: 0.4)
+                            ? const Color(0xFFFF5B1F).withValues(alpha: 0.4)
                             : Colors.transparent,
                       ),
                     ),
@@ -370,16 +376,16 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                       children: [
                         Icon(Icons.timer,
                             color: _isPaused
-                                ? Colors.red
-                                : const Color(0xFF5B242F),
+                                ? const Color(0xFFFF5B1F)
+                                : const Color(0xFFBCAE3A),
                             size: 16),
                         const SizedBox(width: 6),
                         Text(
                           _formatTime(_remainingSec),
                           style: TextStyle(
                             color: _isPaused
-                                ? Colors.red
-                                : const Color(0xFF5B242F),
+                                ? const Color(0xFFFF5B1F)
+                                : const Color(0xFFBCAE3A),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -387,10 +393,10 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                     ),
                   ),
                   if (_isPaused)
-                    Text(
+                    const Text(
                       "PAUSE",
                       style: TextStyle(
-                        color: Colors.red.withValues(alpha: 0.85),
+                        color: Color(0xFFFF5B1F),
                         fontWeight: FontWeight.bold,
                         letterSpacing: 2,
                         fontSize: 13,
@@ -401,29 +407,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
             ),
           ),
         ),
-        // Trail de la bille
-        ..._trail.asMap().entries.map((entry) {
-          final i = entry.key;
-          final pos = entry.value;
-          final t = (1.0 - (i / _trailLength)).clamp(0.0, 1.0);
-          final trailColor = Color.lerp(
-            const Color(0xFFFF96B9),
-            const Color(0xFFFF5B1F),
-            t,
-          )!.withValues(alpha: t * 0.45);
-          final sz = 32.0 - (i * 1.2);
-          return Align(
-            alignment: pos,
-            child: Container(
-              width: sz,
-              height: sz,
-              decoration: BoxDecoration(
-                color: trailColor,
-                shape: BoxShape.circle,
-              ),
-            ),
-          );
-        }),
         // Bille principale — dégradé radial orange → rose
         AnimatedBuilder(
           animation: _ballAnim,
@@ -460,10 +443,11 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
               child: Text(
                 _statusMessage,
                 style: const TextStyle(
-                  color: Color(0xFF5C3A2E),
+                  fontFamily: 'Gelica',
+                  color: Color(0xFF232323),
                   fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.3,
+                  fontWeight: FontWeight.w200,
+                  fontStyle: FontStyle.italic,
                 ),
               ),
             ),
@@ -474,76 +458,79 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   }
 
   Widget _buildComplete() {
-    return Container(
+    return Stack(
       key: const ValueKey('complete'),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF735983), Color(0xFF82667F), Color(0xFF9B7EA8)],
-        ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.18),
-                  ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 48),
-                ),
-                const SizedBox(height: 28),
-                const Text(
-                  "'Félicitez-vous d'avoir\npris ce temps pour vous'",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    fontStyle: FontStyle.italic,
-                    height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  "1 min 30 de Reset Saccadique complété.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.65),
-                    fontSize: 15,
-                    height: 1.55,
-                  ),
-                ),
-                const SizedBox(height: 52),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: _accentPurple,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 0,
+      fit: StackFit.expand,
+      children: [
+        Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
+        Container(color: Colors.white.withValues(alpha: 0.10)),
+        SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 36),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFF5B242F),
                     ),
-                    child: const Text("Continuer",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.w600)),
+                    child: const Icon(Icons.favorite,
+                        color: Colors.white, size: 44),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 28),
+                  const Text(
+                    "'Félicitez-vous d'avoir\npris ce temps pour vous'",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Gelica',
+                      color: Color(0xFF232323),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w200,
+                      fontStyle: FontStyle.italic,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "1 min 30 de Reset Saccadique complété.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Gelica',
+                      color: Color(0xFF232323),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w200,
+                      fontStyle: FontStyle.italic,
+                      height: 1.55,
+                    ),
+                  ),
+                  const SizedBox(height: 52),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5B242F),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        elevation: 0,
+                      ),
+                      child: const Text("Continuer",
+                          style: TextStyle(
+                              fontSize: 17, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 

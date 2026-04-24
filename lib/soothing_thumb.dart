@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'widgets/routine_intro_screen.dart';
 import 'package:vibration/vibration.dart';
 
-const _primaryPurple = Color(0xFF82667F);
-const _accentPurple = Color(0xFF735983);
+const _accentPurple = Color(0xFFF5F3F1);
 
 enum _Phase { intro, countdown, exercise, complete }
 
@@ -282,26 +281,6 @@ class _SoothingThumbState extends State<SoothingThumb>
       _isPressed = false;
       _phaseLabel = "Posez votre pouce pour reprendre";
     });
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title:
-            const Text("Contact rompu", style: TextStyle(color: Colors.white)),
-        content: const Text(
-          "Gardez votre pouce sur le cercle pour continuer.",
-          style: TextStyle(color: Colors.white60),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text("Reprendre", style: TextStyle(color: _primaryPurple)),
-          ),
-        ],
-      ),
-    );
   }
 
   void _complete() {
@@ -364,7 +343,8 @@ class _SoothingThumbState extends State<SoothingThumb>
       key: const ValueKey('intro'),
       title: 'Pouce\nApaisant',
       badgeLabel: '2 min  •  Nerf Vague',
-      scienceText: 'La stimulation haptique à basse fréquence (7–10 Hz) active le nerf vague et abaisse le rythme cardiaque. En calquant votre souffle sur les barres latérales, vous induisez une cohérence cardiaque en 2 minutes.',
+      scienceText:
+          'La stimulation haptique à basse fréquence (7–10 Hz) active le nerf vague et abaisse le rythme cardiaque. En calquant votre souffle sur les barres latérales, vous induisez une cohérence cardiaque en 2 minutes.',
       steps: const [
         'Posez et maintenez votre pouce sur le cercle',
         'Suivez les barres latérales : montée = inspirez, descente = expirez',
@@ -378,22 +358,25 @@ class _SoothingThumbState extends State<SoothingThumb>
 
   // ── Countdown ─────────────────────────────────────────────────────
   Widget _buildCountdown() {
-    return Center(
+    return Container(
       key: const ValueKey('countdown'),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Text("Préparez-vous",
-            style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.45),
-                fontSize: 18,
-                fontWeight: FontWeight.w300,
-                letterSpacing: 0.5)),
-        const SizedBox(height: 24),
-        Text("$_countdownValue",
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 100,
-                fontWeight: FontWeight.bold)),
-      ]),
+      color: const Color(0xFF5B242F),
+      child: Center(
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text("Préparez-vous",
+              style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.45),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w300,
+                  letterSpacing: 0.5)),
+          const SizedBox(height: 24),
+          Text("$_countdownValue",
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 100,
+                  fontWeight: FontWeight.bold)),
+        ]),
+      ),
     );
   }
 
@@ -403,11 +386,10 @@ class _SoothingThumbState extends State<SoothingThumb>
       key: const ValueKey('exercise'),
       animation: _breathCtrl,
       builder: (context, _) {
-        const btnColor = Color(0xFF5B242F);
+        const btnColor = Color(0xFFF4F3F2);
         return Stack(children: [
-          // Fond image
-          Positioned.fill(
-            child: Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
+          const Positioned.fill(
+            child: ColoredBox(color: Color(0xFF5B242F)),
           ),
           // Barres respiratoires (gauche et droite)
           Positioned.fill(
@@ -433,21 +415,25 @@ class _SoothingThumbState extends State<SoothingThumb>
               child: Padding(
                 padding: const EdgeInsets.only(top: 40),
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Text(
-                    _phaseLabel,
-                    style: const TextStyle(
-                        color: Color(0xFF3A1018),
-                        fontSize: 22,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.5),
+                  SizedBox(
+                    width: 200,
+                    child: Text(
+                      _phaseLabel,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontFamily: 'Gelica',
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w200,
+                          fontStyle: FontStyle.italic),
+                    ),
                   ),
                   if (_isPressed) ...[
                     const SizedBox(height: 8),
                     Text(
                       "${_remaining ~/ 60}:${(_remaining % 60).toString().padLeft(2, '0')}",
                       style: const TextStyle(
-                          color: Color(0x663A1018),
-                          fontSize: 14),
+                          color: Color(0xFFBCAE3A), fontSize: 14),
                     ),
                   ],
                 ]),
@@ -480,8 +466,8 @@ class _SoothingThumbState extends State<SoothingThumb>
                     height: 112,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: btnColor.withValues(
-                          alpha: _isPressed ? 0.18 : 0.06),
+                      color:
+                          btnColor.withValues(alpha: _isPressed ? 0.18 : 0.06),
                     ),
                   ),
                 ),
@@ -501,7 +487,7 @@ class _SoothingThumbState extends State<SoothingThumb>
                     ],
                   ),
                   child: const Icon(Icons.fingerprint,
-                      size: 50, color: Colors.white),
+                      size: 50, color: Color(0xFF5B242F)),
                 ),
               ]),
             ),
@@ -514,9 +500,11 @@ class _SoothingThumbState extends State<SoothingThumb>
                 padding: const EdgeInsets.only(bottom: 60),
                 child: Text("Touchez et maintenez",
                     style: TextStyle(
-                        color: const Color(0xFF3A1018).withValues(alpha: 0.45),
+                        fontFamily: 'Gelica',
+                        color: Colors.white.withValues(alpha: 0.55),
                         fontSize: 14,
-                        letterSpacing: 0.3)),
+                        fontWeight: FontWeight.w200,
+                        fontStyle: FontStyle.italic)),
               ),
             ),
         ]);
@@ -526,69 +514,72 @@ class _SoothingThumbState extends State<SoothingThumb>
 
   // ── Complete ───────────────────────────────────────────────────────
   Widget _buildComplete() {
-    return Container(
+    return Stack(
       key: const ValueKey('complete'),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF735983), Color(0xFF82667F), Color(0xFF9B7EA8)],
-        ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.18)),
-                  child: const Icon(Icons.check, color: Colors.white, size: 48),
-                ),
-                const SizedBox(height: 28),
-                const Text("'Félicitez-vous d'avoir\npris ce temps pour vous'",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        fontStyle: FontStyle.italic,
-                        height: 1.45)),
-                const SizedBox(height: 16),
-                Text("2 minutes de cohérence cardiaque complétées.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.65),
-                        fontSize: 15,
-                        height: 1.55)),
-                const SizedBox(height: 52),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: _accentPurple,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 0,
-                    ),
-                    child: const Text("Continuer",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.w600)),
+      fit: StackFit.expand,
+      children: [
+        Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
+        Container(color: Colors.white.withValues(alpha: 0.10)),
+        SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 36),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                    child: const Icon(Icons.favorite,
+                        color: Colors.white, size: 44),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 28),
+                  const Text(
+                      "'Félicitez-vous d'avoir\npris ce temps pour vous'",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: 'Gelica',
+                          color: Color(0xFF232323),
+                          fontSize: 22,
+                          fontWeight: FontWeight.w200,
+                          fontStyle: FontStyle.italic,
+                          height: 1.45)),
+                  const SizedBox(height: 16),
+                  const Text("2 minutes de cohérence cardiaque complétées.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: 'Gelica',
+                          color: Color(0xFF232323),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w200,
+                          fontStyle: FontStyle.italic,
+                          height: 1.55)),
+                  const SizedBox(height: 52),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5B242F),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        elevation: 0,
+                      ),
+                      child: const Text("Continuer",
+                          style: TextStyle(
+                              fontSize: 17, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

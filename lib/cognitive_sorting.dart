@@ -258,30 +258,33 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
   }
 
   Widget _buildCountdown() {
-    return Center(
+    return Container(
       key: const ValueKey('countdown'),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "Préparez-vous",
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 18,
-              fontWeight: FontWeight.w300,
-              letterSpacing: 0.5,
+      color: const Color(0xFF5B242F),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Préparez-vous",
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.45),
+                fontSize: 18,
+                fontWeight: FontWeight.w300,
+                letterSpacing: 0.5,
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            "$_countdownValue",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 100,
-              fontWeight: FontWeight.bold,
+            const SizedBox(height: 24),
+            Text(
+              "$_countdownValue",
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 100,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -332,7 +335,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
                     icon: Icons.timer,
                     label:
                         '${_remainingSec ~/ 60}:${(_remainingSec % 60).toString().padLeft(2, '0')}',
-                    color: Colors.white60,
+                    color: const Color(0xFFBCAE3A),
                   ),
                   _TopBadge(
                     icon: Icons.delete_sweep_outlined,
@@ -387,77 +390,75 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
   }
 
   Widget _buildComplete() {
-    return Container(
+    return Stack(
       key: const ValueKey('complete'),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF735983), Color(0xFF82667F), Color(0xFF9B7EA8)],
-        ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.18),
+      fit: StackFit.expand,
+      children: [
+        Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
+        Container(color: Colors.white.withValues(alpha: 0.10)),
+        SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 36),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                    child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
-                  child: const Icon(Icons.delete_sweep,
-                      color: Colors.white, size: 48),
-                ),
-                const SizedBox(height: 28),
-                const Text(
-                  "'Félicitez-vous d'avoir\npris ce temps pour vous'",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    fontStyle: FontStyle.italic,
-                    height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  "$_cleared icône${_cleared > 1 ? 's' : ''} éliminée${_cleared > 1 ? 's' : ''}.\nVotre espace mental est plus léger.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.65),
-                    fontSize: 15,
-                    height: 1.55,
-                  ),
-                ),
-                const SizedBox(height: 52),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: _accentPurple,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 0,
+                  const SizedBox(height: 28),
+                  const Text(
+                    "'Félicitez-vous d'avoir\npris ce temps pour vous'",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Gelica',
+                      color: Color(0xFF232323),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w200,
+                      fontStyle: FontStyle.italic,
+                      height: 1.45,
                     ),
-                    child: const Text("Continuer",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.w600)),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Text(
+                    "$_cleared icône${_cleared > 1 ? 's' : ''} éliminée${_cleared > 1 ? 's' : ''}.\nVotre espace mental est plus léger.",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: 'Gelica',
+                      color: Color(0xFF232323),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w200,
+                      fontStyle: FontStyle.italic,
+                      height: 1.55,
+                    ),
+                  ),
+                  const SizedBox(height: 52),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5B242F),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        elevation: 0,
+                      ),
+                      child: const Text("Continuer",
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
