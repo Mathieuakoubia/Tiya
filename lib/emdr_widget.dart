@@ -238,7 +238,9 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
           ? const Color(0xFFF4F3F2)
           : _phase == _Phase.intro
               ? Colors.transparent
-              : _darkBg,
+              : _phase == _Phase.countdown
+                  ? const Color(0xFF5B242F)
+                  : _darkBg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
