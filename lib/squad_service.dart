@@ -10,16 +10,8 @@ class SquadService {
   static String get currentUid => _auth.currentUser?.uid ?? 'anonymous';
 
   // Stream temps réel de tous les membres du squad
-<<<<<<< HEAD
   static Stream<QuerySnapshot<Map<String, dynamic>>> membersStream() =>
-      _db.collection('squads').doc(squadId).collection('members').snapshots();
-=======
-  static Stream<QuerySnapshot<Map<String, dynamic>>> membersStream() => _db
-      .collection('Squad')
-      .doc(squadId)
-      .collection('members')
-      .snapshots();
->>>>>>> connection-firestore
+      _db.collection('Squad').doc(squadId).collection('members').snapshots();
 
   // Écrire l'énergie de l'utilisateur courant dans Firestore
   static Future<void> updateMyEnergy(double energy,
