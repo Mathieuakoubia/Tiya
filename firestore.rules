@@ -37,12 +37,17 @@ service cloud.firestore {
       allow delete: if true;
     }
 
-    match /Squad/{document} {
-      allow create: if true;
-      allow read: if true;
-      allow write: if true;
-      allow delete: if true;
-    }
+   match /Squad/{squadId} {
+  	allow create: if true;
+ 	 	allow read: if true;
+  	allow write: if true;
+  	allow delete: if true;
+
+   match /members/{userId} {
+    allow read: if true;
+    allow write: if request.auth != null;
+  }
+}
 
     match /squads/{squadId} {
       allow read: if request.auth != null;
