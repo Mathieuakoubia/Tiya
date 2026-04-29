@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'squad_service.dart';
@@ -77,6 +78,11 @@ class _SquadPulseState extends State<SquadPulse>
   }
 
   Future<void> _initFirebase() async {
+    // Connexion anonyme — donne un vrai UID unique par appareil
+    if (FirebaseAuth.instance.currentUser == null) {
+      await FirebaseAuth.instance.signInAnonymously();
+    }
+
     // Afficher au moins "Vous" immédiatement, sans attendre Firestore
     if (mounted) {
       setState(() {
