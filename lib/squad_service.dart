@@ -9,22 +9,23 @@ class SquadService {
 
   static String get currentUid => _auth.currentUser?.uid ?? 'anonymous';
 
-  // Auth anonyme — aucune UI requise, juste un uid stable par appareil
-  static Future<void> ensureSignedIn() async {
-    if (_auth.currentUser == null) {
-      await _auth.signInAnonymously();
-    }
-  }
-
   // Stream temps réel de tous les membres du squad
+<<<<<<< HEAD
   static Stream<QuerySnapshot<Map<String, dynamic>>> membersStream() =>
       _db.collection('squads').doc(squadId).collection('members').snapshots();
+=======
+  static Stream<QuerySnapshot<Map<String, dynamic>>> membersStream() => _db
+      .collection('Squad')
+      .doc(squadId)
+      .collection('members')
+      .snapshots();
+>>>>>>> connection-firestore
 
   // Écrire l'énergie de l'utilisateur courant dans Firestore
   static Future<void> updateMyEnergy(double energy,
           {String displayName = 'Moi'}) =>
       _db
-          .collection('squads')
+          .collection('Squad')
           .doc(squadId)
           .collection('members')
           .doc(currentUid)
