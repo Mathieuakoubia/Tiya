@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,8 +7,8 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'widgets/routine_intro_screen.dart';
 
-const _darkBg = Color(0xFF5B242F);
-const _accentPurple = Color(0xFFF5F3F1);
+const _darkBg = Color(0xFF0DAABA);
+const _accentPurple = Color(0xFFF8F1E9);
 
 enum _Phase { intro, loading, countdown, exercise, complete }
 
@@ -234,11 +234,11 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _phase == _Phase.exercise
-          ? const Color(0xFF5B242F)
+          ? const Color(0xFF0DAABA)
           : _phase == _Phase.intro
               ? Colors.transparent
               : _phase == _Phase.countdown
-                  ? const Color(0xFF5B242F)
+                  ? const Color(0xFF0DAABA)
                   : _darkBg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
@@ -282,7 +282,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   Widget _buildLoading() {
     return Container(
       key: const ValueKey('loading'),
-      color: const Color(0xFF5B242F),
+      color: const Color(0xFF0DAABA),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -314,7 +314,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   Widget _buildCountdown() {
     return Container(
       key: const ValueKey('countdown'),
-      color: const Color(0xFF5B242F),
+      color: const Color(0xFF0DAABA),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -364,7 +364,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                     decoration: BoxDecoration(
                       color: _isPaused
                           ? const Color(0xFFFF5B1F).withValues(alpha: 0.12)
-                          : const Color(0xFFBCAE3A).withValues(alpha: 0.12),
+                          : const Color(0xFFE8B86E).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: _isPaused
@@ -377,7 +377,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                         Icon(Icons.timer,
                             color: _isPaused
                                 ? const Color(0xFFFF5B1F)
-                                : const Color(0xFFBCAE3A),
+                                : const Color(0xFFE8B86E),
                             size: 16),
                         const SizedBox(width: 6),
                         Text(
@@ -385,7 +385,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                           style: TextStyle(
                             color: _isPaused
                                 ? const Color(0xFFFF5B1F)
-                                : const Color(0xFFBCAE3A),
+                                : const Color(0xFFE8B86E),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -476,7 +476,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                     height: 88,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0xFF5B242F),
+                      color: Color(0xFF0DAABA),
                     ),
                     child: const Icon(Icons.favorite,
                         color: Colors.white, size: 44),
@@ -513,7 +513,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B242F),
+                        backgroundColor: const Color(0xFF065963),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(

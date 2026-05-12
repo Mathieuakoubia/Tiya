@@ -1,10 +1,10 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'widgets/routine_intro_screen.dart';
 import 'package:vibration/vibration.dart';
 
-const _accentPurple = Color(0xFFF5F3F1);
+const _accentPurple = Color(0xFFF8F1E9);
 
 enum _Phase { intro, countdown, exercise, complete }
 
@@ -133,10 +133,10 @@ class SoothingThumb extends StatefulWidget {
 
 class _SoothingThumbState extends State<SoothingThumb>
     with SingleTickerProviderStateMixin {
-  // 4 s inspiration + 6 s expiration = 10 s / cycle = 6 cycles / min
+  // 5 s inspiration + 5 s expiration = 10 s / cycle = 6 cycles / min
   static const int _cycleSec = 10;
-  static const int _inhaleSec = 4;
-  static const int _exhaleSec = 6;
+  static const int _inhaleSec = 5;
+  static const int _exhaleSec = 5;
   static const int _totalSec = 120; // 2 min
 
   _Phase _phase = _Phase.intro;
@@ -149,7 +149,6 @@ class _SoothingThumbState extends State<SoothingThumb>
   late AnimationController _breathCtrl;
   late Animation<double> _breathHalo; // halo autour du cercle : 1.0→1.45→1.0
 
-  Timer? _microVibTimer; // micro-vibrations 8 Hz
   Timer? _cdTimer;
   Timer? _exTimer;
 
@@ -165,12 +164,12 @@ class _SoothingThumbState extends State<SoothingThumb>
       TweenSequenceItem(
         tween: Tween<double>(begin: 1.0, end: 1.45)
             .chain(CurveTween(curve: Curves.easeIn)),
-        weight: _inhaleSec.toDouble(),
+        weight: 5.0,
       ),
       TweenSequenceItem(
         tween: Tween<double>(begin: 1.45, end: 1.0)
             .chain(CurveTween(curve: Curves.easeOut)),
-        weight: _exhaleSec.toDouble(),
+        weight: 5.0,
       ),
     ]).animate(_breathCtrl);
     _breathCtrl.addListener(_onBreathTick);
@@ -228,14 +227,8 @@ class _SoothingThumbState extends State<SoothingThumb>
       _phaseLabel = "Inspirez...";
     });
     _breathCtrl.repeat();
-
-    // Pattern cardiaque continu à 7-10 Hz pendant tout le contact.
-    // Simule les battements du cœur: LUB-DUB avec variations selon le rythme respiratoire.
-    // 6 cycles/minute = 1 cycle toutes les 10 secondes (4s inspiration + 6s expiration)
-    _microVibTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
-      if (!mounted || !_isPressed) return;
-      _triggerCardiacHaptics();
-    });
+    // 7 Hz continu : 71 ms on + 72 ms off = 143 ms/cycle ≈ 7 Hz
+    Vibration.vibrate(pattern: [71, 72], repeat: 0);
 
     _exTimer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted || !_isPressed) {
@@ -250,31 +243,9 @@ class _SoothingThumbState extends State<SoothingThumb>
     });
   }
 
-  // Simule le battement du cœur avec pattern LUB-DUB
-  // A l'inspiration: pattern plus intense (battement marqué)
-  // A l'expiration: pattern plus doux (battement apaisé)
-  void _triggerCardiacHaptics() {
-    if (!_isPressed) return;
-
-    // Pattern cardiaque LUB-DUB:
-    // [0: start, 50: LUB (vibration), 100: pause, 30: DUB (vibration), 320: pause avant prochain]
-    // Total: ~500ms pour imiter un battement cardiaque (120 bpm)
-    final pattern = <int>[0, 50, 100, 30, 320];
-
-    // A l'inspiration: vibration plus intense
-    // A l'expiration: vibration plus douce
-    if (_isInhaling) {
-      Vibration.vibrate(pattern: pattern);
-    } else {
-      // A l'expiration: pattern allégé (pause plus longue)
-      Vibration.vibrate(pattern: [0, 30, 130, 20, 320]);
-    }
-  }
-
   void _stopRoutine() {
     if (!_isPressed) return;
     _breathCtrl.stop();
-    _microVibTimer?.cancel();
     _exTimer?.cancel();
     Vibration.cancel();
     setState(() {
@@ -287,7 +258,6 @@ class _SoothingThumbState extends State<SoothingThumb>
     if (!mounted) return;
     _breathCtrl.stop();
     _breathCtrl.reset();
-    _microVibTimer?.cancel();
     Vibration.cancel();
     // Vibration de fin : pattern "succès"
     Vibration.vibrate(pattern: [0, 200, 100, 200, 100, 400]);
@@ -302,7 +272,6 @@ class _SoothingThumbState extends State<SoothingThumb>
   void dispose() {
     _breathCtrl.removeListener(_onBreathTick);
     _breathCtrl.dispose();
-    _microVibTimer?.cancel();
     _cdTimer?.cancel();
     _exTimer?.cancel();
     super.dispose();
@@ -315,7 +284,7 @@ class _SoothingThumbState extends State<SoothingThumb>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _phase == _Phase.countdown
-          ? const Color(0xFF5B242F)
+          ? const Color(0xFF0DAABA)
           : Colors.transparent,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
@@ -360,7 +329,7 @@ class _SoothingThumbState extends State<SoothingThumb>
   Widget _buildCountdown() {
     return Container(
       key: const ValueKey('countdown'),
-      color: const Color(0xFF5B242F),
+      color: const Color(0xFF0DAABA),
       child: Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text("Préparez-vous",
@@ -389,7 +358,7 @@ class _SoothingThumbState extends State<SoothingThumb>
         const btnColor = Color(0xFFF4F3F2);
         return Stack(children: [
           const Positioned.fill(
-            child: ColoredBox(color: Color(0xFF5B242F)),
+            child: ColoredBox(color: Color(0xFF0DAABA)),
           ),
           // Barres respiratoires (gauche et droite)
           Positioned.fill(
@@ -433,7 +402,7 @@ class _SoothingThumbState extends State<SoothingThumb>
                     Text(
                       "${_remaining ~/ 60}:${(_remaining % 60).toString().padLeft(2, '0')}",
                       style: const TextStyle(
-                          color: Color(0xFFBCAE3A), fontSize: 14),
+                          color: Color(0xFFE8B86E), fontSize: 14),
                     ),
                   ],
                 ]),
@@ -487,7 +456,7 @@ class _SoothingThumbState extends State<SoothingThumb>
                     ],
                   ),
                   child: const Icon(Icons.fingerprint,
-                      size: 50, color: Color(0xFF5B242F)),
+                      size: 50, color: Color(0xFF0DAABA)),
                 ),
               ]),
             ),
@@ -531,7 +500,7 @@ class _SoothingThumbState extends State<SoothingThumb>
                     width: 88,
                     height: 88,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                        shape: BoxShape.circle, color: Color(0xFF065963)),
                     child: const Icon(Icons.favorite,
                         color: Colors.white, size: 44),
                   ),
@@ -562,7 +531,7 @@ class _SoothingThumbState extends State<SoothingThumb>
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B242F),
+                        backgroundColor: const Color(0xFF065963),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(

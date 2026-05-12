@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,9 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'squad_service.dart';
 import 'widgets/routine_intro_screen.dart';
 
-const _darkBg = Color(0xFF5B242F);
-const _primaryPurple = Color(0xFFFED7E6);
-const _accentPurple = Color(0xFFF5F3F1);
+const _darkBg = Color(0xFF0DAABA);
+const _primaryPurple = Color(0xFFD9CCE8);
+const _accentPurple = Color(0xFFF8F1E9);
 
 // Palette de couleurs fixe assignée par index de membre
 const _palette = [
@@ -219,7 +219,7 @@ class _SquadPulseState extends State<SquadPulse>
       onTapDown: (_) => _boostEnergy(),
       child: Stack(fit: StackFit.expand, children: [
         Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
-        Container(color: Colors.white.withOpacity(0.12)),
+        Container(color: Colors.white.withValues(alpha: 0.12)),
         if (!_firestoreReady)
           const Center(child: CircularProgressIndicator(color: Colors.white54))
         else ...[
@@ -267,7 +267,7 @@ class _SquadPulseState extends State<SquadPulse>
                         icon: Icons.timer,
                         label:
                             '${_remainingSec ~/ 60}:${(_remainingSec % 60).toString().padLeft(2, '0')}',
-                        color: const Color(0xFFBCAE3A)),
+                        color: const Color(0xFFE8B86E)),
                     _TopBadge(
                         icon: Icons.favorite,
                         label: "Énergie ${(_avgEnergy * 100).toInt()}%",
@@ -377,7 +377,7 @@ class _SquadPulseState extends State<SquadPulse>
                     width: 88,
                     height: 88,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                        shape: BoxShape.circle, color: Color(0xFF065963)),
                     child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
                   const SizedBox(height: 28),
@@ -407,7 +407,7 @@ class _SquadPulseState extends State<SquadPulse>
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B242F),
+                        backgroundColor: const Color(0xFF065963),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(

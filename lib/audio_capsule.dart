@@ -1,11 +1,11 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'widgets/routine_intro_screen.dart';
 
-const _darkBg = Color(0xFF5B242F);
-const _primaryPurple = Color(0xFFFED7E6);
-const _accentPurple = Color(0xFFF5F3F1);
+const _darkBg = Color(0xFF0DAABA);
+const _primaryPurple = Color(0xFFD9CCE8);
+const _accentPurple = Color(0xFFF8F1E9);
 
 enum _Phase { intro, locked, unlocking, playing, complete }
 
@@ -396,7 +396,7 @@ class _AudioCapsuleState extends State<AudioCapsule>
                     width: 88,
                     height: 88,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                        shape: BoxShape.circle, color: Color(0xFF065963)),
                     child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
                   const SizedBox(height: 28),
@@ -425,7 +425,7 @@ class _AudioCapsuleState extends State<AudioCapsule>
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B242F),
+                        backgroundColor: const Color(0xFF065963),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(

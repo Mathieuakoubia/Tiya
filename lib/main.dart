@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'auth_screen.dart';
@@ -13,6 +13,8 @@ import 'pulse_match.dart';
 import 'collective_shield.dart';
 import 'audio_capsule.dart';
 import 'squad_pulse.dart';
+import 'squad_screen.dart';
+import 'twin_screen.dart';
 import 'morning_ritual.dart';
 import 'widgets/aura_widget.dart';
 
@@ -68,13 +70,13 @@ class HomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _SectionHeader(label: "SEULE", color: const Color(0xFF82667F)),
+            _SectionHeader(label: "SEULE", color: const Color(0xFFD9CCE8)),
             const SizedBox(height: 14),
             _RoutineButton(
               icon: Icons.remove_red_eye,
               label: "Saccadic Reset",
               sublabel: "1 min 30  •  Nettoyage oculaire EMDR",
-              color: Colors.blueAccent,
+              color: const Color(0xFF0DAABA),
               onTap: () => _push(
                   context, const EyeMovementEMDR(baseSpeedDuration: 2000)),
             ),
@@ -82,93 +84,107 @@ class HomePage extends StatelessWidget {
               icon: Icons.fingerprint,
               label: "Le Pouce Apaisant",
               sublabel: "2 min  •  Résonance corporelle",
-              color: Colors.teal,
+              color: const Color(0xFF0DAABA),
               onTap: () => _push(context, const SoothingThumb()),
             ),
             _RoutineButton(
               icon: Icons.delete_sweep_outlined,
               label: "Vide-Poubelle Mental",
               sublabel: "1 min 30  •  Décharge cognitive",
-              color: const Color(0xFF735983),
+              color: const Color(0xFF065963),
               onTap: () => _push(context, const CognitiveSorting()),
             ),
             _RoutineButton(
               icon: Icons.auto_awesome,
               label: "Aura Cleaning",
               sublabel: "1 min  •  Reset visuel",
-              color: const Color(0xFF82667F),
+              color: const Color(0xFFD9CCE8),
               onTap: () => _push(context, const AuraCleaning()),
             ),
             const SizedBox(height: 28),
-            _SectionHeader(label: "TWIN", color: const Color(0xFFD4A853)),
+            _SectionHeader(label: "TWIN", color: const Color(0xFFE8B86E)),
             const SizedBox(height: 14),
+            _RoutineButton(
+              icon: Icons.favorite,
+              label: "Mon Twin",
+              sublabel: "Lancer une routine à deux • Invitations",
+              color: const Color(0xFFE8B86E),
+              onTap: () => _push(context, const TwinScreen()),
+            ),
             _RoutineButton(
               icon: Icons.favorite,
               label: "Twin-Coherence",
               sublabel: "3 min  •  Fusion des souffles",
-              color: const Color(0xFFD4A853),
+              color: const Color(0xFFE8B86E),
               onTap: () => _push(context, const TwinCoherence()),
             ),
             _RoutineButton(
               icon: Icons.electric_bolt,
               label: "Mirror-Aura",
               sublabel: "2 min  •  Don d'énergie",
-              color: const Color(0xFFE91E8C),
+              color: const Color(0xFFD9CCE8),
               onTap: () => _push(context, const MirrorAura()),
             ),
             _RoutineButton(
               icon: Icons.water,
               label: "Silent-Presence",
               sublabel: "5 min  •  Silence partagé",
-              color: const Color(0xFF00BCD4),
+              color: const Color(0xFF0DAABA),
               onTap: () => _push(context, const SilentPresence()),
             ),
             _RoutineButton(
               icon: Icons.flash_on,
               label: "Pulse Match",
               sublabel: "1 min 30  •  Contact à distance",
-              color: const Color(0xFFFF5722),
+              color: const Color(0xFFE8B86E),
               onTap: () => _push(context, const PulseMatch()),
             ),
             const SizedBox(height: 28),
-            _SectionHeader(label: "SQUAD", color: const Color(0xFF3F51B5)),
+            _SectionHeader(label: "SQUAD", color: const Color(0xFF065963)),
             const SizedBox(height: 14),
+            _RoutineButton(
+              icon: Icons.group,
+              label: "Mon Squad",
+              sublabel: "Gérer ton groupe • Inviter des amies",
+              color: const Color(0xFF065963),
+              onTap: () => _push(context, const SquadScreen()),
+            ),
             _RoutineButton(
               icon: Icons.shield,
               label: "Collective Shield",
               sublabel: "2 min  •  Protection groupée",
-              color: const Color(0xFF3F51B5),
+              color: const Color(0xFF065963),
               onTap: () => _push(context, const CollectiveShield()),
             ),
             _RoutineButton(
               icon: Icons.headphones,
               label: "Audio Capsule",
               sublabel: "30 sec  •  Murmure de sécurité",
-              color: const Color(0xFFFF8F00),
+              color: const Color(0xFFE8B86E),
               onTap: () => _push(context, const AudioCapsule()),
             ),
             _RoutineButton(
               icon: Icons.people,
               label: "Squad Pulse",
               sublabel: "1 min  •  Partage d'énergie",
-              color: const Color(0xFF4CAF50),
+              color: const Color(0xFF0DAABA),
               onTap: () => _push(context, const SquadPulse()),
             ),
             _RoutineButton(
               icon: Icons.wb_sunny,
               label: "Morning Ritual",
               sublabel: "2 min  •  Alignement du groupe",
-              color: const Color(0xFF9C27B0),
+              color: const Color(0xFFD9CCE8),
               onTap: () => _push(context, const MorningRitual()),
             ),
             const SizedBox(height: 28),
-            _SectionHeader(label: "DESIGN", color: Color(0xFFBCAE3A)),
+            _SectionHeader(label: "DESIGN", color: Color(0xFFE8B86E)),
             const SizedBox(height: 14),
             _RoutineButton(
               icon: Icons.bubble_chart,
               label: "Aura Widget",
               sublabel: "Preview — bulle irisée animée",
-              color: Color(0xFFBCAE3A),
+              color: Color(0xFFE8B86E),
               onTap: () => _push(context, const _AuraPreviewPage()),
             ),
             const SizedBox(height: 32),
@@ -198,36 +214,15 @@ class _AuraPreviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF4F3F2),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF4F3F2),
         foregroundColor: const Color(0xFF232323),
         elevation: 0,
-        title: const Text("Aura Widget"),
+        title: const Text("Aura"),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text("équilibre", style: TextStyle(fontSize: 12, color: Color(0xFFBCAE3A))),
-            SizedBox(height: 8),
-            AuraWidget(size: 220, emotion: AuraEmotion.equilibre),
-            SizedBox(height: 24),
-            Text("apaisement profond", style: TextStyle(fontSize: 12, color: Color(0xFF5170FF))),
-            SizedBox(height: 8),
-            AuraWidget(size: 180, emotion: AuraEmotion.apaisement),
-            SizedBox(height: 24),
-            Text("tension", style: TextStyle(fontSize: 12, color: Color(0xFFFFDE59))),
-            SizedBox(height: 8),
-            AuraWidget(size: 180, emotion: AuraEmotion.tension),
-            SizedBox(height: 24),
-            Text("surcharge", style: TextStyle(fontSize: 12, color: Color(0xFFF2631D))),
-            SizedBox(height: 8),
-            AuraWidget(size: 180, emotion: AuraEmotion.surcharge),
-            SizedBox(height: 32),
-          ],
-        ),
+      body: const Center(
+        child: AuraWidget(size: 320),
       ),
     );
   }

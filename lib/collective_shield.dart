@@ -1,10 +1,10 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'widgets/routine_intro_screen.dart';
 
-const _darkBg        = Color(0xFF5B242F);
-const _primaryPurple = Color(0xFFFED7E6);
+const _darkBg        = Color(0xFF0DAABA);
+const _primaryPurple = Color(0xFFD9CCE8);
 
 enum _Phase { intro, exercise, complete }
 
@@ -238,7 +238,7 @@ class _CollectiveShieldState extends State<CollectiveShield>
               children: [
                 _TopBadge(icon: Icons.timer,
                   label: '${_remainingSec ~/ 60}:${(_remainingSec % 60).toString().padLeft(2, '0')}',
-                  color: const Color(0xFFBCAE3A)),
+                  color: const Color(0xFFE8B86E)),
                 _TopBadge(icon: Icons.shield,
                   label: "${(_shieldSolidity * 100).toInt()}% protégées",
                   color: _primaryPurple, highlighted: true),
@@ -347,17 +347,17 @@ class _CollectiveShieldState extends State<CollectiveShield>
                   Container(
                     width: 88, height: 88,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                        shape: BoxShape.circle, color: Color(0xFF065963)),
                     child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF5B242F).withValues(alpha: 0.10),
+                      color: const Color(0xFF0DAABA).withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(30)),
                     child: const Text("🏅 Squad Invincible",
-                      style: TextStyle(color: Color(0xFF5B242F), fontSize: 15,
+                      style: TextStyle(color: Color(0xFF0DAABA), fontSize: 15,
                           fontWeight: FontWeight.w700)),
                   ),
                   const SizedBox(height: 24),
@@ -386,7 +386,7 @@ class _CollectiveShieldState extends State<CollectiveShield>
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B242F),
+                        backgroundColor: const Color(0xFF065963),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(

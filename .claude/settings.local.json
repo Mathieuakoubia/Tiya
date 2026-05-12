@@ -4,7 +4,8 @@
       "Bash(python3 -)",
       "Bash(python update_intros.py)",
       "Bash(flutter pub:*)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(firebase deploy *)"
     ]
   }
 }

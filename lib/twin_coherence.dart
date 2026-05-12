@@ -1,12 +1,12 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'twin_service.dart';
 import 'widgets/routine_intro_screen.dart';
 
-const _darkBg = Color(0xFF5B242F);
-const _primaryPurple = Color(0xFFFED7E6);
-const _accentPurple = Color(0xFFF5F3F1);
+const _darkBg = Color(0xFF0DAABA);
+const _primaryPurple = Color(0xFFD9CCE8);
+const _accentPurple = Color(0xFFF8F1E9);
 
 enum _Phase { intro, exercise, complete }
 
@@ -210,10 +210,10 @@ class _TwinCoherenceState extends State<TwinCoherence>
                       height: 110 * s,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: const Color(0xFFF5F3F1).withValues(alpha: 0.07),
+                        color: const Color(0xFFF8F1E9).withValues(alpha: 0.07),
                         boxShadow: [
                           BoxShadow(
-                              color: const Color(0xFFF5F3F1)
+                              color: const Color(0xFFF8F1E9)
                                   .withValues(alpha: 0.4),
                               blurRadius: 50,
                               spreadRadius: 6)
@@ -260,7 +260,7 @@ class _TwinCoherenceState extends State<TwinCoherence>
                       letterSpacing: 0.5)),
               Text("Vous",
                   style: TextStyle(
-                      color: const Color(0xFFF5F3F1).withValues(alpha: 0.55),
+                      color: const Color(0xFFF8F1E9).withValues(alpha: 0.55),
                       fontSize: 13,
                       letterSpacing: 0.5)),
             ],
@@ -282,7 +282,7 @@ class _TwinCoherenceState extends State<TwinCoherence>
                         icon: Icons.timer,
                         label:
                             '${_remainingSec ~/ 60}:${(_remainingSec % 60).toString().padLeft(2, '0')}',
-                        color: const Color(0xFFBCAE3A)),
+                        color: const Color(0xFFE8B86E)),
                     _TopBadge(
                         icon: Icons.favorite,
                         label: "$_syncCount / 12 fusions",
@@ -332,7 +332,7 @@ class _TwinCoherenceState extends State<TwinCoherence>
                     width: 88,
                     height: 88,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                        shape: BoxShape.circle, color: Color(0xFF065963)),
                     child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
                   const SizedBox(height: 28),
@@ -362,7 +362,7 @@ class _TwinCoherenceState extends State<TwinCoherence>
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B242F),
+                        backgroundColor: const Color(0xFF065963),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(

@@ -1,12 +1,12 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'widgets/routine_intro_screen.dart';
 
-const _bg = Color(0xFF5B242F);
+const _bg = Color(0xFF0DAABA);
 const _rosePoudre = Color(0xFFFFD7E7);
-const _vertAcide = Color(0xFFBCAE3A);
+const _vertAcide = Color(0xFFE8B86E);
 const _accentPurple = Color(0xFF735983);
 
 class _Item {
@@ -56,7 +56,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
   static const _itemSize = 68.0;
   static const _totalSec = 90;
   static const _maxItems = 40; // objectif à atteindre
-  static const _poolSize = 16; // items simultanés à l'écran
+  static const _poolSize = 3; // items simultanés à l'écran
 
   _Phase _phase = _Phase.intro;
   int _countdownValue = 3;
@@ -140,35 +140,35 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
     });
   }
 
-  // Vitesse globale : démarre à 1×, monte à 2.5× sur 90 secondes
-  double get _speedMult =>
-      1.0 + ((_totalSec - _remainingSec) / _totalSec) * 1.5;
-
-  // Pool fixe de _poolSize items qui recyclent indéfiniment
+  // 3 items en pool, chacun descend l'écran en 9 secondes.
+  // Décalage initial = screenH/3 → un item entre toutes les 3 s.
+  // Au recyclage : offset aléatoire large pour éviter le regroupement.
   void _spawnAllItems() {
     _items.clear();
+    final speed = _screenH / 9.0; // px/s → 9 s pour traverser l'écran
+    final gap = _screenH / _poolSize; // 3 s de décalage entre items
     for (int i = 0; i < _poolSize; i++) {
       final type = _stressors[i % _stressors.length];
       _items.add(_Item(
         icon: type.$1,
         label: type.$2,
         x: _rng.nextDouble() * (_screenW - _itemSize - 40) + 20,
-        y: -_itemSize - (i * 110.0), // échelonnement initial
-        fallSpeed: 60 + _rng.nextDouble() * 40,
+        y: -_itemSize - (i * gap),
+        fallSpeed: speed,
       ));
     }
   }
 
   void _updatePositions() {
     const dt = 0.033;
-    final mult = _speedMult;
     for (final item in _items) {
       if (item.grabbed) continue;
-      item.y += item.fallSpeed * mult * dt;
-      // Item sorti par le bas → recycle en haut
+      item.y += item.fallSpeed * dt;
+      // Item sorti par le bas → recycle en haut avec large décalage aléatoire
+      // pour éviter que les 3 atterrissent en même temps après un cycle
       if (item.y > _screenH + _itemSize) {
         item.x = _rng.nextDouble() * (_screenW - _itemSize - 40) + 20;
-        item.y = -_itemSize - _rng.nextDouble() * 200;
+        item.y = -_itemSize - _rng.nextDouble() * (_screenH * 0.6);
       }
     }
   }
@@ -260,7 +260,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
   Widget _buildCountdown() {
     return Container(
       key: const ValueKey('countdown'),
-      color: const Color(0xFF5B242F),
+      color: const Color(0xFF0DAABA),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -335,7 +335,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
                     icon: Icons.timer,
                     label:
                         '${_remainingSec ~/ 60}:${(_remainingSec % 60).toString().padLeft(2, '0')}',
-                    color: const Color(0xFFBCAE3A),
+                    color: const Color(0xFFE8B86E),
                   ),
                   _TopBadge(
                     icon: Icons.delete_sweep_outlined,
@@ -407,7 +407,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
                     width: 88,
                     height: 88,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                        shape: BoxShape.circle, color: Color(0xFF065963)),
                     child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
                   const SizedBox(height: 28),
@@ -442,7 +442,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B242F),
+                        backgroundColor: const Color(0xFF065963),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(

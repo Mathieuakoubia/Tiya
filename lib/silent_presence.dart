@@ -1,11 +1,13 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'twin_service.dart';
 import 'widgets/routine_intro_screen.dart';
 
-const _darkBg = Color(0xFF5B242F);
-const _primaryPurple = Color(0xFFFED7E6);
-const _accentPurple = Color(0xFFF5F3F1);
+const _darkBg = Color(0xFF0DAABA);
+const _primaryPurple = Color(0xFFD9CCE8);
+const _accentPurple = Color(0xFFF8F1E9);
 
 enum _Phase { intro, exercise, complete }
 
@@ -65,6 +67,10 @@ class _SilentPresenceState extends State<SilentPresence>
   Timer? _timer;
   Timer? _calmTimer;
 
+  String? _twinUid;
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _twinSub;
+  bool _twinOnline = false;
+
   late AnimationController _waveCtrl;
   late Animation<double> _waveAnim;
 
@@ -83,11 +89,26 @@ class _SilentPresenceState extends State<SilentPresence>
     _waveCtrl.dispose();
     _timer?.cancel();
     _calmTimer?.cancel();
+    _twinSub?.cancel();
+    TwinService.leaveRoutine();
     super.dispose();
   }
 
-  void _startExercise() {
+  Future<void> _startExercise() async {
     setState(() => _phase = _Phase.exercise);
+
+    _twinUid = await TwinService.getTwinUid();
+    if (_twinUid != null) {
+      _twinSub = TwinService.twinSignalStream(_twinUid!).listen((snap) {
+        if (!mounted) return;
+        final data = snap.data();
+        setState(() {
+          _twinOnline = data?['status'] == 'active';
+        });
+      });
+    }
+    await TwinService.sendSignal(energy: 1.0, status: 'active');
+
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
@@ -96,7 +117,6 @@ class _SilentPresenceState extends State<SilentPresence>
       setState(() {
         if (_remainingSec > 0) {
           _remainingSec--;
-          // Diminue l'agitation progressivement si calme
           if (_agitation > 0) _agitation = (_agitation - 0.01).clamp(0.0, 1.0);
         } else {
           t.cancel();
@@ -119,6 +139,7 @@ class _SilentPresenceState extends State<SilentPresence>
   void _endExercise() {
     _timer?.cancel();
     setState(() => _phase = _Phase.complete);
+    TwinService.leaveRoutine();
     widget.onComplete?.call();
   }
 
@@ -176,12 +197,12 @@ class _SilentPresenceState extends State<SilentPresence>
             size: Size.infinite,
           ),
         ),
-        // Aura glow central
+        // Aura glow central — plus intense si les deux sont présentes
         Center(
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 800),
-            width: 160,
-            height: 160,
+            width: _twinOnline ? 180 : 140,
+            height: _twinOnline ? 180 : 140,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: _primaryPurple.withValues(
@@ -189,9 +210,9 @@ class _SilentPresenceState extends State<SilentPresence>
               boxShadow: [
                 BoxShadow(
                     color: _primaryPurple.withValues(
-                        alpha: 0.2 + (1 - _agitation) * 0.25),
-                    blurRadius: 80,
-                    spreadRadius: 20)
+                        alpha: (_twinOnline ? 0.35 : 0.15) + (1 - _agitation) * 0.20),
+                    blurRadius: _twinOnline ? 100 : 60,
+                    spreadRadius: _twinOnline ? 30 : 10)
               ],
             ),
           ),
@@ -225,12 +246,12 @@ class _SilentPresenceState extends State<SilentPresence>
                       icon: Icons.timer,
                       label:
                           '${_remainingSec ~/ 60}:${(_remainingSec % 60).toString().padLeft(2, '0')}',
-                      color: const Color(0xFFBCAE3A)),
+                      color: const Color(0xFFE8B86E)),
                   _TopBadge(
                       icon: Icons.people,
-                      label: "2 présentes",
+                      label: _twinOnline ? "2 présentes" : "1 présente",
                       color: _primaryPurple,
-                      highlighted: true),
+                      highlighted: _twinOnline),
                 ],
               ),
             ),
@@ -242,9 +263,13 @@ class _SilentPresenceState extends State<SilentPresence>
             child: Padding(
               padding: const EdgeInsets.only(bottom: 28),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text("Restez silencieuses ensemble",
+                Text(
+                    _twinOnline
+                        ? "Vous êtes présentes ensemble"
+                        : "En attente de votre Twin…",
                     style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.22),
+                        color: Colors.white.withValues(
+                            alpha: _twinOnline ? 0.22 : 0.45),
                         fontSize: 13,
                         letterSpacing: 0.3)),
                 const SizedBox(height: 12),
@@ -283,7 +308,7 @@ class _SilentPresenceState extends State<SilentPresence>
                     width: 88,
                     height: 88,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                        shape: BoxShape.circle, color: Color(0xFF065963)),
                     child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
                   const SizedBox(height: 28),
@@ -313,7 +338,7 @@ class _SilentPresenceState extends State<SilentPresence>
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B242F),
+                        backgroundColor: const Color(0xFF065963),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(

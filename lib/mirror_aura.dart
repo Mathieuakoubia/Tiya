@@ -1,10 +1,12 @@
-import 'dart:async';
+﻿import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'twin_service.dart';
 import 'widgets/routine_intro_screen.dart';
 
-const _darkBg = Color(0xFF5B242F);
-const _primaryPurple = Color(0xFFFED7E6);
-const _accentPurple = Color(0xFFF5F3F1);
+const _darkBg = Color(0xFF0DAABA);
+const _primaryPurple = Color(0xFFD9CCE8);
+const _accentPurple = Color(0xFFF8F1E9);
 
 enum _Phase { intro, exercise, complete }
 
@@ -19,12 +21,21 @@ class MirrorAura extends StatefulWidget {
 class _MirrorAuraState extends State<MirrorAura> with TickerProviderStateMixin {
   static const _totalSec = 120;
 
+  static const _threshold = 0.80;
+
   _Phase _phase = _Phase.intro;
   int _remainingSec = _totalSec;
-  double _userEnergy = 0.0; // 0.0 (rouge) → 1.0 (bleu)
-  double _twinEnergy = 0.2; // La twin commence stressée
+  // Ce que MOI j'ai donné à mon twin (mes balayages) → sphère du haut
+  double _myGiven = 0.0;
+  // Ce que mon TWIN m'a donné (son signal Firestore) → sphère du bas
+  double _twinGiven = 0.0;
   bool _transferring = false;
   Timer? _timer;
+
+  String? _twinUid;
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _twinSub;
+  bool _twinOnline = false;
+
   late AnimationController _pulseCtrl;
   late Animation<double> _pulseAnim;
   late AnimationController _transferCtrl;
@@ -54,11 +65,33 @@ class _MirrorAuraState extends State<MirrorAura> with TickerProviderStateMixin {
     _pulseCtrl.dispose();
     _transferCtrl.dispose();
     _timer?.cancel();
+    _twinSub?.cancel();
+    TwinService.leaveRoutine();
     super.dispose();
   }
 
-  void _startExercise() {
+  Future<void> _startExercise() async {
     setState(() => _phase = _Phase.exercise);
+
+    _twinUid = await TwinService.getTwinUid();
+    if (_twinUid != null) {
+      _twinSub = TwinService.twinSignalStream(_twinUid!).listen((snap) {
+        if (!mounted) return;
+        final data = snap.data();
+        setState(() {
+          _twinOnline = data?['status'] == 'active';
+          final given = (data?['routineData']?['givenEnergy'] as num?)?.toDouble();
+          if (given != null) {
+            _twinGiven = given;
+            if (_myGiven >= _threshold && _twinGiven >= _threshold) {
+              _endExercise();
+            }
+          }
+        });
+      });
+    }
+    await TwinService.sendSignal(energy: 0.0, status: 'active');
+
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
@@ -85,21 +118,26 @@ class _MirrorAuraState extends State<MirrorAura> with TickerProviderStateMixin {
   }
 
   void _doTransfer() {
-    if (_transferring) return;
+    if (_transferring || _phase != _Phase.exercise) return;
     setState(() {
       _transferring = true;
-      _userEnergy = (_userEnergy - 0.12).clamp(0.0, 1.0);
-      _twinEnergy = (_twinEnergy + 0.18).clamp(0.0, 1.0);
+      _myGiven = (_myGiven + 0.18).clamp(0.0, 1.0);
     });
+    TwinService.sendSignal(
+      energy: _myGiven,
+      status: 'active',
+      routineData: {'givenEnergy': _myGiven},
+    );
     _transferCtrl.forward(from: 0.0).then((_) {
       if (mounted) setState(() => _transferring = false);
     });
-    if (_twinEnergy >= 0.95) _endExercise();
+    if (_myGiven >= _threshold && _twinGiven >= _threshold) _endExercise();
   }
 
   void _endExercise() {
     _timer?.cancel();
     setState(() => _phase = _Phase.complete);
+    TwinService.leaveRoutine();
     widget.onComplete?.call();
   }
 
@@ -153,35 +191,60 @@ class _MirrorAuraState extends State<MirrorAura> with TickerProviderStateMixin {
       onPanEnd: _onPanEnd,
       child: Stack(fit: StackFit.expand, children: [
         const ColoredBox(color: _darkBg),
-        // Twin aura (haut)
+        // Sphère Twin (haut) — bleuit via MES balayages
         Positioned(
-          top: 120,
+          top: 100,
           left: 0,
           right: 0,
           child: Column(children: [
-            AnimatedBuilder(
-              animation: _pulseAnim,
-              builder: (_, __) => Container(
-                width: 130 * _pulseAnim.value,
-                height: 130 * _pulseAnim.value,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _auraColor(_twinEnergy).withValues(alpha: 0.08),
-                  boxShadow: [
-                    BoxShadow(
-                        color: _auraColor(_twinEnergy).withValues(alpha: 0.55),
-                        blurRadius: 60,
-                        spreadRadius: 12)
-                  ],
+            Opacity(
+              opacity: _twinOnline ? 1.0 : 0.35,
+              child: AnimatedBuilder(
+                animation: _pulseAnim,
+                builder: (_, __) => Container(
+                  width: 130 * _pulseAnim.value,
+                  height: 130 * _pulseAnim.value,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _auraColor(_myGiven).withValues(alpha: 0.08),
+                    boxShadow: [
+                      BoxShadow(
+                          color: _auraColor(_myGiven).withValues(alpha: 0.55),
+                          blurRadius: 60,
+                          spreadRadius: 12)
+                    ],
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            Text("Twin",
+            const SizedBox(height: 10),
+            Row(mainAxisSize: MainAxisSize.min, children: [
+              Container(
+                width: 6, height: 6,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _twinOnline
+                      ? const Color(0xFF4CAF50)
+                      : Colors.white.withValues(alpha: 0.25),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                "Twin  •  ${(_myGiven * 100).toInt()}% reçu",
                 style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.4),
-                    fontSize: 14,
-                    letterSpacing: 0.5)),
+                    color: Colors.white.withValues(alpha: 0.45),
+                    fontSize: 13,
+                    letterSpacing: 0.3)),
+            ]),
+            if (_myGiven >= _threshold)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text("✓ Don complet",
+                    style: TextStyle(
+                        color: const Color(0xFF4CAF50).withValues(alpha: 0.8),
+                        fontSize: 11,
+                        letterSpacing: 0.5)),
+              ),
           ]),
         ),
         // Transfert particle
@@ -215,18 +278,28 @@ class _MirrorAuraState extends State<MirrorAura> with TickerProviderStateMixin {
               );
             },
           ),
-        // User aura (bas)
+        // Sphère Vous (bas) — bleuit via les balayages du Twin
         Positioned(
-          bottom: 120,
+          bottom: 90,
           left: 0,
           right: 0,
           child: Column(children: [
-            Text("Vous",
-                style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.4),
-                    fontSize: 14,
-                    letterSpacing: 0.5)),
-            const SizedBox(height: 12),
+            if (_twinGiven >= _threshold)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text("✓ Don reçu",
+                    style: TextStyle(
+                        color: const Color(0xFF4CAF50).withValues(alpha: 0.8),
+                        fontSize: 11,
+                        letterSpacing: 0.5)),
+              ),
+            Text(
+              "Vous  •  ${(_twinGiven * 100).toInt()}% reçu",
+              style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.45),
+                  fontSize: 13,
+                  letterSpacing: 0.3)),
+            const SizedBox(height: 10),
             AnimatedBuilder(
               animation: _pulseAnim,
               builder: (_, __) => AnimatedContainer(
@@ -235,10 +308,10 @@ class _MirrorAuraState extends State<MirrorAura> with TickerProviderStateMixin {
                 height: 130 * _pulseAnim.value,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _auraColor(_userEnergy).withValues(alpha: 0.08),
+                  color: _auraColor(_twinGiven).withValues(alpha: 0.08),
                   boxShadow: [
                     BoxShadow(
-                        color: _auraColor(_userEnergy).withValues(alpha: 0.55),
+                        color: _auraColor(_twinGiven).withValues(alpha: 0.55),
                         blurRadius: 60,
                         spreadRadius: 12)
                   ],
@@ -263,23 +336,27 @@ class _MirrorAuraState extends State<MirrorAura> with TickerProviderStateMixin {
                         icon: Icons.timer,
                         label:
                             '${_remainingSec ~/ 60}:${(_remainingSec % 60).toString().padLeft(2, '0')}',
-                        color: const Color(0xFFBCAE3A)),
+                        color: const Color(0xFFE8B86E)),
                     _TopBadge(
                         icon: Icons.electric_bolt,
-                        label: "${(_twinEnergy * 100).toInt()}% énergie Twin",
+                        label: "↑${(_myGiven * 100).toInt()}%  ↓${(_twinGiven * 100).toInt()}%",
                         color: _primaryPurple,
-                        highlighted: true),
+                        highlighted: _myGiven >= _threshold && _twinGiven >= _threshold),
                   ],
                 ),
               ),
             )),
         Align(
           alignment: Alignment.center,
-          child: Text("↑  Balayez vers le haut",
-              style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.18),
-                  fontSize: 13,
-                  letterSpacing: 0.5)),
+          child: Text(
+            _myGiven >= _threshold
+                ? "En attente du don de votre Twin…"
+                : "↑  Balayez vers le haut pour donner",
+            style: TextStyle(
+                color: Colors.white.withValues(
+                    alpha: _myGiven >= _threshold ? 0.40 : 0.18),
+                fontSize: 13,
+                letterSpacing: 0.5)),
         ),
       ]),
     );
@@ -303,7 +380,7 @@ class _MirrorAuraState extends State<MirrorAura> with TickerProviderStateMixin {
                     width: 88,
                     height: 88,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                        shape: BoxShape.circle, color: Color(0xFF065963)),
                     child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
                   const SizedBox(height: 28),
@@ -317,8 +394,8 @@ class _MirrorAuraState extends State<MirrorAura> with TickerProviderStateMixin {
                           fontStyle: FontStyle.italic,
                           height: 1.45)),
                   const SizedBox(height: 16),
-                  const Text(
-                      "L'Aura de votre Twin est passée de rouge à bleue.\nVotre don d'énergie a été reçu.",
+                  Text(
+                      "Vous avez donné ${(_myGiven * 100).toInt()}% à votre Twin.\nVotre Twin vous a donné ${(_twinGiven * 100).toInt()}%.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontFamily: 'Gelica',
@@ -333,7 +410,7 @@ class _MirrorAuraState extends State<MirrorAura> with TickerProviderStateMixin {
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B242F),
+                        backgroundColor: const Color(0xFF065963),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(

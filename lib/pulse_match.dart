@@ -1,12 +1,13 @@
-import 'dart:async';
+﻿import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'widgets/routine_intro_screen.dart';
 import 'package:flutter/services.dart';
+import 'twin_service.dart';
+import 'widgets/routine_intro_screen.dart';
 
-const _darkBg = Color(0xFF5B242F);
-const _primaryPurple = Color(0xFFFED7E6);
-const _accentPurple = Color(0xFFF5F3F1);
+const _primaryPurple = Color(0xFFD9CCE8);
+const _accentPurple = Color(0xFFF8F1E9);
 
 enum _Phase { intro, countdown, waiting, result, complete }
 
@@ -28,10 +29,13 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
   int _score = 0;
   int? _lastDeltaMs;
 
-  // Timestamp du "0" idéal
   int _targetMs = 0;
   Timer? _cdTimer;
   Timer? _waitTimer;
+
+  String? _twinUid;
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _twinSub;
+  int? _twinScore;
 
   late AnimationController _pulseCtrl;
   late Animation<double> _pulseAnim;
@@ -63,12 +67,36 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
     _flashCtrl.dispose();
     _cdTimer?.cancel();
     _waitTimer?.cancel();
+    _twinSub?.cancel();
+    TwinService.leaveRoutine();
     super.dispose();
   }
 
+  Future<void> _initTwin() async {
+    _twinUid = await TwinService.getTwinUid();
+    if (_twinUid != null) {
+      _twinSub = TwinService.twinSignalStream(_twinUid!).listen((snap) {
+        if (!mounted) return;
+        final data = snap.data();
+        if (data?['routineData']?['score'] != null) {
+          setState(() {
+            _twinScore = (data!['routineData']['score'] as num).toInt();
+          });
+        }
+      });
+    }
+    await TwinService.sendSignal(energy: 0.0, status: 'active');
+  }
+
   void _startRound() {
+    if (_round == 0) _initTwin();
     if (_round >= _rounds) {
       setState(() => _phase = _Phase.complete);
+      TwinService.sendSignal(
+        energy: _score / _rounds,
+        status: 'idle',
+        routineData: {'score': _score},
+      );
       widget.onComplete?.call();
       return;
     }
@@ -123,13 +151,18 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
       _round++;
     });
     _pulseCtrl.forward(from: 0.0);
+    TwinService.sendSignal(
+      energy: _score / _rounds,
+      status: 'active',
+      routineData: {'score': _score},
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          _phase == _Phase.intro ? Colors.transparent : const Color(0xFF5B242F),
+          _phase == _Phase.intro ? Colors.transparent : const Color(0xFF0DAABA),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 400),
         child: _buildPhase(),
@@ -172,7 +205,7 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
   Widget _buildCountdown() {
     return Container(
       key: const ValueKey('countdown'),
-      color: const Color(0xFF5B242F),
+      color: const Color(0xFF0DAABA),
       child: Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text("Manche ${_round + 1} / $_rounds",
@@ -203,7 +236,7 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
       key: const ValueKey('waiting'),
       onTapDown: (_) => _onTap(),
       child: Stack(fit: StackFit.expand, children: [
-        const ColoredBox(color: Color(0xFF5B242F)),
+        const ColoredBox(color: Color(0xFF0DAABA)),
         Center(
           child: AnimatedBuilder(
             animation: _pulseAnim,
@@ -219,11 +252,11 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFFBCAE3A), Color(0xFFF4F3F2)],
+                    colors: [Color(0xFFE8B86E), Color(0xFFF4F3F2)],
                   ),
                   boxShadow: [
                     BoxShadow(
-                        color: const Color(0xFFBCAE3A).withOpacity(0.35),
+                        color: const Color(0xFFE8B86E).withValues(alpha:0.35),
                         blurRadius: 40 + v * 60,
                         spreadRadius: 5 + v * 15)
                   ],
@@ -231,7 +264,7 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
                 child: Center(
                   child: Text("TOUCHEZ",
                       style: GoogleFonts.poppins(
-                          color: Colors.white.withOpacity(v),
+                          color: Colors.white.withValues(alpha:v),
                           fontSize: 18 + v * 6,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 2)),
@@ -277,7 +310,7 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
       key: const ValueKey('result'),
       fit: StackFit.expand,
       children: [
-        const ColoredBox(color: Color(0xFF5B242F)),
+        const ColoredBox(color: Color(0xFF0DAABA)),
         // Flash on success
         if (perfect)
           AnimatedBuilder(
@@ -302,7 +335,7 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
                   ),
                   boxShadow: [
                     BoxShadow(
-                        color: const Color(0xFFFF5B1F).withOpacity(0.45),
+                        color: const Color(0xFFFF5B1F).withValues(alpha:0.45),
                         blurRadius: 50)
                   ],
                 ),
@@ -376,7 +409,7 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
                     width: 88,
                     height: 88,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                        shape: BoxShape.circle, color: Color(0xFF065963)),
                     child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
                   const SizedBox(height: 28),
@@ -390,7 +423,10 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
                           fontStyle: FontStyle.italic,
                           height: 1.45)),
                   const SizedBox(height: 16),
-                  Text("$_score / $_rounds synchronisations parfaites.",
+                  Text(
+                      _twinScore != null
+                          ? "Vous : $_score/$_rounds  •  Twin : $_twinScore/$_rounds"
+                          : "$_score / $_rounds synchronisations parfaites.",
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                           fontFamily: 'Gelica',
@@ -405,7 +441,7 @@ class _PulseMatchState extends State<PulseMatch> with TickerProviderStateMixin {
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B242F),
+                        backgroundColor: const Color(0xFF065963),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(

@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const _btnColor = Color(0xFF5B242F);
+const _btnColor = Color(0xFF0DAABA);
 const _titleColor = Color(0xFF1A0A0E);
 const _bodyColor = Color(0xFF2C1A1E);
 
@@ -164,7 +164,7 @@ class _IntroStep extends StatelessWidget {
           height: 28,
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(0xFFBCAE3A),
+            color: Color(0xFFE8B86E),
           ),
           child: Center(
             child: Text(

@@ -1,19 +1,19 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'widgets/routine_intro_screen.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-const _darkBg = Color(0xFF5B242F);
-const _primaryPurple = Color(0xFFFED7E6);
-const _accentPurple = Color(0xFFF5F3F1);
+const _darkBg = Color(0xFF0DAABA);
+const _primaryPurple = Color(0xFFD9CCE8);
+const _accentPurple = Color(0xFFF8F1E9);
 
 // Couleurs de stress → disparaissent au nettoyage
 const _mistColors = [
-  Color(0xFF5B242F),
+  Color(0xFF0DAABA),
   Color(0xFFFFD7E7),
-  Color(0xFFBCAE3A),
+  Color(0xFFE8B86E),
   Color(0xFFF2631D),
   Color(0xFFF4F3F2),
 ];
@@ -117,7 +117,7 @@ class _MistPainter extends CustomPainter {
         ..shader = RadialGradient(
           colors: [
             const Color(0xFFF2631D).withValues(alpha: 0.10 + auraProgress * 0.35),
-            const Color(0xFF5B242F).withValues(alpha: 0.06 + auraProgress * 0.20),
+            const Color(0xFF0DAABA).withValues(alpha: 0.06 + auraProgress * 0.20),
             const Color(0xFFFFD7E7).withValues(alpha: 0.0),
           ],
           stops: const [0.0, 0.55, 1.0],
@@ -146,7 +146,7 @@ class _MistPainter extends CustomPainter {
         tp,
         _clearRadius,
         Paint()
-          ..color = const Color(0xFF5B242F).withValues(alpha: 0.30)
+          ..color = const Color(0xFF0DAABA).withValues(alpha: 0.30)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5,
       );
@@ -154,7 +154,7 @@ class _MistPainter extends CustomPainter {
         tp,
         _clearRadius * 0.45,
         Paint()
-          ..color = const Color(0xFFBCAE3A).withValues(alpha: 0.12)
+          ..color = const Color(0xFFE8B86E).withValues(alpha: 0.12)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
       );
     }
@@ -368,36 +368,44 @@ class _AuraCleaningState extends State<AuraCleaning>
               ),
             ),
           ),
-        // Top bar
+        // Barre de progression en haut (remplace timer + %)
         Positioned(
           top: 0,
           left: 0,
           right: 0,
           child: SafeArea(
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _TopBadge(
-                    icon: Icons.timer,
-                    label:
-                        '${_remainingSec ~/ 60}:${(_remainingSec % 60).toString().padLeft(2, '0')}',
-                    color: const Color(0xFFBCAE3A),
-                  ),
-                  // Progress aura nettoyée
-                  ListenableBuilder(
-                    listenable: _mist,
-                    builder: (_, __) => _TopBadge(
-                      icon: Icons.auto_awesome,
-                      label:
-                          "${(_mist.cleanedRatio * 100).toStringAsFixed(0)}%",
-                      color: _primaryPurple,
-                      highlighted: true,
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+              child: ListenableBuilder(
+                listenable: _mist,
+                builder: (_, __) {
+                  final ratio = _mist.cleanedRatio;
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: ratio,
+                          minHeight: 5,
+                          backgroundColor: Colors.white.withValues(alpha: 0.15),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              _primaryPurple.withValues(alpha: 0.85)),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        "Nettoyage ${(ratio * 100).toInt()}%",
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.40),
+                          fontSize: 11,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -442,7 +450,7 @@ class _AuraCleaningState extends State<AuraCleaning>
                     width: 88,
                     height: 88,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Color(0xFF5B242F)),
+                        shape: BoxShape.circle, color: Color(0xFF065963)),
                     child: const Icon(Icons.favorite, color: Colors.white, size: 44),
                   ),
                   const SizedBox(height: 28),
@@ -477,7 +485,7 @@ class _AuraCleaningState extends State<AuraCleaning>
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B242F),
+                        backgroundColor: const Color(0xFF065963),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(
@@ -498,39 +506,3 @@ class _AuraCleaningState extends State<AuraCleaning>
   }
 }
 
-class _TopBadge extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final bool highlighted;
-
-  const _TopBadge({
-    required this.icon,
-    required this.label,
-    required this.color,
-    this.highlighted = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: highlighted
-            ? _primaryPurple.withValues(alpha: 0.14)
-            : Colors.white.withValues(alpha: 0.07),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 16),
-          const SizedBox(width: 6),
-          Text(label,
-              style:
-                  TextStyle(color: color, fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-}
