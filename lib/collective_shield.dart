@@ -2,6 +2,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'widgets/routine_intro_screen.dart';
+import 'squad_service.dart';
 
 const _darkBg        = Color(0xFF0DAABA);
 const _primaryPurple = Color(0xFFD9CCE8);
@@ -75,12 +76,9 @@ class _CollectiveShieldState extends State<CollectiveShield>
   Timer? _timer;
   Timer? _simTimer;
 
-  final _members = [
-    _Member(name: "Vous",    stress: 0.75),
-    _Member(name: "Alice",   stress: 0.62),
-    _Member(name: "Léa",     stress: 0.50),
-    _Member(name: "Camille", stress: 0.80),
-    _Member(name: "Sofia",   stress: 0.45),
+  // Initialisé avec "Vous" seul ; remplacé par les vrais membres Firestore
+  final _members = <_Member>[
+    _Member(name: 'Vous', stress: 0.75),
   ];
 
   double get _shieldSolidity =>
@@ -99,6 +97,31 @@ class _CollectiveShieldState extends State<CollectiveShield>
     _pulseAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
     );
+    _loadSquadMembers();
+  }
+
+  Future<void> _loadSquadMembers() async {
+    final squad = await SquadService.getMySquad();
+    if (!mounted || squad == null) return;
+    final squadId = squad['id'] as String;
+    final data = await SquadService.mySquadMembersStream(squadId).first;
+    if (!mounted || data.isEmpty) return;
+    setState(() {
+      _members.clear();
+      for (final m in data) {
+        final isMe = (m['uid'] as String?) == SquadService.currentUid;
+        _members.add(_Member(
+          name: isMe ? 'Vous' : (m['prenom'] as String? ?? '?'),
+          stress: 0.35 + _rng.nextDouble() * 0.55,
+        ));
+      }
+      // "Vous" toujours en position 0 (bouton Reset Flash)
+      final myIdx = _members.indexWhere((m) => m.name == 'Vous');
+      if (myIdx > 0) {
+        final me = _members.removeAt(myIdx);
+        _members.insert(0, me);
+      }
+    });
   }
 
   @override

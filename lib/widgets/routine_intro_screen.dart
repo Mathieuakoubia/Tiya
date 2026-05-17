@@ -30,11 +30,7 @@ class RoutineIntroScreen extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset(
-          'assets/images/Fonds-02.png',
-          fit: BoxFit.cover,
-        ),
-        Container(color: Colors.white.withValues(alpha: 0.10)),
+        const ColoredBox(color: Color(0xFFF8F1E9)),
         SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 28),

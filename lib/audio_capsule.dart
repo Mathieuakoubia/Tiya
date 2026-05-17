@@ -1,6 +1,7 @@
 ﻿import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'widgets/routine_intro_screen.dart';
 
 const _darkBg = Color(0xFF0DAABA);
@@ -49,7 +50,10 @@ class _WaveformPainter extends CustomPainter {
 
 class AudioCapsule extends StatefulWidget {
   final VoidCallback? onComplete;
-  const AudioCapsule({super.key, this.onComplete});
+  /// URL Firebase Storage de la capsule audio (mp3/aac).
+  /// Si null → simulation visuelle (pas d'audio réel).
+  final String? soundUrl;
+  const AudioCapsule({super.key, this.onComplete, this.soundUrl});
 
   @override
   State<AudioCapsule> createState() => _AudioCapsuleState();
@@ -64,6 +68,7 @@ class _AudioCapsuleState extends State<AudioCapsule>
   _Phase _phase = _Phase.intro;
   double _playProgress = 0.0;
   Timer? _playTimer;
+  AudioPlayer? _audioPlayer;
 
   late AnimationController _pulseCtrl;
   late Animation<double> _pulseAnim;
@@ -102,6 +107,7 @@ class _AudioCapsuleState extends State<AudioCapsule>
     _waveCtrl.dispose();
     _unlockCtrl.dispose();
     _playTimer?.cancel();
+    _audioPlayer?.dispose();
     super.dispose();
   }
 
@@ -118,21 +124,28 @@ class _AudioCapsuleState extends State<AudioCapsule>
   }
 
   void _startPlaying() {
-    const interval = Duration(milliseconds: 500);
-    const steps = _playDurationSec * 2; // 2 steps/sec
-    int tick = 0;
-    _playTimer = Timer.periodic(interval, (t) {
-      if (!mounted) {
-        t.cancel();
-        return;
-      }
-      tick++;
-      setState(() => _playProgress = tick / steps);
-      if (tick >= steps) {
-        t.cancel();
-        _endExercise();
-      }
-    });
+    if (widget.soundUrl != null) {
+      // ── Lecture audio réelle (URL Firebase Storage) ─────────────────
+      _audioPlayer = AudioPlayer();
+      _audioPlayer!.onPositionChanged.listen((pos) {
+        if (!mounted) return;
+        setState(() =>
+            _playProgress = (pos.inMilliseconds / (_playDurationSec * 1000.0))
+                .clamp(0.0, 1.0));
+      });
+      _audioPlayer!.onPlayerComplete.listen((_) => _endExercise());
+      _audioPlayer!.play(UrlSource(widget.soundUrl!));
+    } else {
+      // ── Simulation visuelle (pas d'audio fourni) ─────────────────────
+      const steps = _playDurationSec * 2;
+      int tick = 0;
+      _playTimer = Timer.periodic(const Duration(milliseconds: 500), (t) {
+        if (!mounted) { t.cancel(); return; }
+        tick++;
+        setState(() => _playProgress = tick / steps);
+        if (tick >= steps) { t.cancel(); _endExercise(); }
+      });
+    }
   }
 
   void _endExercise() {

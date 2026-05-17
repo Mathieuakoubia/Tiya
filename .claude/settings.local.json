@@ -5,7 +5,12 @@
       "Bash(python update_intros.py)",
       "Bash(flutter pub:*)",
       "Bash(flutter analyze:*)",
-      "Bash(firebase deploy *)"
+      "Bash(firebase deploy *)",
+      "Bash(not exist *)",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\functions\")",
+      "Bash(dir lib\\\\tiyia-bq88ia /b)",
+      "Bash(dir lib\\\\custom_code /b)",
+      "Bash(attrib -R \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\test.txt\")"
     ]
   }
 }

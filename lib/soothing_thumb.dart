@@ -1,12 +1,10 @@
 ﻿import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'widgets/routine_intro_screen.dart';
 import 'package:vibration/vibration.dart';
 
-const _accentPurple = Color(0xFFF8F1E9);
 
-enum _Phase { intro, countdown, exercise, complete }
+enum _Phase { countdown, exercise, complete }
 
 // ──────────────────────────────────────────────────────────────────
 // Ripple rings : 4 cercles concentriques qui s'expandent depuis
@@ -124,7 +122,7 @@ class _BarPainter extends CustomPainter {
 // Widget principal
 // ──────────────────────────────────────────────────────────────────
 class SoothingThumb extends StatefulWidget {
-  final VoidCallback? onComplete;
+  final Future<void> Function()? onComplete;
   const SoothingThumb({super.key, this.onComplete});
 
   @override
@@ -139,7 +137,7 @@ class _SoothingThumbState extends State<SoothingThumb>
   static const int _exhaleSec = 5;
   static const int _totalSec = 120; // 2 min
 
-  _Phase _phase = _Phase.intro;
+  _Phase _phase = _Phase.countdown;
   int _countdownValue = 3;
   int _elapsedSec = 0;
   bool _isPressed = false;
@@ -173,6 +171,7 @@ class _SoothingThumbState extends State<SoothingThumb>
       ),
     ]).animate(_breathCtrl);
     _breathCtrl.addListener(_onBreathTick);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _goToCountdown());
   }
 
   // Détecte le changement de phase inspiration/expiration
@@ -295,8 +294,6 @@ class _SoothingThumbState extends State<SoothingThumb>
 
   Widget _buildPhase() {
     switch (_phase) {
-      case _Phase.intro:
-        return _buildIntro();
       case _Phase.countdown:
         return _buildCountdown();
       case _Phase.exercise:
@@ -304,25 +301,6 @@ class _SoothingThumbState extends State<SoothingThumb>
       case _Phase.complete:
         return _buildComplete();
     }
-  }
-
-  // ── Intro ─────────────────────────────────────────────────────────
-  Widget _buildIntro() {
-    return RoutineIntroScreen(
-      key: const ValueKey('intro'),
-      title: 'Pouce\nApaisant',
-      badgeLabel: '2 min  •  Nerf Vague',
-      scienceText:
-          'La stimulation haptique à basse fréquence (7–10 Hz) active le nerf vague et abaisse le rythme cardiaque. En calquant votre souffle sur les barres latérales, vous induisez une cohérence cardiaque en 2 minutes.',
-      steps: const [
-        'Posez et maintenez votre pouce sur le cercle',
-        'Suivez les barres latérales : montée = inspirez, descente = expirez',
-        'Des micro-vibrations imitent un cœur sous votre pouce',
-      ],
-      onStart: _goToCountdown,
-      buttonLabel: 'Commencer',
-      accentColor: _accentPurple,
-    );
   }
 
   // ── Countdown ─────────────────────────────────────────────────────

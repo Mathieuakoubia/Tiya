@@ -1,13 +1,11 @@
 ﻿import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'widgets/routine_intro_screen.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 const _darkBg = Color(0xFF0DAABA);
 const _primaryPurple = Color(0xFFD9CCE8);
-const _accentPurple = Color(0xFFF8F1E9);
 
 // Couleurs de stress → disparaissent au nettoyage
 const _mistColors = [
@@ -22,7 +20,7 @@ const _clearRadius = 78.0;   // rayon de nettoyage (px)
 const _clearSpeed  = 0.055;  // vitesse de disparition par passage
 const _blobCount   = 58;     // nombre de blobs de brume
 
-enum _Phase { intro, loading, exercise, complete }
+enum _Phase { loading, exercise, complete }
 
 class _Blob {
   final double x;      // normalisé 0.0–1.0
@@ -166,7 +164,7 @@ class _MistPainter extends CustomPainter {
 }
 
 class AuraCleaning extends StatefulWidget {
-  final VoidCallback? onComplete;
+  final Future<void> Function()? onComplete;
 
   const AuraCleaning({super.key, this.onComplete});
 
@@ -182,7 +180,7 @@ class _AuraCleaningState extends State<AuraCleaning>
   final _mist = _MistModel();
   final _rng = Random();
 
-  _Phase _phase = _Phase.intro;
+  _Phase _phase = _Phase.loading;
   int _remainingSec = _totalSec;
   Timer? _timer;
 
@@ -201,6 +199,7 @@ class _AuraCleaningState extends State<AuraCleaning>
     _breathAnim = Tween<double>(begin: 0.94, end: 1.06).animate(
       CurvedAnimation(parent: _breathCtrl, curve: Curves.easeInOut),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startLoading());
   }
 
   @override
@@ -273,8 +272,7 @@ class _AuraCleaningState extends State<AuraCleaning>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          _phase == _Phase.intro ? Colors.transparent : _darkBg,
+      backgroundColor: _darkBg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
@@ -284,8 +282,6 @@ class _AuraCleaningState extends State<AuraCleaning>
 
   Widget _buildPhase() {
     switch (_phase) {
-      case _Phase.intro:
-        return _buildIntro();
       case _Phase.loading:
         return _buildLoading();
       case _Phase.exercise:
@@ -320,23 +316,6 @@ class _AuraCleaningState extends State<AuraCleaning>
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildIntro() {
-    return RoutineIntroScreen(
-      key: const ValueKey('intro'),
-      title: 'Aura\nCleaning',
-      badgeLabel: '1 min  •  Reset Visuel',
-      scienceText: 'Le geste de balayage combiné à une visualisation colorée active la mémoire procédurale et crée une rupture émotionnelle mesurable. La brume rouge symbolise le stress ; effacer physiquement les taches renforce la sensation de contrôle.',
-      steps: const [
-        'Une brume rouge de stress recouvre l\'écran',
-        'Frottez avec votre doigt pour la dissiper',
-        'Votre Aura apparaît au fil du nettoyage',
-      ],
-      onStart: _startLoading,
-      buttonLabel: 'Commencer',
-      accentColor: _accentPurple,
     );
   }
 

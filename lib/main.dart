@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'auth_screen.dart';
 import 'emdr_widget.dart';
@@ -17,6 +18,7 @@ import 'squad_screen.dart';
 import 'twin_screen.dart';
 import 'morning_ritual.dart';
 import 'widgets/aura_widget.dart';
+import 'notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +37,15 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   @override
+  void initState() {
+    super.initState();
+    // Initialise les notifs push dès que l'utilisateur est authentifié
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null) NotificationService.init();
+    });
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     precacheImage(const AssetImage('assets/images/Fonds-02.png'), context);
@@ -44,6 +55,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Tiyia MVP',
+      navigatorKey: NotificationService.navigatorKey,
       theme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.blue,
@@ -52,14 +64,35 @@ class _MyAppState extends State<MyApp> {
       ),
       home: const AuthGate(),
       routes: {
-        '/home': (_) => const HomePage(),
+        '/home':             (_) => const HomePage(),
+        '/collective-shield':(_) => const CollectiveShield(),
+        '/squad-pulse':      (_) => const SquadPulse(),
+        '/morning-ritual':   (_) => const MorningRitual(),
+        '/audio-capsule':    (_) => const AudioCapsule(),
+        '/twin-coherence':   (_) => const TwinCoherence(),
+        '/mirror-aura':      (_) => const MirrorAura(),
+        '/silent-presence':  (_) => const SilentPresence(),
+        '/pulse-match':      (_) => const PulseMatch(),
       },
     );
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Pousse la route en attente si l'app a été ouverte via une notification
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => NotificationService.flushPendingRoute());
+  }
 
   @override
   Widget build(BuildContext context) {

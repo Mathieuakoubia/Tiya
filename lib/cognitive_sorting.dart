@@ -2,13 +2,10 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'widgets/routine_intro_screen.dart';
 
 const _bg = Color(0xFF0DAABA);
 const _rosePoudre = Color(0xFFFFD7E7);
 const _vertAcide = Color(0xFFE8B86E);
-const _accentPurple = Color(0xFF735983);
-
 class _Item {
   final IconData icon;
   final String label;
@@ -26,7 +23,7 @@ class _Item {
   });
 }
 
-enum _Phase { intro, countdown, exercise, complete }
+enum _Phase { countdown, exercise, complete }
 
 const _stressors = [
   (Icons.email_outlined, "Email"),
@@ -44,7 +41,7 @@ const _stressors = [
 ];
 
 class CognitiveSorting extends StatefulWidget {
-  final VoidCallback? onComplete;
+  final Future<void> Function()? onComplete;
 
   const CognitiveSorting({super.key, this.onComplete});
 
@@ -58,7 +55,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
   static const _maxItems = 40; // objectif à atteindre
   static const _poolSize = 3; // items simultanés à l'écran
 
-  _Phase _phase = _Phase.intro;
+  _Phase _phase = _Phase.countdown;
   int _countdownValue = 3;
   int _remainingSec = _totalSec;
   int _cleared = 0;
@@ -77,6 +74,12 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
 
   // Aura intensity 0.0 → 1.0
   double get _aura => (_cleared / _maxItems).clamp(0.0, 1.0);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _goToCountdown());
+  }
 
   @override
   void dispose() {
@@ -219,7 +222,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _phase == _Phase.intro ? Colors.transparent : _bg,
+      backgroundColor: _bg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
@@ -229,8 +232,6 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
 
   Widget _buildPhase() {
     switch (_phase) {
-      case _Phase.intro:
-        return _buildIntro();
       case _Phase.countdown:
         return _buildCountdown();
       case _Phase.exercise:
@@ -238,23 +239,6 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
       case _Phase.complete:
         return _buildComplete();
     }
-  }
-
-  Widget _buildIntro() {
-    return RoutineIntroScreen(
-      key: const ValueKey('intro'),
-      title: 'Vide-Poubelle\nMental',
-      badgeLabel: '1 min 30  •  Décharge Mentale',
-      scienceText:
-          "Externaliser ses sources de stress par un geste physique (balayage) active le cortex préfrontal et réduit la charge cognitive. Chaque icône jetée symbolise une libération mentale réelle.",
-      steps: const [
-        "Des icônes de stress tombent sur l'écran",
-        'Balayez-les rapidement hors de l\'écran',
-        'Chaque icône jetée libère votre Aura',
-      ],
-      onStart: _goToCountdown,
-      accentColor: _accentPurple,
-    );
   }
 
   Widget _buildCountdown() {

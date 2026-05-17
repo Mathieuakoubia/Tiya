@@ -5,16 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'widgets/routine_intro_screen.dart';
-
 const _darkBg = Color(0xFF0DAABA);
-const _accentPurple = Color(0xFFF8F1E9);
 
-enum _Phase { intro, loading, countdown, exercise, complete }
+enum _Phase { loading, countdown, exercise, complete }
 
 class EyeMovementEMDR extends StatefulWidget {
   final int baseSpeedDuration;
-  final VoidCallback? onComplete;
+  final Future<void> Function()? onComplete;
 
   const EyeMovementEMDR({
     super.key,
@@ -40,7 +37,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   final List<Alignment> _trail = [];
   int _trailLength = 25;
 
-  _Phase _phase = _Phase.intro;
+  _Phase _phase = _Phase.loading;
   int _countdownValue = 3;
   static const int _totalSec = 90;
   int _remainingSec = _totalSec;
@@ -61,6 +58,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   void initState() {
     super.initState();
     _setupBallAnimation();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startLoading());
   }
 
   void _setupBallAnimation() {
@@ -233,13 +231,9 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _phase == _Phase.exercise
+      backgroundColor: _phase == _Phase.exercise || _phase == _Phase.countdown
           ? const Color(0xFF0DAABA)
-          : _phase == _Phase.intro
-              ? Colors.transparent
-              : _phase == _Phase.countdown
-                  ? const Color(0xFF0DAABA)
-                  : _darkBg,
+          : _darkBg,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         child: _buildPhase(),
@@ -249,8 +243,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
 
   Widget _buildPhase() {
     switch (_phase) {
-      case _Phase.intro:
-        return _buildIntro();
       case _Phase.loading:
         return _buildLoading();
       case _Phase.countdown:
@@ -260,23 +252,6 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
       case _Phase.complete:
         return _buildComplete();
     }
-  }
-
-  Widget _buildIntro() {
-    return RoutineIntroScreen(
-      key: const ValueKey('intro'),
-      title: 'Saccadic\nReset',
-      badgeLabel: '1 min 30  •  EMDR',
-      scienceText:
-          "Inspiré de l'EMDR (Eye Movement Desensitization and Reprocessing), cette méthode utilise des mouvements oculaires rythmés pour désactiver la réponse au stress et libérer les pensées bloquées.",
-      steps: const [
-        'Placez votre visage face à la caméra',
-        'Suivez la bille lumineuse des yeux',
-        "Si vous détournez le regard, la bille s'arrête",
-      ],
-      onStart: _startLoading,
-      accentColor: _accentPurple,
-    );
   }
 
   Widget _buildLoading() {
