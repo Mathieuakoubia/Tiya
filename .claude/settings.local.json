@@ -10,7 +10,14 @@
       "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\functions\")",
       "Bash(dir lib\\\\tiyia-bq88ia /b)",
       "Bash(dir lib\\\\custom_code /b)",
-      "Bash(attrib -R \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\test.txt\")"
+      "Bash(attrib -R \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\test.txt\")",
+      "PowerShell(attrib -R \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\test.txt\")",
+      "PowerShell(attrib -R \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\flutterflow.txt\")",
+      "PowerShell($f = Get-Item \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\flutterflow.txt\"; Write-Output \"IsReadOnly: $\\($f.IsReadOnly\\)\"; Write-Output \"Attributes: $\\($f.Attributes\\)\")",
+      "Bash(cd \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\" && sed -i 's/\\\\.withValues\\(alpha: /\\\\.withOpacity\\(/g' lib/soothing_thumb.dart lib/cognitive_sorting.dart lib/aura_cleaning.dart lib/emdr_widget.dart && echo \"Done\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\mathi\\Documents\\Pierre\\tiyia_mvp\\lib"
     ]
   }
 }

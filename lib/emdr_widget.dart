@@ -274,7 +274,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
             Text(
               "Initialisation caméra...",
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.55),
+                color: Colors.white.withOpacity(0.55),
                 fontSize: 16,
                 fontWeight: FontWeight.w300,
                 letterSpacing: 0.5,
@@ -297,7 +297,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
             Text(
               "Préparez-vous",
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.55),
+                color: Colors.white.withOpacity(0.55),
                 fontSize: 18,
                 fontWeight: FontWeight.w300,
                 letterSpacing: 0.5,
@@ -338,12 +338,12 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
                       color: _isPaused
-                          ? const Color(0xFFFF5B1F).withValues(alpha: 0.12)
-                          : const Color(0xFFE8B86E).withValues(alpha: 0.12),
+                          ? const Color(0xFFFF5B1F).withOpacity(0.12)
+                          : const Color(0xFFE8B86E).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: _isPaused
-                            ? const Color(0xFFFF5B1F).withValues(alpha: 0.4)
+                            ? const Color(0xFFFF5B1F).withOpacity(0.4)
                             : Colors.transparent,
                       ),
                     ),
@@ -399,7 +399,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF5B1F).withValues(alpha: 0.55),
+                      color: const Color(0xFFFF5B1F).withOpacity(0.55),
                       blurRadius: 22,
                       spreadRadius: 4,
                     ),
@@ -438,7 +438,7 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
       fit: StackFit.expand,
       children: [
         Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
-        Container(color: Colors.white.withValues(alpha: 0.10)),
+        Container(color: Colors.white.withOpacity(0.10)),
         SafeArea(
           child: Center(
             child: Padding(

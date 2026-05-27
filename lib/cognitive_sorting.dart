@@ -252,7 +252,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
             Text(
               "Préparez-vous",
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.45),
+                color: Colors.white.withOpacity(0.45),
                 fontSize: 18,
                 fontWeight: FontWeight.w300,
                 letterSpacing: 0.5,
@@ -289,14 +289,14 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
               gradient: RadialGradient(
                 colors: [
                   Color.lerp(_rosePoudre, _vertAcide, _aura)!
-                      .withValues(alpha: 0.08 + _aura * 0.12),
+                      .withOpacity(0.08 + _aura * 0.12),
                   Colors.transparent,
                 ],
               ),
               boxShadow: [
                 BoxShadow(
                   color: Color.lerp(_rosePoudre, _vertAcide, _aura)!
-                      .withValues(alpha: 0.08 + _aura * 0.30),
+                      .withOpacity(0.08 + _aura * 0.30),
                   blurRadius: 50 + _aura * 90,
                   spreadRadius: 8,
                 ),
@@ -360,7 +360,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
               child: Text(
                 "Balayez vite pour libérer",
                 style: GoogleFonts.poppins(
-                  color: Colors.white.withValues(alpha: 0.45),
+                  color: Colors.white.withOpacity(0.45),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   letterSpacing: 0.3,
@@ -379,7 +379,7 @@ class _CognitiveSortingState extends State<CognitiveSorting> {
       fit: StackFit.expand,
       children: [
         Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
-        Container(color: Colors.white.withValues(alpha: 0.10)),
+        Container(color: Colors.white.withOpacity(0.10)),
         SafeArea(
           child: Center(
             child: Padding(
@@ -464,18 +464,18 @@ class _StressChip extends StatelessWidget {
         width: 68,
         height: 68,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.07),
+          color: Colors.white.withOpacity(0.07),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: grabbed
-                ? _rosePoudre.withValues(alpha: 0.80)
-                : _rosePoudre.withValues(alpha: 0.22),
+                ? _rosePoudre.withOpacity(0.80)
+                : _rosePoudre.withOpacity(0.22),
             width: grabbed ? 2 : 1,
           ),
           boxShadow: grabbed
               ? [
                   BoxShadow(
-                    color: _rosePoudre.withValues(alpha: 0.35),
+                    color: _rosePoudre.withOpacity(0.35),
                     blurRadius: 20,
                     spreadRadius: 2,
                   ),
@@ -497,7 +497,7 @@ class _StressChip extends StatelessWidget {
             Text(
               label,
               style: GoogleFonts.poppins(
-                color: Colors.white.withValues(alpha: 0.75),
+                color: Colors.white.withOpacity(0.75),
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
               ),
@@ -528,8 +528,8 @@ class _TopBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: highlighted
-            ? _rosePoudre.withValues(alpha: 0.14)
-            : Colors.white.withValues(alpha: 0.07),
+            ? _rosePoudre.withOpacity(0.14)
+            : Colors.white.withOpacity(0.07),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

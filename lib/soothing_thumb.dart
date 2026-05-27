@@ -48,7 +48,7 @@ class _RipplePainter extends CustomPainter {
         center,
         radius,
         Paint()
-          ..color = color.withValues(alpha: alpha)
+          ..color = color.withOpacity(alpha)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.5 - phase * 1.8,
       );
@@ -86,7 +86,7 @@ class _BarPainter extends CustomPainter {
 
     // Piste fantôme (montre la plage complète)
     final trackPaint = Paint()
-      ..color = color.withValues(alpha: 0.10)
+      ..color = color.withOpacity(0.10)
       ..strokeWidth = barW
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(
@@ -98,7 +98,7 @@ class _BarPainter extends CustomPainter {
 
     // Barre active
     final barPaint = Paint()
-      ..color = color.withValues(alpha: 0.82)
+      ..color = color.withOpacity(0.82)
       ..strokeWidth = barW
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(
@@ -108,7 +108,7 @@ class _BarPainter extends CustomPainter {
 
     // Lueur au sommet de chaque barre
     final glowPaint = Paint()
-      ..color = color.withValues(alpha: 0.32)
+      ..color = color.withOpacity(0.32)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
     canvas.drawCircle(Offset(xLeft, baseY - currentH), 7, glowPaint);
     canvas.drawCircle(Offset(xRight, baseY - currentH), 7, glowPaint);
@@ -312,7 +312,7 @@ class _SoothingThumbState extends State<SoothingThumb>
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text("Préparez-vous",
               style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.45),
+                  color: Colors.white.withOpacity(0.45),
                   fontSize: 18,
                   fontWeight: FontWeight.w300,
                   letterSpacing: 0.5)),
@@ -401,7 +401,7 @@ class _SoothingThumbState extends State<SoothingThumb>
                   child: CircularProgressIndicator(
                     value: _progress,
                     strokeWidth: 4,
-                    backgroundColor: btnColor.withValues(alpha: 0.12),
+                    backgroundColor: btnColor.withOpacity(0.12),
                     valueColor: const AlwaysStoppedAnimation<Color>(btnColor),
                   ),
                 ),
@@ -414,7 +414,7 @@ class _SoothingThumbState extends State<SoothingThumb>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color:
-                          btnColor.withValues(alpha: _isPressed ? 0.18 : 0.06),
+                          btnColor.withOpacity(_isPressed ? 0.18 : 0.06),
                     ),
                   ),
                 ),
@@ -427,7 +427,7 @@ class _SoothingThumbState extends State<SoothingThumb>
                     color: btnColor,
                     boxShadow: [
                       BoxShadow(
-                        color: btnColor.withValues(alpha: 0.40),
+                        color: btnColor.withOpacity(0.40),
                         blurRadius: _isPressed ? 32 : 18,
                         spreadRadius: _isPressed ? 8 : 2,
                       )
@@ -448,7 +448,7 @@ class _SoothingThumbState extends State<SoothingThumb>
                 child: Text("Touchez et maintenez",
                     style: TextStyle(
                         fontFamily: 'Gelica',
-                        color: Colors.white.withValues(alpha: 0.55),
+                        color: Colors.white.withOpacity(0.55),
                         fontSize: 14,
                         fontWeight: FontWeight.w200,
                         fontStyle: FontStyle.italic)),
@@ -466,7 +466,7 @@ class _SoothingThumbState extends State<SoothingThumb>
       fit: StackFit.expand,
       children: [
         Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
-        Container(color: Colors.white.withValues(alpha: 0.10)),
+        Container(color: Colors.white.withOpacity(0.10)),
         SafeArea(
           child: Center(
             child: Padding(

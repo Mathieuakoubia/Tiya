@@ -114,9 +114,9 @@ class _MistPainter extends CustomPainter {
       Paint()
         ..shader = RadialGradient(
           colors: [
-            const Color(0xFFF2631D).withValues(alpha: 0.10 + auraProgress * 0.35),
-            const Color(0xFF0DAABA).withValues(alpha: 0.06 + auraProgress * 0.20),
-            const Color(0xFFFFD7E7).withValues(alpha: 0.0),
+            const Color(0xFFF2631D).withOpacity(0.10 + auraProgress * 0.35),
+            const Color(0xFF0DAABA).withOpacity(0.06 + auraProgress * 0.20),
+            const Color(0xFFFFD7E7).withOpacity(0.0),
           ],
           stops: const [0.0, 0.55, 1.0],
         ).createShader(Rect.fromCircle(center: center, radius: auraR)),
@@ -132,7 +132,7 @@ class _MistPainter extends CustomPainter {
         Offset(bx, by),
         br,
         Paint()
-          ..color = blob.color.withValues(alpha: blob.opacity * 0.48)
+          ..color = blob.color.withOpacity(blob.opacity * 0.48)
           ..maskFilter = MaskFilter.blur(BlurStyle.normal, br * 0.55),
       );
     }
@@ -144,7 +144,7 @@ class _MistPainter extends CustomPainter {
         tp,
         _clearRadius,
         Paint()
-          ..color = const Color(0xFF0DAABA).withValues(alpha: 0.30)
+          ..color = const Color(0xFF0DAABA).withOpacity(0.30)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5,
       );
@@ -152,7 +152,7 @@ class _MistPainter extends CustomPainter {
         tp,
         _clearRadius * 0.45,
         Paint()
-          ..color = const Color(0xFFE8B86E).withValues(alpha: 0.12)
+          ..color = const Color(0xFFE8B86E).withOpacity(0.12)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
       );
     }
@@ -309,7 +309,7 @@ class _AuraCleaningState extends State<AuraCleaning>
           Text(
             "Initialisation caméra...",
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.45),
+              color: Colors.white.withOpacity(0.45),
               fontSize: 16,
               fontWeight: FontWeight.w300,
             ),
@@ -368,16 +368,16 @@ class _AuraCleaningState extends State<AuraCleaning>
                         child: LinearProgressIndicator(
                           value: ratio,
                           minHeight: 5,
-                          backgroundColor: Colors.white.withValues(alpha: 0.15),
+                          backgroundColor: Colors.white.withOpacity(0.15),
                           valueColor: AlwaysStoppedAnimation<Color>(
-                              _primaryPurple.withValues(alpha: 0.85)),
+                              _primaryPurple.withOpacity(0.85)),
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         "Nettoyage ${(ratio * 100).toInt()}%",
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.40),
+                          color: Colors.white.withOpacity(0.40),
                           fontSize: 11,
                           letterSpacing: 0.5,
                         ),
@@ -398,7 +398,7 @@ class _AuraCleaningState extends State<AuraCleaning>
               child: Text(
                 "Frottez la brume pour libérer votre Aura",
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.22),
+                  color: Colors.white.withOpacity(0.22),
                   fontSize: 13,
                   letterSpacing: 0.3,
                 ),
@@ -417,7 +417,7 @@ class _AuraCleaningState extends State<AuraCleaning>
       fit: StackFit.expand,
       children: [
         Image.asset('assets/images/Fonds-02.png', fit: BoxFit.cover),
-        Container(color: Colors.white.withValues(alpha: 0.10)),
+        Container(color: Colors.white.withOpacity(0.10)),
         SafeArea(
           child: Center(
             child: Padding(
