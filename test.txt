@@ -1,0 +1,131 @@
+================================================================================
+        GUIDE D'INTEGRATION FLUTTERFLOW — PROJET TIYA
+        Dernière mise à jour : 2026-05-27
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+1. CONNEXION FIRESTORE DANS FLUTTERFLOW
+────────────────────────────────────────────────────────────────────────────────
+
+  FlutterFlow gère Firestore nativement. Pas de code nécessaire pour les
+  collections suivantes — modélise-les dans FF > onglet Firestore :
+
+  users/
+    uid → { prenom (String), email (String), squadId (String) }
+
+  squads/
+    id  → { name (String), createdBy (String), users (List<String>),
+             createdAt (Timestamp) }
+
+  squad_invitations/
+    id  → { squadId, fromUid, toUid, status, fromName, squadName,
+             createdAt (Timestamp) }
+
+  squad_sessions/
+    id  → { squadId, routineName, launchedBy, status,
+             acceptedBy (List<String>), createdAt (Timestamp) }
+
+  FF génère automatiquement les queries, streams et widgets StreamBuilder.
+  Le SquadScreen entier (recherche, invitations, membres temps réel) peut
+  être fait SANS custom widget.
+
+  POINT A CORRIGER : le _hardcodedSquadId dans squad_service.dart (ligne 12)
+  doit être remplacé par l'App State FF ou le profil utilisateur connecté.
+
+────────────────────────────────────────────────────────────────────────────────
+2. ECRANS SANS CUSTOM WIDGET (natif FF)
+────────────────────────────────────────────────────────────────────────────────
+
+  auth_screen.dart    → Module Auth natif FF (Google, email/password)
+  squad_screen.dart   → 100% faisable avec les composants FF natifs
+                        (ListView, StreamBuilder, TextField, Button)
+
+────────────────────────────────────────────────────────────────────────────────
+3. CUSTOM WIDGETS OBLIGATOIRES (copier le code Dart existant)
+────────────────────────────────────────────────────────────────────────────────
+
+  Fichier                  Raison
+  ─────────────────────────────────────────────────────────────────────────────
+  emdr_widget.dart       → Animation oculaire temporisée
+  soothing_thumb.dart    → Geste tactile + vibration
+  cognitive_sorting.dart → Interaction complexe
+  aura_cleaning.dart     → Effets visuels
+  twin_coherence.dart    → Animation synchronisée
+  mirror_aura.dart       → Animation
+  silent_presence.dart   → Timer + visuel
+  pulse_match.dart       → Animation temps réel
+  collective_shield.dart → Animation de groupe
+  audio_capsule.dart     → Lecture audio
+  squad_pulse.dart       → Visualisation énergie temps réel
+  morning_ritual.dart    → Séquence animée
+  widgets/aura_widget.dart → Animation dégradé irisé
+
+  → Tu NE réécris pas le code. Tu copies le Dart existant dans le champ
+    "Custom Widget Code" de FlutterFlow.
+
+────────────────────────────────────────────────────────────────────────────────
+4. PARAMETRES A EXPOSER DANS CHAQUE CUSTOM WIDGET
+────────────────────────────────────────────────────────────────────────────────
+
+  Règle :
+    - Tout ce qui vient de Firestore ou de la navigation = parameter (prop)
+    - Tout ce qui doit déclencher une action FF après = action callback
+
+  emdr_widget
+    parameter : int baseSpeedDuration       (ex: 2000)
+    callback  : VoidCallback? onComplete
+
+  audio_capsule
+    parameter : String audioUrl
+    callback  : VoidCallback? onFinished
+
+  squad_pulse
+    parameter : String squadId
+    parameter : double initialEnergy
+    callback  : Function(double)? onEnergyChanged
+
+  collective_shield / morning_ritual / silent_presence
+    parameter : String squadId
+    parameter : String sessionId
+    callback  : VoidCallback? onComplete
+
+  twin_coherence / mirror_aura / pulse_match
+    parameter : String sessionId
+    parameter : String partnerUid
+    callback  : VoidCallback? onComplete
+
+  soothing_thumb / cognitive_sorting / aura_cleaning
+    callback  : VoidCallback? onComplete    (pas de param Firestore)
+
+  notification_service → reste en Custom ACTION FF (pas un widget)
+
+────────────────────────────────────────────────────────────────────────────────
+5. DEPENDANCES A AJOUTER (FF > Settings > Pub Dependencies)
+────────────────────────────────────────────────────────────────────────────────
+
+  NE PAS re-ajouter (déjà gérés nativement par FF) :
+    firebase_core, firebase_auth, cloud_firestore
+
+  A ajouter manuellement :
+
+    google_fonts: ^6.2.1         utilisé partout (Poppins)
+    just_audio: ^0.9.40          pour audio_capsule.dart
+    firebase_messaging: ^15.0.0  pour notification_service.dart
+    vibration: ^2.0.0            si vibrations dans les routines tactiles
+
+────────────────────────────────────────────────────────────────────────────────
+6. ORDRE DE MISE EN PLACE
+────────────────────────────────────────────────────────────────────────────────
+
+  Etape 1 — FF > Firebase > connecter le projet (utilise firebase_options.dart)
+  Etape 2 — Modéliser les 4 collections Firestore (section 1)
+  Etape 3 — Recréer AuthScreen avec le module Auth natif FF
+  Etape 4 — Recréer SquadScreen en FF natif (pas de code)
+  Etape 5 — Créer les 13 Custom Widgets avec les params listés (section 4)
+  Etape 6 — Créer les Custom Actions : NotificationService.init()
+  Etape 7 — Câbler la navigation depuis HomePage vers chaque Custom Widget
+  Etape 8 — Ajouter les dépendances pub.dev (section 5)
+
+================================================================================
+                         FIN DU GUIDE — TIYA x FLUTTERFLOW
+================================================================================

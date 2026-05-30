@@ -40,11 +40,26 @@ dependencies:
   firebase_database: ^11.0.0
   firebase_auth: ^5.0.0
   firebase_messaging: ^15.0.0
+  firebase_storage: ^12.0.0
   google_fonts: ^6.2.1
+  just_audio: ^0.9.40
+  audio_session: ^0.1.21
+  record: ^5.1.2
+  sensors_plus: ^5.0.1
+  noise_meter: ^5.0.0
+  path_provider: ^2.1.0
+  tflite_flutter: ^0.10.4
+  image: ^4.2.0
+  proximity_sensor: ^1.0.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+
+# Résolution du conflit record_platform_interface 1.6.0 / record_linux 0.7.2
+# record_platform_interface 1.6.0 a ajouté startStream non implémenté par record_linux 0.7.2
+dependency_overrides:
+  record_platform_interface: 1.5.0
 
 dev_dependencies:
   flutter_test:
@@ -70,8 +85,13 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/models/enet_b2_8_integer_quant.tflite
 
   fonts:
+    - family: icomoon
+      fonts:
+        - asset: assets/fonts/icomoon.ttf
+
     - family: Gelica
       fonts:
         - asset: assets/fonts/gelica-semi-bold.otf

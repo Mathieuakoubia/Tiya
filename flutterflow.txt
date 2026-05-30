@@ -1883,20 +1883,1174 @@ class _EyeMovementEMDRState extends State<EyeMovementEMDR>
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  CHECKLIST FINALE
+  [9] DÉPENDANCES SUPPLÉMENTAIRES POUR LES ROUTINES PHASE 1-2-3
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-[ ] 5 dépendances pub ajoutées (google_fonts, vibration, camera,
-    google_mlkit_face_detection, permission_handler)
-[ ] Police Gelica uploadée (2 fichiers : poids 200 et 600)
-[ ] Fonds-02.png uploadée dans Assets
-[ ] Custom Widget SoothingThumb créé  (1 param : onComplete)
-[ ] Custom Widget CognitiveSorting créé (1 param : onComplete)
-[ ] Custom Widget AuraCleaning créé   (1 param : onComplete)
-[ ] Custom Widget EyeMovementEMDR créé (2 params)
-[ ] Permission VIBRATE ajoutée (AndroidManifest)
-[ ] Permission CAMERA ajoutée Android + iOS (AuraCleaning + EMDR)
-[ ] 4 pages créées — widgets fullscreen — onComplete → Go Back
-[ ] Navigation depuis HomePage vers chaque page
-[ ] Testé sur device physique (Android ou iOS)
-    ⚠ EyeMovementEMDR ne fonctionne PAS dans le preview navigateur
+  Ajouter dans Settings > Pub Dependencies (en plus des 5 déjà listées) :
+
+  just_audio              ^0.9.40   → routines audio (Bio-Ambient, Binaurale,
+                                       Audio-Capsule, Réveil Doux, etc.)
+  audio_session           ^0.1.21   → détection casque (Audio-Binaurale)
+  record                  ^5.1.2    → enregistrement micro (Audio-Capsule,
+                                       Vocal-Humming Sync, Gratitude Flash)
+  sensors_plus            ^5.0.1    → gyroscope + proximity (Lullaby, Vagus-Ear)
+  firebase_database       ^10.4.0   → temps réel Twin/Squad (remplace Supabase)
+  firebase_messaging      ^15.0.0   → notifications push
+  noise_meter             ^5.0.0    → détection amplitude (Bio-Ambient Duo)
+  path_provider           ^2.1.0    → chemin temporaire (AudioCapsule)
+
+  ✗ NE PAS ajouter supabase_flutter — tout est sur Firebase.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [10] INFRASTRUCTURE TEMPS RÉEL — FIREBASE REALTIME DATABASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Toutes les routines Twin et Squad utilisent Firebase Realtime Database
+  pour les données éphémères (< 1s de latence, nettoyage automatique).
+  Firestore reste pour les données persistantes (profils, sessions, etc.)
+
+  ── ACTIVER RTDB DANS FIREBASE CONSOLE ───────────────────────
+  Firebase Console > Realtime Database > Créer une base de données
+  Mode : production
+  Région : europe-west1 (cohérent avec Firestore eur3)
+
+  ── RULES RTDB À APPLIQUER ────────────────────────────────────
+  {
+    "rules": {
+      "sessions": {
+        "$sessionId": {
+          ".read":  "auth != null",
+          ".write": "auth != null"
+        }
+      }
+    }
+  }
+
+  ── STRUCTURE DES DONNÉES EN RTDB ─────────────────────────────
+  sessions/{sessionId}/
+    ready/{uid}: true                 ← présence (les 2 connectées)
+    {clé}/{uid}: valeur               ← données par utilisateur
+    countdown: timestamp              ← signal de démarrage
+
+  Exemple pour TwinCoherence :
+    sessions/{id}/ready/{uid}: true
+    sessions/{id}/breath/{uid}: 0.45  ← phase respiratoire
+
+  ── PATTERN TYPE DANS CHAQUE WIDGET ───────────────────────────
+
+  import 'package:firebase_database/firebase_database.dart';
+  import 'package:firebase_auth/firebase_auth.dart';
+
+  // Variables
+  late DatabaseReference _ref;
+  final List<StreamSubscription> _subs = [];
+  String _myUid = '';
+
+  // Dans initState()
+  _myUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+  _ref = FirebaseDatabase.instance.ref('sessions/${widget.sessionId}');
+  _markReady();
+
+  // Marquer sa présence et attendre l'autre
+  Future<void> _markReady() async {
+    await _ref.child('ready/$_myUid').set(true);
+    _subs.add(_ref.child('ready').onValue.listen((event) {
+      final map = event.snapshot.value as Map?;
+      if (map != null && map.length >= 2 && mounted) {
+        _onBothReady();
+      }
+    }));
+  }
+
+  // Envoyer une donnée
+  void _send(String key, dynamic value) {
+    _ref.child('$key/$_myUid').set(value);
+  }
+
+  // Écouter les données du partenaire
+  void _listenPartner(String key, void Function(dynamic) cb) {
+    _subs.add(_ref.child(key).onValue.listen((event) {
+      final map = event.snapshot.value as Map?;
+      if (map == null) return;
+      map.forEach((uid, val) {
+        if (uid != _myUid) cb(val);
+      });
+    }));
+  }
+
+  // Dans dispose()
+  @override
+  void dispose() {
+    for (final s in _subs) s.cancel();
+    _ref.remove(); // nettoyage données éphémères
+    super.dispose();
+  }
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [11] CHARTE GRAPHIQUE — CONSTANTES DE DESIGN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  À respecter dans TOUS les custom widgets :
+
+  Couleurs
+  ──────────────────────────────────────────────
+  Fond principal         #121212  (noir profond)
+  Accent Teal            #0DAABA  (routines Solo)
+  Accent Foncé           #065963  (Squad, boutons CTA)
+  Or / Twin              #E8B86E  (routines Twin)
+  Lilas / Aura           #D9CCE8  (EMDR, transitions)
+  Rose poudré            #FFD7E7  (CognitiveSorting)
+  Orange énergie         #F2631D  (EMDR ball, énergie haute)
+  Écran de fin           #F4F3F2  (fond clair completion screen)
+  Texte sombre sur fond clair : #232323
+
+  Typographie
+  ──────────────────────────────────────────────
+  Titres / poésie        Gelica ExtraLight (200) italic
+  Titres forts           Gelica SemiBold (600)
+  Corps / labels         Poppins (google_fonts)
+
+  Patterns UI récurrents
+  ──────────────────────────────────────────────
+  Countdown : fond couleur accent, chiffre blanc 100pt bold
+  Écran d'exercice : fullscreen, fond accent ou caméra
+  Écran de fin : Image.asset('assets/images/Fonds-02.png')
+                 + overlay blanc 10% + icon cercle vert + bouton "Continuer"
+  Durée affichée : couleur #E8B86E, format M:SS
+  Bouton principal : BorderRadius.circular(30), padding vertical 10-16
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ══ PHASE 1 — ROUTINES SOLO RESTANTES (à créer après les 4 déjà faits)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [12] CUSTOM WIDGET : ResetFlash  (Routine 1 — Vagal-Haptic visuel)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom du widget : ResetFlash
+  → Durée : 3 minutes — Respiration 6 cycles/min + haptique 7-10 Hz
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  Nom             Type    Nullable   Défaut
+  onComplete      Action  oui        —
+
+  ── DÉPENDANCES ───────────────────────────────────────────────
+  vibration (déjà ajouté)
+
+  ── PERMISSION ANDROID ────────────────────────────────────────
+  VIBRATE (déjà ajoutée)
+
+  ── STRUCTURE DU WIDGET ───────────────────────────────────────
+  Phases : countdown(3) → exercise(180s) → complete
+
+  EXERCISE SCREEN :
+  - Fond : #0DAABA
+  - Aura centrale : cercle animé qui gonfle (inspire 5s) et dégonfle (expire 5s)
+    AnimationController durée 10s, repeat
+    Tween<double> begin:0.8 end:1.4 sur le scale du cercle
+  - Barres latérales (comme SoothingThumb) : progress inspire/expire
+  - Haptique : Vibration.vibrate(pattern:[71,72], repeat:0) au démarrage
+  - Timer 180s → complete
+  - Label "Inspirez..." / "Expirez..." en Gelica italic
+
+  COMPLETE SCREEN : identique aux autres (Fonds-02.png + "3 minutes de
+  cohérence cardiaque complétées.")
+
+  IMPORTANT : ce widget N'utilise PAS la caméra (Selfie Flash = Phase 2
+  quand l'outil d'analyse SOZIA sera prêt). Version Phase 1 = haptique
+  + visuel seulement.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [13] CUSTOM WIDGET : BioAmbient  (Routine 6 — Audio immersif)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom du widget : BioAmbient
+  → Durée : 3 minutes
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  Nom             Type    Nullable   Défaut
+  audioUrl        String  non        ''      ← URL Firebase Storage du fichier
+  onComplete      Action  oui        —
+
+  ── DÉPENDANCES ───────────────────────────────────────────────
+  just_audio: ^0.9.40
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - Phases : countdown(3) → exercise(180s) → complete
+  - EXERCISE : fond #121212 animé (RadialGradient lent qui pulse de
+    #0DAABA à #065963, animation 8s en loop)
+  - Lecture audio via AudioPlayer().setUrl(audioUrl) → play()
+  - Timer 180s → stop audio → complete
+  - Pas d'interaction requise (routine passive)
+  - Label "Fermez les yeux" en Gelica italic
+
+  FICHIERS AUDIO à uploader dans Firebase Storage :
+    sozia_bio_ambient_calme.mp3    (bruit brun + fréquences alpha)
+    sozia_bio_ambient_tension.mp3  (version plus dynamique)
+  → Mettre les URLs dans les paramètres de la page dans FF.
+
+  PERMISSION : aucune (lecture d'URL distante)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [14] CUSTOM WIDGET : TapSync  (Routine 15 — Anti-rumination)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom du widget : TapSync
+  → Durée : 1 minute
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  onComplete      Action  oui        —
+
+  ── DÉPENDANCES ───────────────────────────────────────────────
+  Aucune (juste flutter/material.dart)
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - Phases : countdown(3) → exercise(60s) → complete
+  - EXERCISE : fond #121212
+    → List<Offset> de 1 point visible à la fois
+    → Quand tapé : disparaît, nouveau point aléatoire apparaît
+    → Point : cercle 24px, gradient néon de #0DAABA à #E8B86E
+    → Timer 60s → complete
+    → Score = nombre de taps (affiché dans le complete screen)
+  - Pas de haptique nécessaire
+  - COMPLETE : "XX points en 60 secondes. Votre esprit est plus libre."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [15] CUSTOM WIDGET : InfiniDraw  (Routine 18 — Dessin Infini)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom du widget : InfiniDraw
+  → Durée : 2 minutes
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  onComplete      Action  oui        —
+
+  ── DÉPENDANCES ───────────────────────────────────────────────
+  vibration (déjà ajouté)
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - Phases : countdown(3) → exercise(120s) → complete
+  - EXERCISE :
+    → CustomPainter qui trace l'infini (∞) en transparence (guide)
+    → GestureDetector.onPanUpdate trace le chemin du doigt
+    → Si velocity > seuil (300 px/s) → Vibration.vibrate(duration:80)
+      (résistance haptique = friction)
+    → Couleur trace : gradient #0DAABA → #D9CCE8
+    → Timer 120s → complete
+  - IMPORTANT : ne PAS valider si le tracé suit exactement l'infini
+    (trop complexe). Juste détecter la vitesse excessive.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [16] CUSTOM WIDGET : MorningAncrage  (Routine 29)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom du widget : MorningAncrage
+  → Durée : 90 secondes
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  onComplete      Action  oui        —
+  onIntentionSet  Action  oui        —   ← FF peut sauvegarder le mot choisi
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - PAS de countdown (s'ouvre directement sur le choix d'intention)
+  - ÉCRAN 1 — Choix (30s) :
+    → Fond dégradé aube : #121212 → #1A1A2E
+    → 6 boutons ronds : Clarté, Douceur, Présence, Force, Légèreté, Patience
+    → Couleurs : nuances de #D9CCE8 et #E8B86E
+    → Sélection → cercle lumineux autour du mot choisi
+  - ÉCRAN 2 — Respiration (60s) :
+    → Même fond, aura centrale #0DAABA qui pulse (4 cycles)
+    → Label "Inspirez..." / "Expirez..."
+    → Haptique légère (vibration 50ms à l'inspire)
+    → Mot choisi affiché en Gelica 18pt italic au centre
+  - COMPLETE : appel onIntentionSet + onComplete
+  - Sauvegarder le mot dans Firestore :
+    users/{uid}.intentionDuJour (Custom Action FF)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [17] CUSTOM WIDGET : EndOfDayRelease  (Routine 31)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : EndOfDayRelease
+  → Durée : 3 minutes
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  onComplete      Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - ÉCRAN PRINCIPAL (fond #121212) :
+    → 4-6 petits objets lumineux flottants (comme CognitiveSorting mais
+      lents et doux — vitesse x0.3)
+    → Labels : Réunion, Email, Appel, Tension, Fatigue, etc.
+    → Boîte centrale gris clair — GestureDetector drag & drop
+    → Glisser un objet dans la boîte : il disparaît avec fade out
+    → Quand tous déposés OU 3 minutes → boîte se "ferme" (animation scale 0)
+    → Fond vire progressivement à #1A1030 (mode soirée)
+  - COMPLETE : "La journée est déposée. Bonne soirée."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [18] CUSTOM WIDGET : GratitudeFlash  (Routine 33)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : GratitudeFlash
+  → Durée : 90 secondes
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  onComplete      Action  oui        —
+  onEntriesSaved  Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - 3 champs TextField (limités à 80 car chacun)
+  - Fond #121212, labels en Gelica italic
+  - Aria (texte animé) : "Trois choses qui vous ont fait du bien aujourd'hui."
+  - Bouton "Déposer" (couleur #065963) → enregistre dans Firestore
+    user_notes/{uid}/entries/{date} avec liste des 3 items
+  - Animation de galets qui tombent dans le jardin (3 CircleAvatar colorés)
+  - COMPLETE : appel onEntriesSaved + onComplete
+  - Sauvegarde : Custom Action FF via updateDocument Firestore
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [19] CUSTOM WIDGET : DecrisExpresss  (Routine 42 — PMR)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : DecrisExpress
+  → Durée : 90 secondes
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  onComplete      Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - Séquence de 4 zones, 4 étapes de 20s chacune :
+    Zone 1 — Mâchoire  : "Serrez... et relâchez."
+    Zone 2 — Épaules   : "Montez... et relâchez."
+    Zone 3 — Cou       : "Tournez doucement à gauche... à droite..."
+    Zone 4 — Mains     : "Poings serrés... et ouvrez."
+  - Silhouette stylisée (SVG ou CustomPainter simple)
+    Zone active = highlight #0DAABA
+  - Haptique : vibration de 200ms au moment du "serrez"
+  - Timer 20s par zone avec CircularProgressIndicator
+  - Fond : #121212
+  - COMPLETE : standard
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ══ PHASE 1 — ROUTINES TWIN (nécessitent Supabase Realtime)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠ Toutes les routines Twin écrivent uniquement l'état initial et
+  final dans Firestore. Les données temps réel passent par Supabase.
+  Voir section [10] pour l'initialisation du canal.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [20] CUSTOM WIDGET : TwinCoherence  (Routine 7)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : TwinCoherence
+  → Durée : 3 minutes
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  sessionId       String  non        ''
+  isInitiator     bool    non        false
+  partnerName     String  non        ''
+  onComplete      Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - ATTENTE (avant que les 2 soient connectées) :
+    → "En attente de [partnerName]..." avec spinner
+    → Supabase channel 'twin_${sessionId}' — broadcast event 'ready'
+    → Quand les 2 sont ready → démarre le countdown
+
+  - EXERCISE :
+    → Fond #121212
+    → 2 cercles : "Vous" (gauche, #0DAABA) et partnerName (droite, #E8B86E)
+    → Chaque cercle pulse selon la respiration locale (AnimationController 10s)
+    → Envoyer via Supabase : {'breathPhase': _breathCtrl.value}
+    → Recevoir le breathPhase de l'autre → animer son cercle
+    → Calcul synchronie : |phaseA - phaseB| < 0.1
+    → Si synchronie > 3s → sphère dorée centrale (fusion des deux cercles)
+    → Timer 180s → complete
+
+  - Écriture Firestore UNIQUEMENT à la fin :
+    twin_sessions/{sessionId}.status = 'completed'
+    twin_sessions/{sessionId}.syncScore = valeur 0-100
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [21] CUSTOM WIDGET : HighFive  (Routine 8)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : HighFive
+  → Durée : 2 minutes (plusieurs tentatives)
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  sessionId       String  non        ''
+  partnerName     String  non        ''
+  onComplete      Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - Fond #0DAABA
+  - Compte à rebours "3... 2... 1... Touchez !" (lancé par l'initiatrice)
+    → timestamp envoyé via Supabase : {'countdown_start': DateTime.now().ms}
+  - Zone de tap centrale (cercle 120px)
+  - Quand les 2 tappent dans la même fenêtre de 300ms :
+    → Explosion de lumière (AnimatedContainer scale 0→3, opacity 1→0)
+    → Vibration identique sur les 2 téléphones : pattern [0,150,50,150]
+    → Score : "Parfait ! ±Xms d'écart"
+  - 5 tentatives ou 2 minutes → complete
+  - Données Supabase : {'tap_timestamp': ms} broadcast event 'tap'
+
+  ⚠ Ne PAS stocker les timestamps de tap dans Firestore (éphémère).
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [22] CUSTOM WIDGET : AuraExchange  (Routine 9)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : AuraExchange
+  → Durée : 5 minutes
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  sessionId       String  non        ''
+  myAuraState     double  non        0.5   ← 0.0 (tension) à 1.0 (calme)
+  partnerAuraState double non        0.5
+  isEmitter       bool    non        false ← calculé depuis auraState
+  partnerName     String  non        ''
+  onComplete      Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - isEmitter = myAuraState > partnerAuraState (calculé en FF avant navigation)
+  - INTERFACE ÉMETTRICE :
+    → Aura centrale #E8B86E avec traînée lumineuse vers le haut
+    → Slider vertical "Quantité d'énergie envoyée"
+    → onPanUpdate → envoyer via Supabase : {'energy': value}
+  - INTERFACE RÉCEPTRICE :
+    → Aura qui reçoit l'énergie : couleur change de #F2631D vers #0DAABA
+    → Texte "Votre amie vous envoie de l'énergie..."
+  - Timer 300s → complete
+  - Firestore à la fin : status = 'completed'
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [23] CUSTOM WIDGET : MirrorBreath  (Routine 25)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : MirrorBreath
+  → Durée : 2 minutes
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  sessionId       String  non        ''
+  isEmitter       bool    non        false
+  partnerName     String  non        ''
+  onComplete      Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - ÉMETTRICE (isEmitter = true) :
+    → Respiration libre, AnimationController 10s repeat
+    → Envoyer breathPhase (0.0 à 1.0) via Supabase toutes les 100ms
+    → Label "Respirez naturellement. [partnerName] vous suit."
+  - RÉCEPTRICE (isEmitter = false) :
+    → Recevoir breathPhase → animer une onde lumineuse fluide
+    → Onde = CustomPainter sinusoïdale qui traverse l'écran
+    → Amplitude de l'onde = sin(breathPhase * 2π)
+    → Fond #121212, onde couleur #D9CCE8
+    → Label "Suivez l'onde avec votre souffle..."
+  - Timer 120s → complete
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [24] CUSTOM WIDGET : DuoMorning  (Routine 44)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : DuoMorning
+  → Durée : 90 secondes
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  sessionId       String  non        ''
+  partnerName     String  non        ''
+  onComplete      Action  oui        —
+  onIntentionSet  Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - Mêmes 6 boutons d'intention que MorningAncrage
+  - Afficher en temps réel le mot choisi par l'autre via Supabase
+    (broadcast event 'intention' : {'mot': word})
+  - 2 cercles côte à côte avec les mots choisis
+  - Respiration de 4 cycles synchronisée ensemble
+  - Sauvegarder le mot dans Firestore (même que MorningAncrage)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ══ PHASE 1 — ROUTINES SQUAD (nécessitent Supabase + Firestore)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [25] CUSTOM WIDGET : SquadPulse  (Routine 11 — déjà en partie dans lib)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : SquadPulseWidget
+  → Le fichier squad_pulse.dart existe déjà dans lib/
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  squadId         String  non        ''
+  onComplete      Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - StreamBuilder sur squads/{squadId}/members (Firestore)
+    → Mise à jour de l'energy toutes les 5s max (debounce côté client)
+  - Slider vertical pour la propre énergie (0.0 → 1.0)
+  - 5 cercles pulsants pour les membres :
+    → Rouge (#F2631D) = energy < 0.35 (tension)
+    → Orange (#E8B86E) = energy 0.35-0.65
+    → Bleu (#0DAABA) = energy > 0.65 (calme)
+  - Vitesse de pulsation inversement proportionnelle à l'énergie
+  - Timer 120s → onComplete
+  - ⚠ SÉCURITÉ : throttle dans le widget — ne pas appeler
+    updateMyEnergy() plus d'1 fois/5s (utiliser Timer + flag)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [26] CUSTOM WIDGET : IntentionWheel  (Routine 12)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : IntentionWheel
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  squadId         String  non        ''
+  userId          String  non        ''
+  onComplete      Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - CustomPainter : cercle divisé en 5 sections (une par membre)
+  - Chaque section : nom du membre + son mot du jour
+  - Données : StreamBuilder sur squad_intentions
+    query : squadId == squadId AND date == today
+  - Bouton "Choisir mon intention" → bottom sheet avec 6 mots
+  - Écriture Firestore : doc ID = squadId_userId_date (idempotent)
+  - Section "brillante" = membre a complété une routine aujourd'hui
+    (lire users/{uid}.lastRoutineDate)
+  - Logo SOZIA au centre : s'illumine si 5 sections brillent
+  - Timer 120s → onComplete
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [27] CUSTOM WIDGET : CollectiveShield  (Routine 14 — déjà dans lib)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : CollectiveShieldWidget
+  → collective_shield.dart existe dans lib/
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  squadId         String  non        ''
+  onComplete      Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - StreamBuilder sur squads/{squadId}.niveauBouclier (int 0-5)
+  - Dôme visuel CustomPainter :
+    → 5 segments qui se "solidifient" un par un
+    → Couleur : #065963 opaque quand plein, transparent quand vide
+    → Animation de "soudure" quand un segment s'ajoute
+  - 5 avatars (initiales) des membres sous le dôme
+  - Timer 120s → write dans squad_sessions → onComplete
+  - ⚠ L'incrémentation de niveauBouclier = Cloud Function (pas client)
+    Le client écrit dans squad_sessions avec status='completed'
+    La Cloud Function incrémente via FieldValue.increment(1)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [28] CUSTOM WIDGET : SquadMorningPulse  (Routine 50)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → Nom : SquadMorningPulse
+  → Durée : 60 secondes
+
+  ── PARAMÈTRES ────────────────────────────────────────────────
+  squadId         String  non        ''
+  onComplete      Action  oui        —
+
+  ── STRUCTURE ─────────────────────────────────────────────────
+  - StreamBuilder sur squads/{squadId}/members
+  - 5 cercles en anneau (CustomPainter)
+    → Présente = couleur active selon auraState
+    → Absente (pas de lastActive < 30min) = cercle en veilleuse (opacity 0.2)
+  - Appui long sur un cercle → Signal Aura (haptique simple + write
+    dans Firestore signalAura/{uid}: {from, to, timestamp})
+  - Texte "Votre Squad se lève aussi."
+  - Timer 60s → onComplete
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ══ PHASE 2 — ROUTINES (janvier 2027)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Ces widgets sont à créer après le launch de septembre 2026.
+  Structure résumée (pas de code complet — à développer en Phase 2).
+
+
+  [P2-1] OledTherapy  (Routine 16)
+  ────────────────────────────────
+  Paramètres : onComplete Action
+  Dépendances : aucune
+  Implémentation : AnimationController(duration: 10s) repeat
+    Tween<Color> de #0DAABA à #065963 à 0.1 Hz
+    Plein écran ColoredBox, aucune interaction
+    Avertissement UI : "Si vous êtes sensible à la lumière, évitez cette routine."
+    Timer 120s → complete
+  ⚠ Introduction différée (déverrouillage après J45 d'utilisation)
+
+  [P2-2] AudioBinaurale  (Routine 17)
+  ────────────────────────────────────
+  Paramètres : audioAlphaUrl String, audioThetaUrl String, onComplete Action
+  Dépendances : just_audio, audio_session
+  Implémentation :
+    - Vérifier AudioSession headphones avant de démarrer
+    - Si pas de casque → "Casque stéréo requis" (ne pas démarrer)
+    - Jouer le fichier audio correspondant (alpha ou thêta selon heure)
+    - Onde sonore AnimatedContainer simple
+    - Timer 180s → stop → complete
+  Fichiers à uploader : sozia_binaural_alpha.mp3, sozia_binaural_theta.mp3
+  ⚠ Introduction différée (J40)
+
+  [P2-3] PlexusWeight  (Routine 26)
+  ───────────────────────────────────
+  Paramètres : onComplete Action
+  Dépendances : vibration
+  Implémentation :
+    - Vibration.vibrate(pattern: [0, 2000, 500, 2000], repeat: 2)
+      (vibrations lentes et profondes)
+    - Fond quasi-noir #0A0A0A, onde très lente #065963
+    - Timer max 180s + timer sécurité 300s qui force l'arrêt
+    - Label "Posez l'appareil sur votre plexus solaire"
+  ⚠ Introduction différée (J30)
+
+  [P2-4] VagusEar  (Routine 23)
+  ───────────────────────────────
+  Paramètres : onComplete Action
+  Dépendances : vibration
+  Implémentation :
+    - Capteur proximité via sensors_plus (ProximitySensor)
+    - Écran noir quand proximité détectée
+    - Vibration à 40-60 Hz (pattern [0, 20, 10, 20] repeat)
+    - Timer max 90s (jamais plus)
+    - Délai minimum 15min entre 2 utilisations (sharedPreferences lastVagusTime)
+    - Volume vibratoire réduit (pattern court)
+
+  [P2-5] AudioCapsule  (Routine 13)
+  ───────────────────────────────────
+  Paramètres : squadId String, recipientUid String, onComplete Action
+  Dépendances : record, just_audio
+  Implémentation ENVOI :
+    - Bouton Record (appuyer et maintenir, max 15s)
+    - Amplitude tracker via record : si moyenne > seuil → bandeau
+      "Votre voix semble tendue. Respirez avant d'enregistrer."
+      (remplace Hume AI — validation locale basique uniquement)
+    - Upload vers Firebase Storage → écriture dans audio_capsules
+    - ID : senderUid_recipientUid_date (idempotent)
+  Implémentation RÉCEPTION :
+    - Bulle qui pulse (status = 'delivered')
+    - Déverrouillage : le membre écoute quand elle le décide
+    - Lecture via AudioPlayer().setUrl(audioUrl)
+  ⚠ Validation ton = TODO (outil SOZIA futur)
+
+  [P2-6] SquadResonance  (Routine 21)
+  ─────────────────────────────────────
+  Paramètres : sessionId String, squadId String, membersCount int,
+               isInCrisis bool, onComplete Action
+  Implémentation :
+    - isInCrisis = true → membre reçoit les vibrations des autres
+    - isInCrisis = false → membre tape un rythme lent (1 tap/2s)
+    - Supabase broadcast : {'tap': timestamp}
+    - Réceptrice : Vibration.vibrate(duration:100) à chaque tap reçu
+    - Jusqu'à 5 sources synchronisées
+    - Timer 120s → complete
+
+  [P2-7] LullabyHaptique  (Routine 19)
+  ──────────────────────────────────────
+  Paramètres : sessionId String, isEmitter bool, onComplete Action
+  Dépendances : sensors_plus
+  Implémentation :
+    - ÉMETTRICE : AccelerometerEvent → envoyer x via Supabase
+      channel broadcast 'lullaby' : {'x': event.x}
+    - RÉCEPTRICE : recevoir x → mapper sur vibration
+      x absolu → durée vibration (plus fort = plus long)
+    - Fond : ondes de sable qui basculent selon x
+    - Timer 120s → complete
+
+  [P2-8] CoGazeAlpha  (Routine 20)
+  ──────────────────────────────────
+  Paramètres : sessionId String, onComplete Action
+  Dépendances : camera (déjà), google_mlkit_face_detection (déjà)
+  Implémentation :
+    - Eye tracking (comme EyeMovementEMDR) pour détecter si les yeux
+      sont ouverts et regardent le centre
+    - Point central qui pulse à 0.1 Hz (fixe — pas de rPPG réel, Phase 3)
+    - Si yeux fermés → pause (comme EMDR)
+    - Supabase : envoyer 'ready' quand les 2 sont connectées
+    - Timer 180s → complete
+  ⚠ rPPG = TODO (Phase 3, outil SOZIA)
+
+  [P2-9] BreathDrawing  (Routine 22)
+  ────────────────────────────────────
+  Paramètres : sessionId String, isEmitter bool, onComplete Action
+  Implémentation :
+    - ÉMETTRICE : AnimationController 10s repeat (respiration)
+      Supabase broadcast : {'phase': controller.value}
+    - RÉCEPTRICE : reçoit phase → trace ligne verticale
+      (monte à l'inspire, descend à l'expire)
+      GestureDetector.onPanUpdate → suit la ligne avec le doigt
+    - Score = écart moyen entre le doigt et la ligne
+    - Timer 120s → complete
+
+  [P2-10] VocalHummingSync  (Routine 27)
+  ────────────────────────────────────────
+  Paramètres : sessionId String, onComplete Action
+  Dépendances : record, noise_meter
+  Implémentation :
+    - Micro détecte amplitude (noise_meter)
+    - Si amplitude > seuil → l'utilisatrice fredonne
+    - Envoyer via Supabase : {'humming': bool}
+    - Afficher onde sonore pour les 2 (animée si l'autre fredonne aussi)
+    - Vibration synchronisée quand les 2 fredonnent ensemble
+    - Timer 120s → complete
+
+  [P2-11] ThermalTouch  (Routine 28)
+  ────────────────────────────────────
+  Paramètres : sessionId String, isCaressing bool, onComplete Action
+  Implémentation :
+    - CARESSA (isCaressing) : GestureDetector.onPanUpdate → velocity
+      Supabase broadcast : {'velocity': dx.abs()}
+    - RÉCEPTRICE : reçoit velocity → Vibration.vibrate(duration: 60-200ms)
+      selon velocity (simulation chaleur — illusion de Weber)
+    - ⚠ Nécessite Taptic Engine (iOS uniquement pour la vraie illusion)
+      Sur Android : vibration standard moins précise
+    - Timer 120s → complete
+
+  [P2-12] OculoCardiaque  (Routine 24)
+  ──────────────────────────────────────
+  Paramètres : onComplete Action
+  Dépendances : camera, google_mlkit_face_detection
+  Implémentation :
+    - AnimationController : point qui descend de 0.0 → 1.0 en 10s repeat
+    - Eye tracking : vérifier convergence (les 2 yeux suivent le bas)
+      → approximation : FaceContour.noseBottom descend avec le regard
+    - Label "Regardez le point descendre... expirez lentement..."
+    - Timer 60s → complete
+
+  [P2-13-17] Solo Phase 2
+  ─────────────────────────
+  ReadinessCheck (30) : Voir MorningAncrage + silhouette body scan
+    + Timer 120s. Paramètre : eventName String.
+  SavoringMoment (34) : 3 questions + capsule persistante. Paramètres :
+    onComplete, onCapsuleSaved Action. Écriture : user_notes/{uid}/entries.
+  MicroCelebration (35) : TextField 15 car + animation feu d'artifice
+    + option partage Squad (broadcast via Supabase). Timer 30s.
+  PenseeObservee (36) : TextField 200 car + reformulation Aria en Text widget
+    + 3 boutons (Laisser passer / Noter / Contester). Timer 120s.
+  PreparationSommeil (40) : 4 étapes (body scan 3min + respiration 2min +
+    narration 2min + silence 1min). Durée totale 8min. AudioUrl paramètre.
+    just_audio. En fin : appel System.DO_NOT_DISTURB (Custom Action).
+
+  [P2-18] DebriefDuo (45) Twin
+  ──────────────────────────────
+  Même structure que EndOfDayRelease mais pour 2 personnes.
+  Supabase : broadcast 'deposed' quand une dépose dans sa boîte.
+  Option : partage d'un mot de 15 car. Paramètres : sessionId, partnerName.
+
+  [P2-19] SquadCelebrationWave (52)
+  ───────────────────────────────────
+  Déclenchée automatiquement depuis MicroCelebration si partagé.
+  Les 4 autres voient la notification → bouton "Signal Aura"
+  → Vibration reçue par la célébrante (broadcast Supabase)
+  Paramètres : sessionId, celebrantName, onComplete Action.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ══ PHASE 3 — ROUTINES (mars 2027)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [P3-1] CoconPremenstruel (37)
+  Paramètres : onComplete Action
+  Respiration 4 cycles/min (au lieu de 6). AnimationController(duration:15s).
+  Fond chaud #1A0A08 → #2A1010. Haptique très douce (vibration 60ms).
+
+  [P3-2] VagueRegles (38)
+  Paramètres : audioUrl String, onComplete Action
+  Vibrations profondes sur le bas-ventre (Vibration longues et lentes).
+  Vagues rouges animées CustomPainter. Lecture audio optionnelle.
+
+  [P3-3] EnergieOvulation (39)
+  Paramètres : onComplete Action
+  Respiration vivifiante (3-4 cycles rapides). Animations #E8B86E vives.
+  Version "montante" au lieu d'apaisante.
+
+  [P3-4] CycleCompanion (48) Twin
+  Paramètres : sessionId, isCompanion bool, onComplete Action
+  Prérequis : consentement stocké dans Firestore users/{uid}.cycleShareConsent
+  Si isCompanion : respiration lente synchronisée avec présence silencieuse.
+
+  [P3-5] BetweenTwoWorlds (32)
+  Paramètres : onComplete Action. Durée : 60s. Ultra-simple.
+  AnimationContainer dégradé de #0DAABA vers #E8B86E en 60s.
+  Pas d'interaction. Respiration haptique minimale.
+
+  [P3-6] ReveilDoux (41)
+  Paramètres : onComplete, onChainMorningAncrage Action
+  Fond qui monte de noir à aube claire. Haptique très légère.
+  Respiration 4 cycles. Bouton "Démarrer la journée" → onChainMorningAncrage.
+
+  [P3-7] ReposYeux (43)
+  Paramètres : onComplete Action
+  Dépendances : camera, google_mlkit_face_detection
+  4 cibles successives (proche / lointain / gauche / droite).
+  Eye tracking vérifie la direction. Puis 15s yeux fermés. Timer 60s.
+
+  [P3-8] GratitudeMirror (46) Twin
+  Paramètres : sessionId, partnerName, onComplete Action
+  2 TextField (30 car max). Échange via Supabase. Animation pont lumineux.
+
+  [P3-9] SavoringDuo (47) Twin
+  Paramètres : sessionId, partnerName, onComplete, onCapsuleSaved Action
+  2 réponses combinées en capsule partagée dans twin_capsules/{id}.
+
+  [P3-10] NightTandem (49) Twin
+  Paramètres : sessionId, partnerName, onComplete Action
+  Dépendances : just_audio (audio optionnel)
+  2 lunes qui s'atténuent. Respiration 3 cycles/min. Body scan 2min.
+  Silence haptique 1min. Option "Bonne nuit" (Text field 20 car).
+
+  [P3-11] SquadGratitudeGarden (51)
+  Paramètres : squadId, onComplete Action
+  ListView des galets (couleur par membre). TextField 30 car.
+  Écriture dans squad_gratitude/{auto-id}. Filtre "galets reçus".
+
+  [P3-12] SquadNightWatch (53)
+  Paramètres : sessionId, squadId, onComplete Action
+  5 auras en cercle qui s'atténuent. Respiration 3 cycles/min.
+  Silence haptique collectif 60s. Notification aux absentes via
+  firebase_messaging (Cloud Function).
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  CHECKLIST FINALE — PHASE 1 (launch septembre 2026)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ── Setup de base ─────────────────────────────────────────────
+  [ ] 5 dépendances pub Phase 1 ajoutées (google_fonts, vibration,
+      camera, google_mlkit_face_detection, permission_handler)
+  [ ] 4 dépendances Phase 1+ ajoutées (just_audio, audio_session,
+      record, sensors_plus, supabase_flutter, noise_meter)
+  [ ] Police Gelica uploadée (poids 200 et 600)
+  [ ] Fonds-02.png uploadée dans Assets
+  [ ] Supabase initialisé (URL + anonKey dans Environment Variables)
+  [ ] Firebase App Check activé (Android + iOS)
+  [ ] Firestore Rules déployées (voir flutterflow_securite.txt)
+
+  ── Custom Widgets SOLO déjà faits ────────────────────────────
+  [ ] SoothingThumb      (Routine 4)  — 1 param
+  [ ] CognitiveSorting   (Routine 5)  — 1 param
+  [ ] AuraCleaning       (Routine 2)  — 1 param
+  [ ] EyeMovementEMDR    (Routine 3)  — 2 params
+
+  ── Custom Widgets SOLO Phase 1 restants ──────────────────────
+  [ ] ResetFlash         (Routine 1)  — 1 param
+  [ ] BioAmbient         (Routine 6)  — 2 params (audioUrl + onComplete)
+  [ ] TapSync            (Routine 15) — 1 param
+  [ ] InfiniDraw         (Routine 18) — 1 param
+  [ ] MorningAncrage     (Routine 29) — 2 params
+  [ ] EndOfDayRelease    (Routine 31) — 1 param
+  [ ] GratitudeFlash     (Routine 33) — 2 params
+  [ ] DecrisExpress      (Routine 42) — 1 param
+
+  ── Custom Widgets TWIN Phase 1 ────────────────────────────────
+  [ ] TwinCoherence      (Routine 7)  — 4 params
+  [ ] HighFive           (Routine 8)  — 3 params
+  [ ] AuraExchange       (Routine 9)  — 5 params
+  [ ] MirrorBreath       (Routine 25) — 4 params
+  [ ] DuoMorning         (Routine 44) — 4 params
+
+  ── Custom Widgets SQUAD Phase 1 ───────────────────────────────
+  [ ] SquadPulseWidget   (Routine 11) — 2 params
+  [ ] IntentionWheel     (Routine 12) — 3 params
+  [ ] CollectiveShieldWidget (Routine 14) — 2 params
+  [ ] SquadMorningPulse  (Routine 50) — 2 params
+
+  ── Permissions ───────────────────────────────────────────────
+  [ ] VIBRATE dans AndroidManifest
+  [ ] CAMERA dans AndroidManifest + Info.plist
+  [ ] RECORD_AUDIO dans AndroidManifest (Phase 2)
+  [ ] NSMicrophoneUsageDescription dans Info.plist (Phase 2)
+
+  ── Pages et navigation ───────────────────────────────────────
+  [ ] 20 pages Phase 1 créées (Blank, sans AppBar)
+  [ ] Chaque widget en fullscreen (Width/Height: Infinity)
+  [ ] onComplete → Navigate > Go Back
+  [ ] Navigation depuis HomePage vers chaque page
+  [ ] App State créé : squadId, twinUid, currentAura (double)
+
+  ── Tests ─────────────────────────────────────────────────────
+  [ ] Test sur device physique (EyeMovementEMDR = jamais en preview)
+  [ ] Test Twin avec 2 appareils sur le même réseau
+  [ ] Test Squad avec 2 appareils minimum
+  [ ] Firestore Rules testées dans Rules Playground
+  [ ] Budget Alert Firebase configuré (80%)
+
+  ── Cloud Functions à déployer ────────────────────────────────
+  [ ] onRoutineCompleted → FieldValue.increment niveauBouclier
+  [ ] onAudioCapsuleCreated → validation durée + status = 'delivered'
+  [ ] deleteAccount → RGPD droit à l'effacement
+
+  ── CE QUI N'EST PAS POSSIBLE EN PHASE 1 ──────────────────────
+  [ ] Selfie Flash (Reset Flash) — en attente outil SOZIA image
+  [ ] rPPG fréquence cardiaque  — en attente modèle TFLite SOZIA
+  [ ] Analyse vocale avancée    — en attente outil SOZIA vocal
+      (Audio-Capsule = validation amplitude locale uniquement)
+  [ ] Binaural dynamique        — fichiers audio pré-générés à la place
+  [ ] Détection casque précise  — audio_session approxiative
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⚠ CORRECTION STRUCTURE FIRESTORE (constatée en console le 2026-05-29)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  La console Firestore montre un écart entre le code existant et la
+  vraie structure en production. À aligner avant la Phase 2.
+
+  ── COLLECTIONS EXISTANTES EN CONSOLE ────────────────────────
+  Squad          (capital S)  ← ancienne collection FlutterFlow
+  squads         (lowercase)  ← collection du code Dart actuel
+  routine                     ← sessions de routines (pas squad_sessions)
+  twinInvitation              ← invitations Twin (pas twin_invitations)
+  users                       ← profils (correct)
+
+  ── CHAMPS DU DOCUMENT Squad/{id} VUS EN CONSOLE ─────────────
+  Champ observé       Type                  Notes
+  ───────────────────────────────────────────────────────────────
+  nomSquad            String                ← utiliser ce nom (pas "name")
+  inviteCode          String "123456"       ← code 6 chiffres pour rejoindre
+  actif               bool                  ← squad actif ou archivé
+  initiatorName       String                ← prénom du créateur
+  initiatorRef        DocumentReference     ← ref vers users/{uid}
+  fromUserRef         DocumentReference     ← même que initiatorRef
+  users               Array<DocumentRef>    ← tableau de DocumentReferences
+  createdAt           Timestamp
+
+  ── MIGRATION À FAIRE ─────────────────────────────────────────
+  Option A (recommandée) : continuer sur squads (lowercase) + renommer
+    les champs pour matcher → nomSquad, inviteCode, users comme DocRefs
+  Option B : basculer tout le code vers la collection Squad (capital S)
+
+  Pour la Phase 2, le code utilisera les noms de champs de la console :
+    nomSquad     au lieu de name
+    inviteCode   champ additionnel
+    users        comme Array<DocumentReference> → pour lire :
+      final refs = List<DocumentReference>.from(snap['users'] ?? []);
+      final docs = await Future.wait(refs.map((r) => r.get()));
+
+  ── COLLECTIONS À CRÉER POUR PHASE 2 ──────────────────────────
+  audio_capsules   ← nouvelles capsules audio
+  squad_intentions ← roue d'intentions (déjà dans le code)
+  twin_sessions    ← sessions Twin
+  squad_signals    ← signaux d'aura
+  user_notes/{uid}/entries  ← gratitude + savoring
+
+  ── INTÉGRATION FLUTTERFLOW PHASE 2 — PAGES À CRÉER ──────────
+
+  Nom page FF              Widget                   Fichier Dart
+  ──────────────────────────────────────────────────────────────
+  OledTherapyPage          OledTherapy              oled_therapy.dart
+  AudioBinauralePage       AudioBinaurale           audio_binaurale.dart
+  PlexusWeightPage         PlexusWeight             plexus_weight.dart
+  VagusEarPage             VagusEar                 vagus_ear.dart
+  OculoCardiacPage         OculoCardiaque           oculo_cardiaque.dart
+  ReadinessCheckPage       ReadinessCheck           readiness_check.dart
+  SavoringMomentPage       SavoringMoment           savoring_moment.dart
+  MicroCelebPage           MicroCelebration         micro_celebration.dart
+  PenseeObserveePage       PenseeObservee           pensee_observee.dart
+  PrepSommeilPage          PreparationSommeil       preparation_sommeil.dart
+  LullabyHaptiquePage      LullabyHaptique          lullaby_haptique.dart
+  CoGazeAlphaPage          CoGazeAlpha              co_gaze_alpha.dart
+  BreathDrawingPage        BreathDrawing            breath_drawing.dart
+  VocalHummingPage         VocalHummingSync         vocal_humming_sync.dart
+  ThermalTouchPage         ThermalTouch             thermal_touch.dart
+  DebriefDuoPage           DebriefDuo               debrief_duo.dart
+  AudioCapsuleSendPage     AudioCapsuleSend         audio_capsule_send.dart
+  SquadResonancePage       SquadResonance           squad_resonance.dart
+  SquadCelebWavePage       SquadCelebrationWave     squad_celebration_wave.dart
+
+  Même procédure que Phase 1 :
+  - Page Blank + supprimer AppBar + fond Transparent
+  - Widget fullscreen (Width/Height: Infinity)
+  - onComplete → Navigate > Go Back
+  - Paramètres sessionId/squadId passés depuis l'App State FF
+
+  ── PARAMÈTRES FF À PASSER SELON LE WIDGET ────────────────────
+
+  Widgets Solo (pas de paramètre réseau) :
+    → 1 seul param : onComplete Action
+
+  Widgets avec audio (BioAmbient, AudioBinaurale, PrepSommeil) :
+    → audioUrl String + onComplete Action
+    → Passer l'URL depuis FF Page Parameter (liée à une constante App)
+
+  Widgets Twin (Supabase) :
+    → sessionId String (depuis App State FF)
+    → isEmitter/isInitiator bool (calculé avant navigation)
+    → partnerName String (depuis profil Firestore)
+    → onComplete Action
+
+  Widgets Squad (Firestore + Supabase) :
+    → squadId String (depuis App State FF)
+    → onComplete Action
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [ICÔNES] INTÉGRATION ICOMOON — SETUP ET MAPPING COMPLET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ── SETUP DANS FLUTTERFLOW ────────────────────────────────────
+
+  ÉTAPE 1 — Uploader la police
+    FF > Settings > Custom Fonts > Add Font
+    Nom de famille : icomoon
+    Uploader : fonts/icomoon.ttf  (poids 400)
+
+  ÉTAPE 2 — Copier icomoon_icons.dart dans chaque Custom Widget
+    Le fichier icomoon_icons.dart est dans lib/. Dans chaque custom
+    widget qui utilise ces icônes, COLLER LA CLASSE Icomoon EN HAUT
+    du fichier (avant la classe du widget), car FF ne partage pas
+    les imports entre widgets.
+
+  ÉTAPE 3 — Usage dans le code Dart des custom widgets
+    Icon(Icomoon.phHeartLight, color: Color(0xFFE8B86E), size: 28)
+
+  ÉTAPE 4 — Usage dans l'interface FF (composants natifs FF)
+    FF ne supporte pas les IconData custom dans le UI builder.
+    Pour les boutons et labels natifs FF → utiliser Icons.xxx Material.
+    Pour les icônes dans les Custom Widgets → utiliser Icomoon.xxx.
+
+  ─────────────────────────────────────────────────────────────
+  MAPPING ICÔNES → ROUTINES (à utiliser dans les custom widgets)
+  ─────────────────────────────────────────────────────────────
+
+  Les icônes ci-dessous remplacent les Icons.xxx Material dans TOUS
+  les custom widgets. Respecter ce mapping pour la cohérence SOZIA.
+
+  ── ROUTINES SOLO ─────────────────────────────────────────────
+
+  Routine  Nom                   Icône Icomoon
+  ───────────────────────────────────────────────────────────────
+  1        Reset Flash            Icomoon.phSunDimLight
+  2        Aura-Cleaning          Icomoon.phSparkleLight
+  3        Saccadic Reset         Icomoon.phEyeLight
+  4        Vagal-Haptic           Icomoon.phFingerprintSimpleLight
+  5        Cognitive Sorting      Icomoon.phTrashLight
+  6        Bio-Ambient            Icomoon.phMusicNotesSimpleLight
+  15       Tap-Sync               Icomoon.phShootingStarLight
+  16       OLED-Therapy           Icomoon.phSunDimLight
+  17       Audio-Binaurale        Icomoon.phMusicNotesSimpleLight
+  18       Dessin Infini          Icomoon.phPenLight
+  23       Vagus-Ear              Icomoon.phMicrophoneLight
+  24       Oculo-Cardiaque        Icomoon.phEyeClosedLight
+  26       Plexus-Weight          Icomoon.phFlowerLotusLight
+  29       Morning Ancrage        Icomoon.phSunHorizonLight
+  30       Readiness Check        Icomoon.phCalendarDotsLight
+  31       End-of-Day Release     Icomoon.phMoonLight
+  32       Between-Two-Worlds     Icomoon.phYinYangLight
+  33       Gratitude Flash        Icomoon.phPlantLight
+  34       Savoring Moment        Icomoon.phSparkleLight
+  35       Micro-Célébration      Icomoon.phShootingStarLight
+  36       Pensée Observée        Icomoon.phMagicWandLight
+  37       Cocon Prémenstruel     Icomoon.phMoonStarsLight
+  38       Vague de Règles        Icomoon.phFlowerLotusLight
+  39       Énergie d'Ovulation    Icomoon.phFireSimpleLight
+  40       Préparation Sommeil    Icomoon.phMoonStarsLight
+  41       Réveil Doux            Icomoon.phSunHorizonLight2
+  42       Décrispation Express   Icomoon.phFireSimpleLight
+  43       Repos Yeux             Icomoon.phEyeClosedLight
+
+  ── ROUTINES TWIN ─────────────────────────────────────────────
+
+  Routine  Nom                   Icône Icomoon
+  ───────────────────────────────────────────────────────────────
+  7        Twin-Coherence         Icomoon.phHeartLight
+  8        The High-Five          Icomoon.phChecksLight
+  9        Aura-Exchange          Icomoon.phPaperPlaneRightLight
+  10       Bio-Ambient Duo        Icomoon.phMusicNotesSimpleLight
+  19       Lullaby Haptique       Icomoon.phMoonStarsLight
+  20       Co-Gaze Alpha          Icomoon.phEyeLight
+  22       Breath-Drawing         Icomoon.phPenLight
+  25       Mirror-Breath          Icomoon.phYinYangLight
+  27       Vocal-Humming Sync     Icomoon.phMicrophoneLight
+  28       Thermal-Touch          Icomoon.phHeartLight2
+  44       Duo-Morning            Icomoon.phSunHorizonLight
+  45       Debrief-Duo            Icomoon.phMoonLight
+  46       Gratitude-Mirror       Icomoon.phGiftLight
+  47       Savoring-Duo           Icomoon.phSparkleLight
+  48       Cycle-Companion        Icomoon.phFlowerLotusLight
+  49       Night-Tandem           Icomoon.phMoonStarsLight
+
+  ── ROUTINES SQUAD ────────────────────────────────────────────
+
+  Routine  Nom                    Icône Icomoon
+  ───────────────────────────────────────────────────────────────
+  11       Squad-Pulse             Icomoon.phUsersFourLight
+  12       Intention Wheel         Icomoon.phMagicWandLight
+  13       Audio-Capsule           Icomoon.phMicrophoneLight
+  14       Collective Shield       Icomoon.phSealLight
+  21       Squad-Resonance         Icomoon.phUsersFourLight2
+  50       Squad-Morning-Pulse     Icomoon.phSunHorizonLight2
+  51       Squad-Gratitude-Garden  Icomoon.phPlantLight
+  52       Squad-Celebration-Wave  Icomoon.phShootingStarLight
+  53       Squad-Night-Watch       Icomoon.phMoonStarsLight
+
+  ── ICÔNES UI GÉNÉRALES ───────────────────────────────────────
+
+  Usage                          Icône Icomoon
+  ───────────────────────────────────────────────────────────────
+  Timer / Compte à rebours        Icomoon.phTimerLight
+  Notification                    Icomoon.phBellLight
+  Utilisateur                     Icomoon.phUser
+  Groupe d'utilisateurs           Icomoon.phUsersFourLight
+  Inviter quelqu'un               Icomoon.phPaperPlaneRightLight
+  Ajouter membre                  Icomoon.phPlusCircleLight
+  Supprimer / Corbeille           Icomoon.phTrashLight
+  Valider / Cocher                Icomoon.phCheckCircleLight
+  Fermer / Annuler                Icomoon.phXCircleLight
+  Info                            Icomoon.phInfoLight
+  Paramètres / Profil             Icomoon.phIdentificationBadgeLight
+  Maison / Accueil                Icomoon.phHouseLight
+  Connexion (Auth)                Icomoon.phSignInLight
+  Google Sign-In                  Icomoon.phGoogleLogoLight
+  Invitation reçue                Icomoon.phMailboxLight
+  Aura / Énergie                  Icomoon.phSparkleLight
+  Cœur / Twin                     Icomoon.phHeartLight
+  Cadeau / Partage                Icomoon.phGiftLight
+  Médaille / Badge                Icomoon.phMedalLight
+
+  ── EXEMPLE D'UTILISATION DANS UN CUSTOM WIDGET ───────────────
+
+  // Coller en haut du fichier du widget (avant la classe) :
+  class Icomoon {
+    Icomoon._();
+    static const String _fontFamily = 'icomoon';
+    static const IconData phHeartLight = IconData(0xe940, fontFamily: _fontFamily);
+    // ... coller uniquement les icônes utilisées dans ce widget
+  }
+
+  // Usage :
+  Icon(Icomoon.phHeartLight, color: Color(0xFFE8B86E), size: 28)
+
+  ⚠ Ne PAS coller toute la classe Icomoon dans chaque widget.
+    Copier uniquement les constantes nécessaires pour garder le
+    code léger et lisible.

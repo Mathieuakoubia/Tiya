@@ -14,7 +14,8 @@
       "PowerShell(attrib -R \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\test.txt\")",
       "PowerShell(attrib -R \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\flutterflow.txt\")",
       "PowerShell($f = Get-Item \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\flutterflow.txt\"; Write-Output \"IsReadOnly: $\\($f.IsReadOnly\\)\"; Write-Output \"Attributes: $\\($f.Attributes\\)\")",
-      "Bash(cd \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\" && sed -i 's/\\\\.withValues\\(alpha: /\\\\.withOpacity\\(/g' lib/soothing_thumb.dart lib/cognitive_sorting.dart lib/aura_cleaning.dart lib/emdr_widget.dart && echo \"Done\")"
+      "Bash(cd \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\" && sed -i 's/\\\\.withValues\\(alpha: /\\\\.withOpacity\\(/g' lib/soothing_thumb.dart lib/cognitive_sorting.dart lib/aura_cleaning.dart lib/emdr_widget.dart && echo \"Done\")",
+      "Bash(adb devices *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\mathi\\Documents\\Pierre\\tiyia_mvp\\lib"
