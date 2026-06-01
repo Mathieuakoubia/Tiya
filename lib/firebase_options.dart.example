@@ -1,0 +1,41 @@
+import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
+class DefaultFirebaseOptions {
+  static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      throw UnsupportedError('Web not configured.');
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
+      case TargetPlatform.iOS:
+        return ios;
+      default:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions not configured for this platform.',
+        );
+    }
+  }
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'VOTRE_CLE_API',
+    appId: '1:VOTRE_PROJECT_NUMBER:android:VOTRE_APP_ID',
+    messagingSenderId: 'VOTRE_PROJECT_NUMBER',
+    projectId: 'VOTRE_PROJECT_ID',
+    storageBucket: 'VOTRE_PROJECT_ID.firebasestorage.app',
+    databaseURL: 'https://VOTRE_PROJECT_ID-default-rtdb.europe-west1.firebasedatabase.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'VOTRE_CLE_API_IOS',
+    appId: '1:VOTRE_PROJECT_NUMBER:ios:VOTRE_APP_ID_IOS',
+    messagingSenderId: 'VOTRE_PROJECT_NUMBER',
+    projectId: 'VOTRE_PROJECT_ID',
+    storageBucket: 'VOTRE_PROJECT_ID.firebasestorage.app',
+    databaseURL: 'https://VOTRE_PROJECT_ID-default-rtdb.europe-west1.firebasedatabase.app',
+    iosClientId: 'VOTRE_IOS_CLIENT_ID.apps.googleusercontent.com',
+    iosBundleId: 'com.example.votre_app',
+  );
+}
