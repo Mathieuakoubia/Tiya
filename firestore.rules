@@ -3,42 +3,56 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ── Helpers ─────────────────────────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+    function isUser(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+    // Vérifie que l'utilisateur connecté est membre du squad donné
+    function isSquadMember(squadId) {
+      return isAuth()
+          && request.auth.uid in get(/databases/$(database)/documents/squads/$(squadId)).data.users;
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // UTILISATEURS
     // ═══════════════════════════════════════════════════════════════
     match /users/{uid} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == uid;
-      allow update: if request.auth != null && request.auth.uid == uid;
+      allow read: if isAuth();
+      allow create: if isUser(uid);
+      allow update: if isUser(uid);
       allow delete: if false;
 
       match /selfie/{document} {
-        allow read: if request.auth != null;
-        allow create: if request.auth.uid == uid;
-        allow write: if request.auth.uid == uid;
-        allow delete: if request.auth.uid == uid;
+        allow read: if isAuth();
+        allow create, write, delete: if isUser(uid);
+      }
+
+      // Notes utilisateur — Gratitude Flash & Savoring Moment
+      match /user_notes/{noteId} {
+        allow read, write: if isUser(uid);
+
+        match /entries/{entryId} {
+          allow read, write: if isUser(uid);
+        }
       }
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // TWIN INVITATION (relation de match entre 2 utilisateurs)
-    // Champ 'users' : liste de 2 UIDs (les deux twins matchés)
+    // TWIN INVITATION
     // ═══════════════════════════════════════════════════════════════
     match /twinInvitation/{docId} {
-      // Lecture : uniquement les deux utilisateurs concernés
-      allow read: if request.auth != null
-          && request.auth.uid in resource.data.users;
+      allow read: if isAuth() && request.auth.uid in resource.data.users;
 
-      // Création : l'initiateur doit être fromUid, dans users, statut 'pending'
-      allow create: if request.auth != null
+      allow create: if isAuth()
           && request.auth.uid == request.resource.data.fromUid
           && request.auth.uid in request.resource.data.users
           && request.resource.data.users.size() == 2
           && request.resource.data.status == 'pending';
 
-      // Modification : l'un des deux peut changer le statut uniquement
-      // valeurs autorisées : 'accepted' ou 'declined'
-      allow update: if request.auth != null
+      allow update: if isAuth()
           && request.auth.uid in resource.data.users
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
           && request.resource.data.status in ['accepted', 'declined'];
@@ -47,24 +61,17 @@ service cloud.firestore {
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // SQUADS (champ 'users' aligné avec twinInvitation)
+    // SQUADS
     // ═══════════════════════════════════════════════════════════════
     match /squads/{squadId} {
-      // Lecture : uniquement les membres du squad
-      allow read: if request.auth != null
-          && request.auth.uid in resource.data.users;
+      allow read: if isAuth() && request.auth.uid in resource.data.users;
 
-      // Création : le créateur doit être dans users, seul au départ
-      allow create: if request.auth != null
+      allow create: if isAuth()
           && request.auth.uid == request.resource.data.createdBy
           && request.auth.uid in request.resource.data.users
           && request.resource.data.users.size() == 1;
 
-      // Modification :
-      // - Un membre existant peut modifier (renommer, quitter)
-      // - Un non-membre peut s'ajouter via invitation acceptée
-      //   à condition que seul le champ users change et que le squad ne soit pas plein
-      allow update: if request.auth != null && (
+      allow update: if isAuth() && (
           request.auth.uid in resource.data.users
           ||
           (!(request.auth.uid in resource.data.users)
@@ -81,18 +88,17 @@ service cloud.firestore {
     // INVITATIONS SQUAD
     // ═══════════════════════════════════════════════════════════════
     match /squad_invitations/{inviteId} {
-      // Lecture : uniquement l'expéditeur ou le destinataire
-      allow read: if request.auth != null
+      allow read: if isAuth()
           && (request.auth.uid == resource.data.toUid
            || request.auth.uid == resource.data.fromUid);
 
-      // Création : l'expéditeur doit être l'utilisateur connecté, statut forcé à 'pending'
-      allow create: if request.auth != null
+      // L'expéditeur doit être membre du squad qu'il invite à rejoindre
+      allow create: if isAuth()
           && request.auth.uid == request.resource.data.fromUid
-          && request.resource.data.status == 'pending';
+          && request.resource.data.status == 'pending'
+          && isSquadMember(request.resource.data.squadId);
 
-      // Modification : uniquement le destinataire, uniquement le champ status
-      allow update: if request.auth != null
+      allow update: if isAuth()
           && request.auth.uid == resource.data.toUid
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
           && request.resource.data.status in ['accepted', 'declined'];
@@ -101,19 +107,18 @@ service cloud.firestore {
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // SESSIONS DE ROUTINES (Twin & Squad)
+    // SESSIONS DE ROUTINES SQUAD
     // ═══════════════════════════════════════════════════════════════
     match /squad_sessions/{sessionId} {
-      // Lecture : uniquement les membres du squad concerné
-      allow read: if request.auth != null
-          && request.auth.uid in get(/databases/$(database)/documents/squads/$(resource.data.squadId)).data.users;
+      allow read: if isAuth()
+          && isSquadMember(resource.data.squadId);
 
-      // Création : l'initiateur doit être l'utilisateur connecté
-      allow create: if request.auth != null
-          && request.auth.uid == request.resource.data.launchedBy;
+      // L'initiateur doit être membre du squad ciblé
+      allow create: if isAuth()
+          && request.auth.uid == request.resource.data.launchedBy
+          && isSquadMember(request.resource.data.squadId);
 
-      // Modification : seuls acceptedBy et status peuvent changer
-      allow update: if request.auth != null
+      allow update: if isAuth()
           && request.resource.data.diff(resource.data)
              .affectedKeys().hasOnly(['acceptedBy', 'status']);
 
@@ -122,20 +127,15 @@ service cloud.firestore {
 
     // ═══════════════════════════════════════════════════════════════
     // INVITATIONS DE ROUTINE (lien partageable avec code)
-    // Permet d'inviter un contact externe ou non inscrit à rejoindre
-    // une session de routine via un lien contenant un code unique.
     // ═══════════════════════════════════════════════════════════════
     match /routine_invitations/{code} {
-      // Lecture : tout utilisateur connecté (valider un code à l'inscription)
-      allow read: if request.auth != null;
+      allow read: if isAuth();
 
-      // Création : l'initiateur doit être l'utilisateur connecté
-      allow create: if request.auth != null
+      allow create: if isAuth()
           && request.auth.uid == request.resource.data.createdBy
           && request.resource.data.status == 'pending';
 
-      // Modification : marquer le code comme utilisé (status + usedBy uniquement)
-      allow update: if request.auth != null
+      allow update: if isAuth()
           && resource.data.status == 'pending'
           && request.resource.data.status == 'used'
           && request.auth.uid == request.resource.data.usedBy
@@ -148,18 +148,14 @@ service cloud.firestore {
     // SESSIONS DE ROUTINE TWIN
     // ═══════════════════════════════════════════════════════════════
     match /twin_sessions/{sessionId} {
-      // Lecture : uniquement les deux utilisateurs de la session
-      allow read: if request.auth != null
-          && request.auth.uid in resource.data.users;
+      allow read: if isAuth() && request.auth.uid in resource.data.users;
 
-      // Création : le lanceur doit être l'utilisateur connecté et dans users[]
-      allow create: if request.auth != null
+      allow create: if isAuth()
           && request.auth.uid == request.resource.data.launchedBy
           && request.auth.uid in request.resource.data.users
           && request.resource.data.users.size() == 2;
 
-      // Modification : les deux peuvent changer acceptedBy et status uniquement
-      allow update: if request.auth != null
+      allow update: if isAuth()
           && request.auth.uid in resource.data.users
           && request.resource.data.diff(resource.data)
              .affectedKeys().hasOnly(['acceptedBy', 'status']);
@@ -171,22 +167,21 @@ service cloud.firestore {
     // SQUAD (ancien système FlutterFlow — lecture seule en prod)
     // ═══════════════════════════════════════════════════════════════
     match /Squad/{squadId} {
-      allow read: if request.auth != null;
+      allow read: if isAuth();
       allow create, write, delete: if false;
 
       match /members/{userId} {
-        allow read: if request.auth != null;
-        allow write: if request.auth != null && request.auth.uid == userId;
+        allow read: if isAuth();
+        allow write: if isUser(userId);
       }
     }
 
     // ═══════════════════════════════════════════════════════════════
     // TWIN SIGNALS
     // ═══════════════════════════════════════════════════════════════
-    // Le document ID = UID de l'utilisateur — on vérifie directement le path
     match /twin_signals/{uid} {
-      allow read: if request.auth != null;
-      allow create, update: if request.auth != null && request.auth.uid == uid;
+      allow read: if isAuth();
+      allow create, update: if isUser(uid);
       allow delete: if false;
     }
 
@@ -194,11 +189,9 @@ service cloud.firestore {
     // PROFIL TWIN
     // ═══════════════════════════════════════════════════════════════
     match /profil_twin/{document} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null
-          && request.auth.uid == request.resource.data.uid;
-      allow update: if request.auth != null
-          && request.auth.uid == resource.data.uid;
+      allow read: if isAuth();
+      allow create: if isAuth() && request.auth.uid == request.resource.data.uid;
+      allow update: if isAuth() && request.auth.uid == resource.data.uid;
       allow delete: if false;
     }
 
@@ -206,7 +199,7 @@ service cloud.firestore {
     // ROUTINES & TÂCHES
     // ═══════════════════════════════════════════════════════════════
     match /routine/{document} {
-      allow read: if request.auth != null;
+      allow read: if isAuth();
       allow create: if request.resource.data.user_ref_path
           == /databases/$(database)/documents/users/$(request.auth.uid);
       allow update, delete: if resource.data.user_ref_path
@@ -214,46 +207,44 @@ service cloud.firestore {
     }
 
     match /routine/{parent}/taches/{document} {
-      allow read: if request.auth != null;
-      allow create, write, delete: if request.auth != null;
+      allow read: if isAuth();
+      allow create, write, delete: if isAuth();
     }
 
     match /{path=**}/taches/{document} {
-      allow read: if request.auth != null;
+      allow read: if isAuth();
     }
 
     // ═══════════════════════════════════════════════════════════════
     // NOTIFICATIONS
     // ═══════════════════════════════════════════════════════════════
     match /Notification/{document} {
-      allow read: if request.auth != null
-          && request.auth.uid == resource.data.uid;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null
-          && request.auth.uid == resource.data.uid;
+      allow read: if isAuth() && request.auth.uid == resource.data.uid;
+      allow create: if isAuth();
+      allow update: if isAuth() && request.auth.uid == resource.data.uid;
       allow delete: if false;
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // CALENDRIER (FlutterFlow — auth requise)
+    // CALENDRIER (FlutterFlow)
     // ═══════════════════════════════════════════════════════════════
     match /calendar_events/{document} {
-      allow read, create, update: if request.auth != null;
+      allow read, create, update: if isAuth();
       allow delete: if false;
     }
 
     match /calendar_connections_events/{document} {
-      allow read, create, update: if request.auth != null;
+      allow read, create, update: if isAuth();
       allow delete: if false;
     }
 
     match /calendar_connections/{document} {
-      allow read, create, update: if request.auth != null;
+      allow read, create, update: if isAuth();
       allow delete: if false;
     }
 
     match /CalendarEvents/{document} {
-      allow read, create: if request.auth != null;
+      allow read, create: if isAuth();
       allow update, delete: if false;
     }
 
@@ -261,22 +252,22 @@ service cloud.firestore {
     // HUME / GUARDIAN / ACTUALITÉ
     // ═══════════════════════════════════════════════════════════════
     match /hume_jobs/{document} {
-      allow read, create: if request.auth != null;
+      allow read, create: if isAuth();
       allow update, delete: if false;
     }
 
     match /GuardianActions/{document} {
-      allow read, create: if request.auth != null;
+      allow read, create: if isAuth();
       allow update, delete: if false;
     }
 
     match /guardian_suggestions/{document} {
-      allow read, create: if request.auth != null;
+      allow read, create: if isAuth();
       allow update, delete: if false;
     }
 
     match /Actualite/{document} {
-      allow read: if request.auth != null;
+      allow read: if isAuth();
       allow create, update, delete: if false;
     }
 
@@ -284,15 +275,92 @@ service cloud.firestore {
     // CHALLENGES
     // ═══════════════════════════════════════════════════════════════
     match /challenge/{document} {
-      allow create: if request.auth != null
+      allow create: if isAuth()
           && /databases/$(database)/documents/users/$(request.auth.uid)
              in request.resource.data.user;
-      allow read: if request.auth != null
+      allow read: if isAuth()
           && /databases/$(database)/documents/users/$(request.auth.uid)
              in resource.data.user;
-      allow update, delete: if request.auth != null
+      allow update, delete: if isAuth()
           && /databases/$(database)/documents/users/$(request.auth.uid)
              in resource.data.user;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // INTENTIONS SQUAD — Intention Wheel (routine 12)
+    // Doc ID = {squadId}_{userUid}_{date}
+    // ═══════════════════════════════════════════════════════════════
+    match /squad_intentions/{docId} {
+      // Lecture : membres du squad concerné uniquement
+      allow read: if isAuth()
+          && isSquadMember(resource.data.squadId);
+
+      // Écriture : auteur = utilisateur connecté ET membre du squad ciblé
+      allow create, update: if isAuth()
+          && request.auth.uid == request.resource.data.userUid
+          && isSquadMember(request.resource.data.squadId);
+
+      allow delete: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // JARDIN GRATITUDE SQUAD — Squad-Gratitude-Garden (routine 51)
+    // ═══════════════════════════════════════════════════════════════
+    match /squad_gratitude/{docId} {
+      // Lecture : membres du squad concerné uniquement
+      allow read: if isAuth()
+          && isSquadMember(resource.data.squadId);
+
+      // Écriture : auteur = utilisateur connecté ET membre du squad ciblé
+      allow create: if isAuth()
+          && request.auth.uid == request.resource.data.authorUid
+          && isSquadMember(request.resource.data.squadId);
+
+      allow update, delete: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SIGNALS SQUAD — Squad-Morning-Pulse (routine 50)
+    // ═══════════════════════════════════════════════════════════════
+    match /squad_signals/{docId} {
+      // Lecture : destinataire uniquement
+      allow read: if isAuth()
+          && request.auth.uid == resource.data.toUid;
+
+      // Écriture : expéditeur = utilisateur connecté ET membre du squad ciblé
+      allow create: if isAuth()
+          && request.auth.uid == request.resource.data.fromUid
+          && isSquadMember(request.resource.data.squadId);
+
+      allow update, delete: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // CAPSULES TWIN — Savoring-Duo (routine 47)
+    // ═══════════════════════════════════════════════════════════════
+    match /twin_capsules/{docId} {
+      allow read: if isAuth() && request.auth.uid in resource.data.users;
+      allow create: if isAuth() && request.auth.uid in request.resource.data.users;
+      allow update, delete: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // CAPSULES AUDIO — Audio-Capsule (routine 13)
+    // ═══════════════════════════════════════════════════════════════
+    match /audio_capsules/{docId} {
+      allow read: if isAuth()
+          && (request.auth.uid == resource.data.fromUid
+           || request.auth.uid == resource.data.toUid);
+
+      allow create: if isAuth()
+          && request.auth.uid == request.resource.data.fromUid;
+
+      // Le destinataire peut uniquement marquer la capsule comme ouverte
+      allow update: if isAuth()
+          && request.auth.uid == resource.data.toUid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['opened', 'openedAt']);
+
+      allow delete: if false;
     }
 
     // ═══════════════════════════════════════════════════════════════
