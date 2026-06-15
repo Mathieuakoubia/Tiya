@@ -1,25 +1,13 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'twin_service.dart';
-import 'twin_coherence.dart';
-import 'mirror_aura.dart';
-import 'silent_presence.dart';
-import 'pulse_match.dart';
+import 'routine_lobby.dart';
 
-const _gold = Color(0xFFD4A853);
-const _bg = Color(0xFF121212);
-const _bordeaux = Color(0xFF0DAABA);
-
-Widget _routineWidget(String name) {
-  switch (name) {
-    case 'Twin-Coherence':  return const TwinCoherence();
-    case 'Mirror-Aura':     return const MirrorAura();
-    case 'Silent-Presence': return const SilentPresence();
-    case 'Pulse Match':     return const PulseMatch();
-    default:                return const TwinCoherence();
-  }
-}
+const _gold     = Color(0xFFD4A853);
+const _bg       = Color(0xFF121212);
+const _teal     = Color(0xFF0DAABA);
 
 class TwinScreen extends StatefulWidget {
   const TwinScreen({super.key});
@@ -31,6 +19,7 @@ class TwinScreen extends StatefulWidget {
 class _TwinScreenState extends State<TwinScreen> {
   Map<String, dynamic>? _twinProfile;
   Map<String, dynamic>? _matchedInvite;
+  String _myName = '';
   bool _loading = true;
 
   @override
@@ -40,14 +29,29 @@ class _TwinScreenState extends State<TwinScreen> {
   }
 
   Future<void> _load() async {
-    final invite = await TwinService.getMyMatchedTwin();
-    final profile = invite != null ? await TwinService.getMyTwinProfile() : null;
-    if (mounted) {
-      setState(() {
-        _matchedInvite = invite;
-        _twinProfile = profile;
-        _loading = false;
-      });
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      final futures = await Future.wait([
+        TwinService.getMyMatchedTwin(),
+        if (uid.isNotEmpty)
+          FirebaseFirestore.instance.collection('users').doc(uid).get()
+        else
+          Future.value(null),
+      ]);
+      final invite = futures[0] as Map<String, dynamic>?;
+      final myDoc  = futures[1] as DocumentSnapshot?;
+      final profile = invite != null ? await TwinService.getMyTwinProfile() : null;
+      if (mounted) {
+        setState(() {
+          _matchedInvite = invite;
+          _twinProfile   = profile;
+          _myName = (myDoc?.data() as Map<String, dynamic>?)?['prenom']
+                      as String? ?? '';
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -59,7 +63,8 @@ class _TwinScreenState extends State<TwinScreen> {
         backgroundColor: _bg,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: Text('Mon Twin', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+        title: Text('Mon Twin',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: _gold))
@@ -68,13 +73,14 @@ class _TwinScreenState extends State<TwinScreen> {
               : _HasTwinView(
                   twin: _twinProfile!,
                   invite: _matchedInvite!,
+                  myName: _myName,
                 ),
     );
   }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// PAS ENCORE DE TWIN — Invitations reçues + recherche
+// PAS ENCORE DE TWIN
 // ══════════════════════════════════════════════════════════════════════════════
 
 class _NoTwinView extends StatefulWidget {
@@ -100,7 +106,8 @@ class _NoTwinViewState extends State<_NoTwinView> {
     setState(() => _searching = true);
     try {
       final r = await TwinService.searchUsers(_searchCtrl.text);
-      setState(() => _results = r);
+      if (mounted) setState(() => _results = r);
+    } catch (_) {
     } finally {
       if (mounted) setState(() => _searching = false);
     }
@@ -114,11 +121,14 @@ class _NoTwinViewState extends State<_NoTwinView> {
         content: Text('Invitation envoyée à $name !'),
         backgroundColor: Colors.green.shade700,
       ));
-      setState(() { _results = []; _searchCtrl.clear(); });
+      setState(() {
+        _results = [];
+        _searchCtrl.clear();
+      });
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: _bordeaux));
+          SnackBar(content: Text(e.toString()), backgroundColor: _teal));
     }
   }
 
@@ -127,18 +137,20 @@ class _NoTwinViewState extends State<_NoTwinView> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       children: [
-        // Invitations de matching reçues
         _PendingMatchRequests(onAccepted: widget.onMatched),
         const SizedBox(height: 28),
-
-        // Trouver un twin
-        Text('Trouver un twin', style: GoogleFonts.poppins(
-          color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+        Text('Trouver un twin',
+            style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600)),
         const SizedBox(height: 6),
-        Text('Cherche par email ou prénom et invite quelqu\'un à devenir ton twin.',
-          style: GoogleFonts.poppins(color: Colors.white54, fontSize: 14, height: 1.5)),
+        Text(
+          'Cherche par email ou prénom et invite quelqu\'un à devenir ton twin.',
+          style: GoogleFonts.poppins(
+              color: Colors.white54, fontSize: 14, height: 1.5),
+        ),
         const SizedBox(height: 20),
-
         Row(children: [
           Expanded(
             child: TextField(
@@ -150,11 +162,12 @@ class _NoTwinViewState extends State<_NoTwinView> {
                 filled: true,
                 fillColor: Colors.white.withValues(alpha: 0.06),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none),
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: _gold, width: 1.5)),
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide:
+                        const BorderSide(color: _gold, width: 1.5)),
               ),
               onSubmitted: (_) => _search(),
             ),
@@ -163,36 +176,39 @@ class _NoTwinViewState extends State<_NoTwinView> {
           IconButton(
             onPressed: _searching ? null : _search,
             icon: _searching
-                ? const SizedBox(width: 20, height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: _gold))
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: _gold))
                 : const Icon(Icons.search, color: _gold),
           ),
         ]),
-
         if (_results.isNotEmpty) ...[
           const SizedBox(height: 16),
           ..._results.map((u) {
-            final name = u['prenom'] as String? ?? u['email'] ?? '?';
+            final name =
+                u['prenom'] as String? ?? u['email'] as String? ?? '?';
             return _UserTile(
               user: u,
               action: TextButton(
-                onPressed: () => _invite(u['uid'], name),
-                child: Text('Inviter', style: GoogleFonts.poppins(
-                  color: _gold, fontWeight: FontWeight.w600)),
+                onPressed: () => _invite(u['uid'] as String, name),
+                child: Text('Inviter',
+                    style: GoogleFonts.poppins(
+                        color: _gold, fontWeight: FontWeight.w600)),
               ),
             );
           }),
         ] else if (!_searching && _searchCtrl.text.isNotEmpty) ...[
           const SizedBox(height: 16),
           Text('Aucun résultat.',
-            style: GoogleFonts.poppins(color: Colors.white38)),
+              style: GoogleFonts.poppins(color: Colors.white38)),
         ],
       ],
     );
   }
 }
 
-// Invitations de matching reçues (quelqu'un veut être ton twin)
 class _PendingMatchRequests extends StatelessWidget {
   final VoidCallback onAccepted;
   const _PendingMatchRequests({required this.onAccepted});
@@ -203,31 +219,34 @@ class _PendingMatchRequests extends StatelessWidget {
       stream: TwinService.myPendingTwinRequestsStream(),
       builder: (_, snap) {
         if (!snap.hasData) return const SizedBox.shrink();
-
-        // Filtre : uniquement les invitations reçues (pas envoyées par moi)
         final incoming = snap.data!.docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>;
           return data['fromUid'] != TwinService.currentUid;
         }).toList();
-
         if (incoming.isEmpty) return const SizedBox.shrink();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Demandes reçues', style: GoogleFonts.poppins(
-              color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+            Text('Demandes reçues',
+                style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
             ...incoming.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
               final fromUid = data['fromUid'] as String? ?? '';
               return FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance
-                    .collection('users').doc(fromUid).get(),
+                    .collection('users')
+                    .doc(fromUid)
+                    .get(),
                 builder: (_, userSnap) {
                   final userName = userSnap.hasData && userSnap.data!.exists
                       ? (userSnap.data!.data()
-                          as Map<String, dynamic>)['prenom'] as String? ?? '?'
+                              as Map<String, dynamic>)['prenom']
+                          as String? ?? '?'
                       : '...';
                   return Container(
                     margin: const EdgeInsets.only(bottom: 10),
@@ -235,32 +254,37 @@ class _PendingMatchRequests extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: _gold.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: _gold.withValues(alpha: 0.3)),
+                      border:
+                          Border.all(color: _gold.withValues(alpha: 0.3)),
                     ),
                     child: Row(children: [
                       CircleAvatar(
                         backgroundColor: _gold.withValues(alpha: 0.2),
                         child: Text(userName[0].toUpperCase(),
-                          style: GoogleFonts.poppins(
-                            color: _gold, fontWeight: FontWeight.w700)),
+                            style: GoogleFonts.poppins(
+                                color: _gold,
+                                fontWeight: FontWeight.w700)),
                       ),
                       const SizedBox(width: 12),
-                      Expanded(child: Column(
+                      Expanded(
+                          child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(userName, style: GoogleFonts.poppins(
-                            color: Colors.white, fontWeight: FontWeight.w600)),
+                          Text(userName,
+                              style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600)),
                           Text('veut être ton twin',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white54, fontSize: 12)),
+                              style: GoogleFonts.poppins(
+                                  color: Colors.white54, fontSize: 12)),
                         ],
                       )),
                       TextButton(
-                        onPressed: () async {
-                          await TwinService.declineTwinRequest(doc.id);
-                        },
-                        child: Text('Refuser', style: GoogleFonts.poppins(
-                          color: Colors.white38, fontSize: 13)),
+                        onPressed: () =>
+                            TwinService.declineTwinRequest(doc.id),
+                        child: Text('Refuser',
+                            style: GoogleFonts.poppins(
+                                color: Colors.white38, fontSize: 13)),
                       ),
                       TextButton(
                         onPressed: () async {
@@ -270,14 +294,17 @@ class _PendingMatchRequests extends StatelessWidget {
                           } catch (e) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString()),
-                                  backgroundColor: _bordeaux));
+                                  SnackBar(
+                                      content: Text(e.toString()),
+                                      backgroundColor: _teal));
                             }
                           }
                         },
-                        child: Text('Accepter', style: GoogleFonts.poppins(
-                          color: _gold, fontWeight: FontWeight.w600,
-                          fontSize: 13)),
+                        child: Text('Accepter',
+                            style: GoogleFonts.poppins(
+                                color: _gold,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13)),
                       ),
                     ]),
                   );
@@ -294,56 +321,120 @@ class _PendingMatchRequests extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// TWIN MATCHÉ — Profil + sessions en attente + routines à lancer
+// TWIN MATCHÉ
 // ══════════════════════════════════════════════════════════════════════════════
 
 class _HasTwinView extends StatelessWidget {
   final Map<String, dynamic> twin;
   final Map<String, dynamic> invite;
-  const _HasTwinView({required this.twin, required this.invite});
+  final String myName;
+  const _HasTwinView({
+    required this.twin,
+    required this.invite,
+    required this.myName,
+  });
 
   static const _routines = [
-    {'icon': Icons.favorite,      'name': 'Twin-Coherence',
-     'sublabel': '3 min  •  Fusion des souffles'},
-    {'icon': Icons.electric_bolt, 'name': 'Mirror-Aura',
-     'sublabel': '2 min  •  Don d\'énergie'},
-    {'icon': Icons.water,         'name': 'Silent-Presence',
-     'sublabel': '5 min  •  Silence partagé'},
-    {'icon': Icons.flash_on,      'name': 'Pulse Match',
-     'sublabel': '1 min 30  •  Contact à distance'},
+    {
+      'icon': Icons.air,
+      'routineKey': 'twin_coherence_rt',
+      'routineTitle': 'Cohérence Twin',
+      'sublabel': '5 min  •  Synchronie respiratoire',
+    },
+    {
+      'icon': Icons.electric_bolt,
+      'routineKey': 'mirror_aura',
+      'routineTitle': 'Mirror Aura',
+      'sublabel': '2 min  •  Don d\'énergie',
+    },
+    {
+      'icon': Icons.water,
+      'routineKey': 'silent_presence',
+      'routineTitle': 'Silent Presence',
+      'sublabel': '5 min  •  Silence partagé',
+    },
+    {
+      'icon': Icons.flash_on,
+      'routineKey': 'pulse_match',
+      'routineTitle': 'Pulse Match',
+      'sublabel': '1 min 30  •  Contact à distance',
+    },
+    {
+      'icon': Icons.wb_sunny_outlined,
+      'routineKey': 'duo_morning',
+      'routineTitle': 'Duo Morning',
+      'sublabel': '5 min  •  Rituel du matin ensemble',
+    },
+    {
+      'icon': Icons.chat_bubble_outline,
+      'routineKey': 'debrief_duo',
+      'routineTitle': 'Debrief Duo',
+      'sublabel': '5 min  •  Partage de la journée',
+    },
+    {
+      'icon': Icons.nightlight_round,
+      'routineKey': 'night_tandem',
+      'routineTitle': 'Night Tandem',
+      'sublabel': '3 min  •  Endormissement synchronisé',
+    },
+    {
+      'icon': Icons.spa_outlined,
+      'routineKey': 'savoring_duo',
+      'routineTitle': 'Savoring Duo',
+      'sublabel': '3 min  •  Savourer un moment',
+    },
+    {
+      'icon': Icons.waves,
+      'routineKey': 'bio_ambient_duo',
+      'routineTitle': 'Bio Ambient Duo',
+      'sublabel': '8 min  •  Cohérence cardiaque guidée',
+    },
+    {
+      'icon': Icons.favorite,
+      'routineKey': 'twin_coherence',
+      'routineTitle': 'Twin Cohérence',
+      'sublabel': '3 min  •  Fusion des souffles',
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
     final inviteId = invite['id'] as String;
-    final twinUid = twin['uid'] as String;
+    final twinUid  = twin['uid'] as String;
+    final twinName = twin['prenom'] as String? ?? 'Twin';
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       children: [
         _TwinCard(twin: twin),
-        const SizedBox(height: 28),
-
-        // Sessions de routine en attente (lancées par le twin)
-        _IncomingSessionBanner(inviteId: inviteId),
-
-        Text('LANCER UNE ROUTINE', style: GoogleFonts.poppins(
-          color: Colors.white54, fontSize: 12,
-          fontWeight: FontWeight.w600, letterSpacing: 1.5)),
-        const SizedBox(height: 12),
-        ..._routines.map((r) => _RoutineTile(
-          icon: r['icon'] as IconData,
-          name: r['name'] as String,
-          sublabel: r['sublabel'] as String,
+        const SizedBox(height: 20),
+        _IncomingSessionBanner(
           twinUid: twinUid,
           inviteId: inviteId,
-        )),
+          twinName: twinName,
+          myName: myName,
+        ),
+        Text('LANCER UNE ROUTINE',
+            style: GoogleFonts.poppins(
+                color: Colors.white54,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5)),
+        const SizedBox(height: 12),
+        ..._routines.map((r) => _RoutineTile(
+              icon: r['icon'] as IconData,
+              routineKey: r['routineKey'] as String,
+              routineTitle: r['routineTitle'] as String,
+              sublabel: r['sublabel'] as String,
+              twinUid: twinUid,
+              inviteId: inviteId,
+              twinName: twinName,
+              myName: myName,
+            )),
       ],
     );
   }
 }
-
-// ── Carte twin matché ─────────────────────────────────────────────────────────
 
 class _TwinCard extends StatelessWidget {
   final Map<String, dynamic> twin;
@@ -357,7 +448,8 @@ class _TwinCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [_gold.withValues(alpha: 0.15), _gold.withValues(alpha: 0.05)],
-          begin: Alignment.topLeft, end: Alignment.bottomRight,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: _gold.withValues(alpha: 0.3)),
@@ -366,23 +458,32 @@ class _TwinCard extends StatelessWidget {
         CircleAvatar(
           radius: 32,
           backgroundColor: _gold.withValues(alpha: 0.2),
-          child: Text(name[0].toUpperCase(), style: GoogleFonts.poppins(
-            color: _gold, fontSize: 24, fontWeight: FontWeight.w700)),
+          child: Text(name[0].toUpperCase(),
+              style: GoogleFonts.poppins(
+                  color: _gold,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700)),
         ),
         const SizedBox(width: 16),
-        Expanded(child: Column(
+        Expanded(
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(name, style: GoogleFonts.poppins(
-              color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+            Text(name,
+                style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700)),
             const SizedBox(height: 4),
             Row(children: [
-              Container(width: 8, height: 8,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle, color: _gold)),
+              Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                      shape: BoxShape.circle, color: _gold)),
               const SizedBox(width: 6),
-              Text('Ton twin', style: GoogleFonts.poppins(
-                color: _gold, fontSize: 13)),
+              Text('Ton twin',
+                  style: GoogleFonts.poppins(color: _gold, fontSize: 13)),
             ]),
           ],
         )),
@@ -392,23 +493,35 @@ class _TwinCard extends StatelessWidget {
   }
 }
 
-// ── Sessions de routine reçues (bannière) ─────────────────────────────────────
+// ── Bannière sessions entrantes ───────────────────────────────────────────────
 
 class _IncomingSessionBanner extends StatelessWidget {
+  final String twinUid;
   final String inviteId;
-  const _IncomingSessionBanner({required this.inviteId});
+  final String twinName;
+  final String myName;
+
+  const _IncomingSessionBanner({
+    required this.twinUid,
+    required this.inviteId,
+    required this.twinName,
+    required this.myName,
+  });
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: TwinService.pendingTwinSessionsStream(inviteId),
+      stream: TwinService.incomingRoutineSessionsStream(),
       builder: (_, snap) {
         if (!snap.hasData || snap.data!.docs.isEmpty) {
           return const SizedBox.shrink();
         }
+        final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
         final incoming = snap.data!.docs.where((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          return data['launchedBy'] != TwinService.currentUid;
+          final data     = doc.data() as Map<String, dynamic>;
+          final launched = data['launchedBy'] as String? ?? '';
+          final accepted = List<String>.from(data['acceptedBy'] ?? []);
+          return launched != currentUid && !accepted.contains(currentUid);
         }).toList();
 
         if (incoming.isEmpty) return const SizedBox.shrink();
@@ -416,15 +529,27 @@ class _IncomingSessionBanner extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('INVITATION REÇUE', style: GoogleFonts.poppins(
-              color: Colors.white54, fontSize: 12,
-              fontWeight: FontWeight.w600, letterSpacing: 1.5)),
+            Text('INVITATION REÇUE',
+                style: GoogleFonts.poppins(
+                    color: Colors.white54,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.5)),
             const SizedBox(height: 10),
             ...incoming.map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
-              return _IncomingSessionCard(sessionId: doc.id, data: data);
+              final data   = doc.data() as Map<String, dynamic>;
+              final rKey   = data['routineKey']    as String? ?? '';
+              final rTitle = data['routineTitle']  as String? ?? rKey;
+              final from   = data['initiatorName'] as String? ?? 'Quelqu\'un';
+              return _IncomingCard(
+                sessionId: doc.id,
+                routineKey: rKey,
+                routineTitle: rTitle,
+                initiatorName: from,
+                myName: myName,
+              );
             }),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
           ],
         );
       },
@@ -432,81 +557,98 @@ class _IncomingSessionBanner extends StatelessWidget {
   }
 }
 
-class _IncomingSessionCard extends StatelessWidget {
+class _IncomingCard extends StatelessWidget {
   final String sessionId;
-  final Map<String, dynamic> data;
-  const _IncomingSessionCard({required this.sessionId, required this.data});
+  final String routineKey;
+  final String routineTitle;
+  final String initiatorName;
+  final String myName;
+
+  const _IncomingCard({
+    required this.sessionId,
+    required this.routineKey,
+    required this.routineTitle,
+    required this.initiatorName,
+    required this.myName,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final routineName = data['routineName'] as String? ?? 'Routine';
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _gold.withValues(alpha: 0.08),
+        color: _teal.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _gold.withValues(alpha: 0.3)),
+        border: Border.all(color: _teal.withValues(alpha: 0.35)),
       ),
       child: Row(children: [
-        const Icon(Icons.notifications_active, color: _gold, size: 22),
+        Icon(Icons.notifications_active,
+            color: _teal.withValues(alpha: 0.80), size: 22),
         const SizedBox(width: 12),
-        Expanded(child: Column(
+        Expanded(
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Invitation à $routineName', style: GoogleFonts.poppins(
-              color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
-            Text('Ton twin t\'invite à cette routine maintenant',
-              style: GoogleFonts.poppins(color: Colors.white54, fontSize: 12)),
+            Text(routineTitle,
+                style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14)),
+            Text('$initiatorName t\'invite',
+                style: GoogleFonts.poppins(
+                    color: Colors.white54, fontSize: 12)),
           ],
         )),
-        const SizedBox(width: 8),
-        Column(children: [
-          TextButton(
-            onPressed: () async {
-              try {
-                await TwinService.acceptTwinSession(sessionId);
-                if (!context.mounted) return;
-                Navigator.push(context, MaterialPageRoute(
-                  builder: (_) => _routineWidget(routineName)));
-              } catch (e) {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(e.toString()),
-                  backgroundColor: _bordeaux));
-              }
-            },
-            style: TextButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6)),
-            child: Text('Rejoindre', style: GoogleFonts.poppins(
-              color: _gold, fontWeight: FontWeight.w600, fontSize: 13)),
+        TextButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => RoutineLobby(
+                routineKey: routineKey,
+                routineTitle: routineTitle,
+                routineType: 'twin',
+                myName: myName,
+                existingSessionId: sessionId,
+              ),
+            ),
           ),
-          TextButton(
-            onPressed: () => TwinService.declineTwinSession(sessionId),
-            style: TextButton.styleFrom(
+          style: TextButton.styleFrom(
               minimumSize: Size.zero,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6)),
-            child: Text('Refuser', style: GoogleFonts.poppins(
-              color: Colors.white38, fontSize: 12)),
-          ),
-        ]),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6)),
+          child: Text('Rejoindre',
+              style: GoogleFonts.poppins(
+                  color: _teal,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13)),
+        ),
       ]),
     );
   }
 }
 
-// ── Tuile routine à lancer ────────────────────────────────────────────────────
+// ── Tuile routine ─────────────────────────────────────────────────────────────
 
 class _RoutineTile extends StatelessWidget {
   final IconData icon;
-  final String name;
+  final String routineKey;
+  final String routineTitle;
   final String sublabel;
   final String twinUid;
   final String inviteId;
+  final String twinName;
+  final String myName;
+
   const _RoutineTile({
-    required this.icon, required this.name, required this.sublabel,
-    required this.twinUid, required this.inviteId,
+    required this.icon,
+    required this.routineKey,
+    required this.routineTitle,
+    required this.sublabel,
+    required this.twinUid,
+    required this.inviteId,
+    required this.twinName,
+    required this.myName,
   });
 
   @override
@@ -517,129 +659,55 @@ class _RoutineTile extends StatelessWidget {
         color: _gold.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          onTap: () => _launch(context),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => RoutineLobby(
+                routineKey: routineKey,
+                routineTitle: routineTitle,
+                routineType: 'twin',
+                myName: myName,
+                twinUid: twinUid,
+                twinInviteId: inviteId,
+                partnerName: twinName,
+              ),
+            ),
+          ),
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
             child: Row(children: [
               Container(
-                width: 44, height: 44,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _gold.withValues(alpha: 0.15)),
+                    shape: BoxShape.circle,
+                    color: _gold.withValues(alpha: 0.15)),
                 child: Icon(icon, color: _gold, size: 22),
               ),
               const SizedBox(width: 16),
-              Expanded(child: Column(
+              Expanded(
+                  child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: const TextStyle(
-                    color: Colors.white, fontSize: 16,
-                    fontWeight: FontWeight.w600)),
+                  Text(routineTitle,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600)),
                   const SizedBox(height: 2),
-                  Text(sublabel, style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.4), fontSize: 12)),
+                  Text(sublabel,
+                      style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.4),
+                          fontSize: 12)),
                 ],
               )),
-              Icon(Icons.send, color: _gold.withValues(alpha: 0.6), size: 18),
+              Icon(Icons.send,
+                  color: _gold.withValues(alpha: 0.6), size: 18),
             ]),
           ),
         ),
-      ),
-    );
-  }
-
-  Future<void> _launch(BuildContext context) async {
-    try {
-      final sessionId =
-          await TwinService.startTwinSession(twinUid, inviteId, name);
-      if (!context.mounted) return;
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => _WaitingDialog(sessionId: sessionId, routineName: name),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: _bordeaux));
-    }
-  }
-}
-
-// ── Dialog d'attente côté lanceur ─────────────────────────────────────────────
-
-class _WaitingDialog extends StatefulWidget {
-  final String sessionId;
-  final String routineName;
-  const _WaitingDialog({required this.sessionId, required this.routineName});
-
-  @override
-  State<_WaitingDialog> createState() => _WaitingDialogState();
-}
-
-class _WaitingDialogState extends State<_WaitingDialog> {
-  bool _navigated = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<DocumentSnapshot>(
-      stream: TwinService.sessionStream(widget.sessionId),
-      builder: (_, snap) {
-        if (snap.hasData && snap.data!.exists) {
-          final data = snap.data!.data() as Map<String, dynamic>;
-          final status = data['status'] as String?;
-
-          if (status == 'active' && !_navigated) {
-            _navigated = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (context.mounted) {
-                Navigator.of(context).pop();
-                Navigator.push(context, MaterialPageRoute(
-                  builder: (_) => _routineWidget(widget.routineName)));
-              }
-            });
-          }
-
-          if (status == 'declined') {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (context.mounted) Navigator.of(context).pop();
-            });
-            return _shell(child: Text('Ton twin a refusé.',
-              style: GoogleFonts.poppins(
-                color: Colors.redAccent, fontSize: 16,
-                fontWeight: FontWeight.w600)));
-          }
-        }
-
-        return _shell(child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const CircularProgressIndicator(color: _gold, strokeWidth: 2),
-          const SizedBox(height: 20),
-          Text('En attente de ton twin...', style: GoogleFonts.poppins(
-            color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 6),
-          Text('Invitation envoyée pour ${widget.routineName}',
-            style: GoogleFonts.poppins(color: Colors.white54, fontSize: 13)),
-        ]));
-      },
-    );
-  }
-
-  Widget _shell({required Widget child}) {
-    return Dialog(
-      backgroundColor: const Color(0xFF1E1E1E),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          child,
-          const SizedBox(height: 24),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Annuler', style: GoogleFonts.poppins(
-              color: Colors.white38, fontSize: 13)),
-          ),
-        ]),
       ),
     );
   }
@@ -654,8 +722,8 @@ class _UserTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = user['prenom'] as String? ?? '?';
-    final email = user['email'] as String? ?? '';
+    final name  = user['prenom'] as String? ?? '?';
+    final email = user['email']  as String? ?? '';
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -667,18 +735,24 @@ class _UserTile extends StatelessWidget {
         CircleAvatar(
           radius: 22,
           backgroundColor: _gold.withValues(alpha: 0.15),
-          child: Text(name[0].toUpperCase(), style: GoogleFonts.poppins(
-            color: _gold, fontWeight: FontWeight.w700, fontSize: 16)),
+          child: Text(name[0].toUpperCase(),
+              style: GoogleFonts.poppins(
+                  color: _gold,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16)),
         ),
         const SizedBox(width: 14),
-        Expanded(child: Column(
+        Expanded(
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(name, style: GoogleFonts.poppins(
-              color: Colors.white, fontWeight: FontWeight.w600)),
-            Text(email, style: GoogleFonts.poppins(
-              color: Colors.white38, fontSize: 12),
-              overflow: TextOverflow.ellipsis),
+            Text(name,
+                style: GoogleFonts.poppins(
+                    color: Colors.white, fontWeight: FontWeight.w600)),
+            Text(email,
+                style: GoogleFonts.poppins(
+                    color: Colors.white38, fontSize: 12),
+                overflow: TextOverflow.ellipsis),
           ],
         )),
         action,

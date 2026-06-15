@@ -4,7 +4,23 @@
       "Bash(python -c ':*)",
       "Bash(flutter build:*)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\android\\\\app\\\\google-services.json\" | ConvertFrom-Json\\).client[0].api_key[0].current_key)",
+      "PowerShell(\\(Get-Item \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\.claude\\\\CLAUDE.md\"\\).Length)",
+      "PowerShell(Set-Content -Path \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\.claude\\\\CLAUDE.md\" -Value \"\" -Encoding utf8; \\(Get-Item \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\.claude\\\\CLAUDE.md\"\\).Length)",
+      "Bash(flutter test *)",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\mathi\\\\Documents\\\\Pierre\\\\tiyia_mvp\\\\android\\\\app\\\\google-services.json\" | ConvertFrom-Json\\).client[0].client_info.android_client_info.package_name)",
+      "Bash(cat c:/Users/mathi/AppData/Local/Pub/Cache/hosted/pub.dev/tflite_flutter-0.10.4/lib/src/tensor.dart | head -20)",
+      "Read(//c/Users/mathi/AppData/Local/Pub/Cache/hosted/pub.dev/tflite_flutter-0.10.4/lib/src/**)",
+      "Bash(flutter --version)",
+      "Bash(dart --version)",
+      "Bash(ls c:/Users/mathi/AppData/Local/Pub/Cache/hosted/pub.dev/tflite_flutter-0.10.4/ 2>&1)",
+      "Read(//c/Users/mathi/AppData/Local/Pub/Cache/hosted/pub.dev/tflite_flutter-0.10.4/**)",
+      "Bash(dart pub *)",
+      "Bash(grep -v \"patches/tflite_flutter/example\\\\|patches\\\\\\\\\\\\\\\\tflite_flutter\\\\\\\\\\\\\\\\example\")",
+      "Bash(dart analyze *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\mathi\\.claude\\projects\\c--Users-mathi-Documents-Pierre-tiyia-mvp\\memory"

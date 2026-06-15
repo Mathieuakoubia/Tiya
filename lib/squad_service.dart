@@ -236,4 +236,40 @@ class SquadService {
         .where('status', isEqualTo: 'waiting')
         .snapshots();
   }
+
+  // ── Sessions de routine (nouveau flow Lobby) ──────────────────────
+
+  static Future<String> createRoutineSession({
+    required String squadId,
+    required String routineKey,
+    required String routineTitle,
+    required String initiatorName,
+    required List<String> memberUids,
+    required List<String> memberNames,
+  }) async {
+    final ref = await _db.collection('squad_sessions').add({
+      'routineKey':    routineKey,
+      'routineTitle':  routineTitle,
+      'squadId':       squadId,
+      'launchedBy':    currentUid,
+      'initiatorName': initiatorName,
+      'memberUids':    memberUids,
+      'memberNames':   memberNames,
+      'status':        'waiting',
+      'acceptedBy':    [currentUid],
+      'extraData':     {},
+      'createdAt':     FieldValue.serverTimestamp(),
+    });
+    return ref.id;
+  }
+
+  // Sessions en attente pour tout le squad (reçues ET envoyées)
+  static Stream<QuerySnapshot> incomingRoutineSessionsStream(String squadId) {
+    if (currentUid.isEmpty) return const Stream.empty();
+    return _db
+        .collection('squad_sessions')
+        .where('squadId', isEqualTo: squadId)
+        .where('status', whereIn: ['waiting', 'accepted'])
+        .snapshots();
+  }
 }

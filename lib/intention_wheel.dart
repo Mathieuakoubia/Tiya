@@ -4,16 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class _Ico {
-  static const String _f = 'icomoon';
-  static const IconData magic = IconData(0xe94c, fontFamily: _f);
-}
-
 const _bg   = Color(0xFF121212);
 const _teal = Color(0xFF0DAABA);
 const _dark = Color(0xFF065963);
 const _gold = Color(0xFFE8B86E);
-const _rose = Color(0xFFFFD7E7);
 
 const _wordChoices = [
   'Calme', 'Force', 'Présence', 'Légèreté', 'Clarté', 'Courage',
@@ -22,7 +16,7 @@ const _wordChoices = [
 
 const _sectionColors = [
   Color(0xFF0DAABA), Color(0xFFE8B86E),
-  Color(0xFFD9CCE8), Color(0xFFF2631D), Color(0xFF065963),
+  Color(0xFFD9CCE8), Color(0xFFF8F1E9), Color(0xFF065963),
 ];
 
 class IntentionWheel extends StatefulWidget {
@@ -164,9 +158,9 @@ class _IntentionWheelState extends State<IntentionWheel>
                     ),
                     child: Center(
                       child: _allCompleted
-                          ? Icon(_Ico.magic,
+                          ? Icon(Icons.stars,
                               color: _gold.withValues(alpha: 0.85), size: 40)
-                          : Icon(_Ico.magic,
+                          : Icon(Icons.stars,
                               color: Colors.white.withValues(alpha: 0.15), size: 36),
                     ),
                   ),
@@ -336,7 +330,3 @@ class _WheelPainter extends CustomPainter {
       old.allCompleted != allCompleted;
 }
 
-const _sectionColors = [
-  Color(0xFF0DAABA), Color(0xFFE8B86E),
-  Color(0xFFD9CCE8), Color(0xFFF2631D), Color(0xFF065963),
-];

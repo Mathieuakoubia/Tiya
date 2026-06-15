@@ -1,0 +1,361 @@
+================================================================================
+     PROTOCOLE FLUTTER RUN — TIYA MVP
+     Basé sur routine explication.md (53 routines, avril 2026)
+     Usage : cocher chaque item au fur et à mesure du test
+================================================================================
+
+COMMANDE DE LANCEMENT
+  flutter run --debug
+  ou : flutter run --release (pour tester les perfs réelles)
+
+LÉGENDE
+  [ ] à tester    [OK] validé    [KO] bug    [N/A] non applicable seul
+
+────────────────────────────────────────────────────────────────────────────────
+ÉTAPE 0 — BUILD & DÉMARRAGE (30 secondes)
+────────────────────────────────────────────────────────────────────────────────
+
+  [ ] Build sans erreur (0 error, 0 warning critique dans le terminal)
+  [ ] App s'ouvre sur l'écran d'auth
+  [ ] Fond noir #121212 dès le splash
+  [ ] Aucun caractère chinois visible (icomoon remplacé par Material Icons)
+  [ ] Police Gelica visible sur les titres
+  [ ] Police Poppins visible sur les corps de texte
+
+────────────────────────────────────────────────────────────────────────────────
+ÉTAPE 1 — AUTHENTIFICATION
+────────────────────────────────────────────────────────────────────────────────
+
+  [ ] Création compte email/password → UID créé dans Firebase Auth
+  [ ] Doc /users/{uid} créé automatiquement avec { prenom, email }
+  [ ] Connexion → accès à l'app principale
+  [ ] Déconnexion → retour à l'écran d'auth
+
+────────────────────────────────────────────────────────────────────────────────
+ÉTAPE 2 — SELFIE FLASH / BIOMÉTRIE (commun à 12+ routines)
+────────────────────────────────────────────────────────────────────────────────
+
+  Lancer depuis Routine 1 (Reset Flash) — Selfie Flash initial
+
+  [ ] Permission caméra demandée si non accordée
+  [ ] Texte "Regardez la caméra 6 secondes" affiché (police Gelica, italic)
+  [ ] Caméra frontale s'active puis se ferme automatiquement ≤ 6s
+  [ ] Transition vers écran micro "Dites quelque chose 3 secondes"
+  [ ] Micro se ferme automatiquement ≤ 3s
+  [ ] Écran "Calcul de votre Aura..." (spinner lila)
+  [ ] Résultat Aura affiché : cercle coloré + label (Sereine/Équilibrée/Tendue/Très tendue)
+  [ ] Couleur du cercle correspond à la palette :
+        Sereine    → #9DD9D2 (turquoise clair)
+        Équilibrée → #C4F9FF (bleu très clair)
+        Tendue     → #E89B7A (saumon)
+        Très tendue→ #D97A7A (rouge doux)
+
+  VÉRIFIER EN CONSOLE FIREBASE :
+  [ ] /users/{uid} contient uniquement : auraState, auraScore, lastAuraAt
+  [ ] Firebase Storage = VIDE (aucune image ni audio uploadés)
+
+  FALLBACK — couvrir la caméra :
+  [ ] Analyse continue avec voix seule (pas de crash)
+  [ ] Résultat affiché malgré l'absence de visage
+
+  FALLBACK — refuser micro ET caméra dans les settings :
+  [ ] Écran erreur "Analyse indisponible. Votre routine continue normalement."
+  [ ] Bouton "Continuer quand même" fonctionne
+
+────────────────────────────────────────────────────────────────────────────────
+ÉTAPE 3 — ROUTINES SOLO (testables seul)
+────────────────────────────────────────────────────────────────────────────────
+
+  CRITÈRES COMMUNS À TOUTES LES ROUTINES :
+  [ ] Fond #121212 correct
+  [ ] Aucune couleur hors palette (#0DAABA / #065963 / #D9CCE8 / #F8F1E9 / #E8B86E)
+  [ ] Timer / barre de progression fonctionne
+  [ ] Bouton retour ou compléter disponible
+  [ ] dispose() ne crashe pas (tester en quittant avant la fin)
+
+  ── R1 — Reset Flash (3 min, Niveau 2) ─────────────────────────────────
+  [ ] Selfie Flash initial déclenche (voir Étape 2)
+  [ ] Deux cercles gonflent/dégonflent au rythme respiration (4s montée / 5s descente)
+  [ ] Micro-vibrations haptiques en continu (7-10 Hz)
+  [ ] Aura vire progressivement vers le bleu pendant la séance
+  [ ] Selfie Flash final à la fin → delta Aura avant/après visible
+  [ ] Durée exacte ≤ 3 min
+
+  ── R2 — Aura-Cleaning (3 min, Niveau 1) ───────────────────────────────
+  [ ] Caméra frontale active (détection mouvement des mains)
+  [ ] Fond "brume colorée" visible
+  [ ] Geste de balayage → zones se nettoient visuellement
+
+  ── R3 — Saccadic Reset (1min30, Niveau 2) ─────────────────────────────
+  [ ] Bille lumineuse traverse l'écran gauche → droite
+  [ ] Traînée lumineuse derrière la bille
+  [ ] Eye-tracking via caméra : si regard quitte la bille, elle s'arrête
+  [ ] Vitesse augmente si regard fixe
+
+  ── R4 — Vagal-Haptic (2 min, Niveau 3) ────────────────────────────────
+  [ ] Zone circulaire "poser le pouce" affichée
+  [ ] Vibrations 7-10 Hz au contact du pouce
+  [ ] Rythme 6 cycles/min cadencé par les vibrations
+  [ ] Si pouce quitte → message "contact rompu", routine en pause
+
+  ── R5 — Cognitive Sorting (2 min, Niveau 1) ────────────────────────────
+  [ ] Icônes de stress tombent sur l'écran
+  [ ] Balayage vers corbeille → icône disparaît + étincelle
+  [ ] Aura s'éclaircit de ~5% par icône jetée
+
+  ── R6 — Bio-Ambient (3 min, Niveau 2) ──────────────────────────────────
+  [ ] Fond d'écran immersif (pas d'éléments interactifs)
+  [ ] Musique/sons alpha ou bruit brun (vérifier avec casque)
+  [ ] S'adapte au score de tension de l'utilisatrice
+
+  ── R15 — Tap-Sync (1 min, Niveau 1) ───────────────────────────────────
+  [ ] Points néon apparaissent à différents endroits de l'écran
+  [ ] Tap sur le point → disparaît + animation pop
+  [ ] Nouveau point apparaît immédiatement après chaque tap
+  [ ] Vitesse suffisante pour saturer l'attention (anti-rumination)
+  [ ] Durée exacte 60 secondes
+
+  ── R16 — OLED Therapy (2 min, Niveau 1) ───────────────────────────────
+  [ ] Écran entier pulse en couleur à 0.1 Hz (très lent)
+  [ ] Aucune interaction requise
+  [ ] Fond quasi-noir entre les pulses (économie OLED)
+  [ ] Aucun flash lumineux brusque
+
+  ── R17 — Audio Binaurale (3 min, Niveau 2) ─────────────────────────────
+  [ ] Détection casque avant de démarrer (message si pas branché)
+  [ ] Onde sonore stylisée réagit au volume
+  [ ] Deux fréquences distinctes (une par oreille) — vérifier avec casque stéréo
+
+  ── R18 — Infini Draw (2 min, Niveau 1) ─────────────────────────────────
+  [ ] Tracé lumineux suit le doigt
+  [ ] Symbole infini pré-dessiné en transparence comme guide
+  [ ] Résistance haptique si mouvement trop rapide (vibrations de friction)
+
+  ── R23 — Vagus Ear (1 min, Niveau 2) ──────────────────────────────────
+  [ ] Schéma du tragus affiché
+  [ ] Capteur proximité : écran devient noir quand téléphone contre oreille
+  [ ] Vibrations 40-60 Hz activées
+  [ ] Durée max 90s → délai 15 min avant relance
+
+  ── R24 — Oculo Cardiaque (1 min, Niveau 1) ─────────────────────────────
+  [ ] Point descend lentement au centre de l'écran
+  [ ] Eye-tracking vérifie la convergence oculaire
+
+  ── R26 — Plexus Weight (3 min, Niveau 2) ───────────────────────────────
+  [ ] Interface très sombre, presque noire
+  [ ] Impulsion centrale très lente
+  [ ] Vibrations profondes (Deep Pressure) quand posé à plat
+  [ ] Timer automatique 5 min max
+
+  ── R29 — Morning Ancrage (90s, Niveau 1) ───────────────────────────────
+  [ ] Texte Aria "Avant que la journée ne vous prenne..."
+  [ ] 6 mots proposés (Clarté, Douceur, Présence, Force, Légèreté, Patience)
+  [ ] OU champ de saisie libre
+  [ ] Intention choisie "se charge" visuellement dans l'Aura
+  [ ] 4 cycles de micro-respiration vivifiante
+
+  ── R30 — Readiness Check (2 min, Niveau 1) ──────────────────────────────
+  [ ] Texte Aria "Dans quelques minutes, vous allez avoir [événement]"
+  [ ] Étape 1 : identification somatique sur silhouette tactile
+  [ ] Étape 2 : respiration d'ancrage 30s
+  [ ] Étape 3 : "Imaginez-vous à la fin de cet événement"
+
+  ── R31 — End of Day Release (3 min, Niveau 1) ───────────────────────────
+  [ ] Boîte symbolique + petits objets lumineux autour
+  [ ] Glisser les objets dans la boîte → haptique de confirmation
+  [ ] Boîte se ferme à la fin
+  [ ] Fond passe progressivement en tonalité "soirée"
+
+  ── R32 — Between Two Worlds (60s, Niveau 1) ─────────────────────────────
+  [ ] Dégradé progressif d'une teinte à une autre
+  [ ] Respiration guidée par haptique uniquement (pas de texte)
+  [ ] Aura reprend avec légère variation à la fin
+
+  ── R33 — Gratitude Flash (90s, Niveau 2) ────────────────────────────────
+  [ ] Texte Aria "Trois choses qui vous ont fait du bien"
+  [ ] Saisie de 3 éléments courts (clavier ou micro)
+  [ ] Chaque élément devient un galet dans le jardin visuel
+  [ ] VÉRIFIER : sauvegardé dans /users/{uid}/user_notes
+  [ ] Rechargement → galets persistants d'une session à l'autre
+
+  ── R34 — Savoring Moment (2 min, Niveau 1) ──────────────────────────────
+  [ ] Texte "Quelque chose de bon arrive"
+  [ ] 3 questions posées dans l'ordre
+  [ ] Option audio 10s (micro)
+  [ ] Capsule créée et accessible plus tard
+
+  ── R35 — Micro Célébration (30s, Niveau 1) ──────────────────────────────
+  [ ] Saisie limitée à 15 caractères maximum
+  [ ] Animation feu d'artifice doux à la validation
+  [ ] Aura vire en teinte dorée
+  [ ] Option "Partager avec le Squad" (optionnel — squad requis)
+
+  ── R36 — Pensée Observée (2 min, Niveau 2) ──────────────────────────────
+  [ ] Fond très épuré, minimaliste (pas de couleurs vives)
+  [ ] Aria reformule avec distance "Vous avez la pensée que [texte]"
+  [ ] Pause 10 secondes
+  [ ] 3 choix : "Laisser passer" / "Noter pour plus tard" / "Contester"
+
+  ── R37 — Cocon Prémenstruel (3 min, Niveau 1) ───────────────────────────
+  [ ] Tonalités chaudes, couleurs corail/lila/ivoire (PAS de rouge vif)
+  [ ] Fond #121212 correct (pas #120A0A)
+  [ ] Rythme respiration PLUS LENT que Reset Flash : 4 cycles/min
+  [ ] Haptique douce
+  [ ] Message de validation des émotions affiché
+
+  ── R38 — Vague de Règles (2 min, Niveau 1) ──────────────────────────────
+  [ ] Fond #121212 correct (pas #0E0508)
+  [ ] Vagues visuelles lentes, couleur rouge profond (spec : "vagues rouges profondes")
+  [ ] Vibrations profondes (Deep Pressure) quand posé sur bas-ventre
+  [ ] Option narration apaisante 90s
+
+  ── R39 — Énergie Ovulation (90s, Niveau 1) ──────────────────────────────
+  [ ] Tonalités lumineuses et chaudes, Aura dorée (gold #E8B86E) — PAS orange #F2631D
+  [ ] Animations PLUS RAPIDES (seule routine qui monte en intensité)
+  [ ] Respiration VIVIFIANTE (pas apaisante)
+  [ ] Suggestion de tâche à forte intensité proposée
+
+  ── R40 — Préparation Sommeil (8 min, Niveau 3) ──────────────────────────
+  [ ] C'est la routine la plus longue du catalogue
+  [ ] Luminosité progressivement diminuée → noir complet
+  [ ] 4 étapes enchaînées : body scan 3min → respiration 3 cycles/min → narration → silence
+  [ ] App programme "Ne Pas Déranger" à la fin
+
+  ── R41 — Réveil Doux (60s, Niveau 1) ────────────────────────────────────
+  [ ] Lumière monte progressivement (lever de soleil)
+  [ ] Voix douce : "Bonjour. Prenons un moment pour arriver à nous-mêmes"
+  [ ] Choix à la fin : enchaîner avec Morning Ancrage (R29) ou sortir
+
+  ── R42 — Décrispation Express (Niveau 2) ────────────────────────────────
+  [ ] Silhouette humaine avec zones en tension éclairées
+  [ ] 4 zones guidées : mâchoire → épaules → cou → mains
+  [ ] Haptique accompagne chaque phase (serrer 5s / relâcher)
+
+────────────────────────────────────────────────────────────────────────────────
+ÉTAPE 4 — ROUTINES TWIN (2 appareils requis)
+────────────────────────────────────────────────────────────────────────────────
+
+  Pré-requis : compte Twin lié en Firestore (twinInvitation accepted)
+
+  ── R7 — Twin Coherence (3 min, Niveau 1) ────────────────────────────────
+  [ ] Deux cercles visibles (un par Twin)
+  [ ] Sync RTDB : sessions/{id}/ready → les deux marqués ready
+  [ ] Si respiration synchrone → sphère dorée apparaît (fusion des Auras)
+  [ ] dispose() nettoie sessions/{id} (vérifier console Firebase RTDB)
+
+  ── R8 — The High Five (2 min, Niveau 1) ─────────────────────────────────
+  [ ] Compte à rebours 3, 2, 1 synchronisé via RTDB
+  [ ] Si timing parfait → vibration identique sur les deux appareils
+  [ ] Animation d'explosion de lumière
+
+  ── R9 — Aura Exchange (5 min, Niveau 1) ─────────────────────────────────
+  [ ] Twin avec meilleur état peut envoyer
+  [ ] Blocage mécanique si émettrice est elle-même tendue
+  [ ] Aura de la destinataire change de couleur instantanément
+
+  ── R13 — Audio Capsule (1 min, Niveau 1) ────────────────────────────────
+  [ ] Enregistrement 10s → stocké dans Firebase Storage
+  [ ] Filtrage Hume AI : refus si ton stressé
+  [ ] Déverrouillage uniquement si destinataire atteint un pic de tension
+  [ ] Champ 'opened' + 'openedAt' mis à jour à l'ouverture
+  [ ] Règle Firestore : fromUid NE PEUT PAS ouvrir sa propre capsule
+
+  ── R19 — Lullaby Haptique (2 min, Niveau 1) ─────────────────────────────
+  [ ] Gyroscope de A → vibrations de B via RTDB (latence < 200ms)
+  [ ] Visuel de berceau ou ondes de sable qui basculent
+
+  ── R22 / R25 — Breath Drawing / Mirror Breath (2 min, Niveau 1) ─────────
+  [ ] Caméra de A capte la respiration → onde lumineuse sur B
+  [ ] Latence RTDB acceptable (< 500ms)
+  [ ] R22 : B doit suivre avec le doigt (tactile requis)
+  [ ] R25 : B regarde seulement l'onde (passif)
+
+  ── R27 — Vocal Humming Sync (2 min, Niveau 2) ───────────────────────────
+  [ ] Micro détecte le Hmmm des deux Twins
+  [ ] Haptique synchronisée sur les deux appareils
+  [ ] Résonnance sympathique perçue
+
+  ── R28 — Thermal Touch Illusion (2 min, Niveau 1) ───────────────────────
+  [ ] Caresse de A → vibration haute fréquence sur B
+  [ ] NOTE : ne fonctionne que sur Taptic Engine iPhone (désactivé Android standard)
+
+  ── R47 — Savoring Duo ───────────────────────────────────────────────────
+  [ ] Message A dans /twin_capsules → users[] contient les 2 UIDs
+  [ ] B ne peut pas écrire sans être dans users[]
+
+────────────────────────────────────────────────────────────────────────────────
+ÉTAPE 5 — ROUTINES SQUAD (2+ appareils requis)
+────────────────────────────────────────────────────────────────────────────────
+
+  Pré-requis : Squad créé, ≥ 2 membres
+
+  ── Gestion Squad (squad_screen.dart) ────────────────────────────────────
+  [ ] Créer Squad → doc /squads + squadId dans /users/{uid}
+  [ ] Inviter → doc /squad_invitations status='pending'
+  [ ] Accepter → transaction atomique (squads + users + invitation)
+  [ ] Maximum 5 membres (6ème bloqué par règle Firestore)
+  [ ] Quitter → arrayRemove + suppression squadId
+
+  ── TEST SÉCURITÉ CROSS-SQUAD (Hacker Adjustment) ────────────────────────
+  [ ] Depuis appareil A (Squad X), tenter d'écrire squad_signals avec
+      squadId = Squad Y → Firestore REFUSE (403 permission-denied)
+  [ ] Depuis A, tenter de lire squad_intentions de Squad Y → REFUS
+
+  ── R11 — Squad Pulse (2 min, Niveau 1) ──────────────────────────────────
+  [ ] Widget 5 pulsations représentant les membres
+  [ ] Rouge rapide = tension, bleu lent = calme
+  [ ] Mise à jour temps réel (RTDB)
+
+  ── R12 — Intention Wheel (2 min, Niveau 1) ───────────────────────────────
+  [ ] Roue partagée avec 5 sections
+  [ ] Chaque membre choisit un mot → apparaît dans la roue commune
+  [ ] Sauvegardé dans /squad_intentions avec userUid = uid correct
+  [ ] Non-membres ne voient rien (règle Firestore)
+
+  ── R14 — Collective Shield (2 min, Niveau 1) ────────────────────────────
+  [ ] Dôme visuel se solidifie quand un membre complète une routine
+  [ ] Badge "Squad Invincible" si bouclier complet
+
+  ── R21 — Squad Resonance (2 min, Niveau 1) ───────────────────────────────
+  [ ] Aura de la personne en crise visible par tout le groupe
+  [ ] Les 4 autres tapotent → micro-vibrations sur le 5ème appareil (RTDB)
+  [ ] Latence haptique acceptable (< 500ms)
+
+  ── R50 — Squad Morning Pulse (1 min, Niveau 1) ────────────────────────────
+  [ ] 5 auras en anneau (couleurs palette uniquement : teal/gold/lila/ivoire/pétrole)
+  [ ] Auras actives pulsent (lastActive < 30min)
+  [ ] Long press → signal Firestore envoyé + vibration haptic sur envoyeur
+  [ ] Règle cross-squad vérifiée : signal avec mauvais squadId → REFUS
+
+  ── R51 — Squad Gratitude Garden (Niveau 1) ────────────────────────────────
+  [ ] Message → /squad_gratitude avec authorUid = uid correct
+  [ ] Tous les membres du squad voient le jardin
+  [ ] Non-membres ne voient rien
+
+────────────────────────────────────────────────────────────────────────────────
+ÉTAPE 6 — BATTERIE & CYCLE DE VIE
+────────────────────────────────────────────────────────────────────────────────
+
+  [ ] Lancer biométrie → appuyer Home pendant l'analyse → caméra + micro libérés
+  [ ] Revenir dans l'app → état cohérent, pas de double session
+  [ ] Lancer routine RTDB Twin → couper réseau → pas de crash, reconnexion propre
+  [ ] Lancer 5 routines de suite → Memory profiler (Android Studio) : pas de fuite
+
+────────────────────────────────────────────────────────────────────────────────
+ORDRE RECOMMANDÉ POUR TEST SOLO
+────────────────────────────────────────────────────────────────────────────────
+
+  1. Étape 0 (build)
+  2. Étape 1 (auth)
+  3. Étape 2 (biométrie — le plus critique)
+  4. Routines courtes solo : R15 (1min), R35 (30s), R32 (60s), R41 (60s)
+  5. Routines avec haptique : R4, R23, R26, R38
+  6. Routines avec caméra : R2, R3, R24
+  7. Routines avec saisie texte : R33, R34, R36
+  8. Routines cycles féminins : R37, R38, R39
+  9. R40 (8 min — garder pour la fin, c'est la plus longue)
+  10. Étape 6 (batterie)
+
+================================================================================
+                   FIN DU PROTOCOLE FLUTTER RUN — TIYA MVP
+================================================================================

@@ -26,7 +26,7 @@ class RtdbSession {
 
   /// Marque l'utilisateur comme prêt et appelle [onReady] quand au moins
   /// [minUsers] participants sont connectés.
-  Future<void> markReady({int minUsers = 2, VoidCallback? onReady}) async {
+  Future<void> markReady({int minUsers = 2, void Function()? onReady}) async {
     await _ref.child('ready/$_myUid').set(true);
     _subs.add(_ref.child('ready').onValue.listen((event) {
       final map = event.snapshot.value as Map?;

@@ -134,6 +134,9 @@ class _AuthScreenState extends State<AuthScreen> {
       );
     } on FirebaseAuthException catch (e) {
       setState(() { _error = _friendlyError(e.code); _step2 = false; });
+    } catch (e) {
+      // Firestore write failure ou autre erreur non-Auth
+      setState(() { _error = 'Erreur lors de la création du profil : $e'; _step2 = false; });
     } finally {
       if (mounted) setState(() => _loading = false);
     }

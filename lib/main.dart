@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'auth_screen.dart';
+import 'biometric_test_screen.dart';
 import 'emdr_widget.dart';
 import 'soothing_thumb.dart';
 import 'cognitive_sorting.dart';
@@ -19,6 +20,7 @@ import 'twin_screen.dart';
 import 'morning_ritual.dart';
 import 'widgets/aura_widget.dart';
 import 'notification_service.dart';
+import 'auth_service.dart';
 // Nouvelles routines Phase 1-3
 import 'reset_flash.dart';
 import 'bio_ambient.dart';
@@ -123,6 +125,7 @@ class _MyAppState extends State<MyApp> {
         '/between-worlds':    (_) => const BetweenTwoWorlds(),
         '/reveil-doux':       (_) => const ReveilDoux(),
         '/repos-yeux':        (_) => const ReposYeux(),
+        '/biometric-test':    (_) => const BiometricTestScreen(),
       },
     );
   }
@@ -147,12 +150,64 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Tiyia — Prototypes")),
+      appBar: AppBar(
+        title: const Text("Tiyia — Prototypes"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Se déconnecter',
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  backgroundColor: const Color(0xFF1E1E1E),
+                  title: const Text('Se déconnecter ?',
+                      style: TextStyle(color: Colors.white)),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Annuler',
+                          style: TextStyle(color: Colors.white54)),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Déconnexion',
+                          style: TextStyle(color: Color(0xFF0DAABA))),
+                    ),
+                  ],
+                ),
+              );
+              if (confirm == true) {
+                await AuthService.signOut();
+                if (context.mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => const AuthGate(),
+                      transitionDuration: Duration.zero,
+                    ),
+                    (_) => false,
+                  );
+                }
+              }
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _SectionHeader(label: "DIAGNOSTIC", color: const Color(0xFF0DAABA)),
+            const SizedBox(height: 14),
+            _RoutineButton(
+              icon: Icons.face,
+              label: "Test Biométrie",
+              sublabel: "6s caméra + 3s voix  •  Score Aura en direct",
+              color: const Color(0xFF0DAABA),
+              onTap: () => _push(context, const BiometricTestScreen()),
+            ),
+            const SizedBox(height: 28),
             _SectionHeader(label: "SEULE", color: const Color(0xFFD9CCE8)),
             const SizedBox(height: 14),
             _RoutineButton(
@@ -190,37 +245,9 @@ class _HomePageState extends State<HomePage> {
             _RoutineButton(
               icon: Icons.favorite,
               label: "Mon Twin",
-              sublabel: "Lancer une routine à deux • Invitations",
+              sublabel: "10 routines  •  Invitations • Lobby",
               color: const Color(0xFFE8B86E),
               onTap: () => _push(context, const TwinScreen()),
-            ),
-            _RoutineButton(
-              icon: Icons.favorite,
-              label: "Twin-Coherence",
-              sublabel: "3 min  •  Fusion des souffles",
-              color: const Color(0xFFE8B86E),
-              onTap: () => _push(context, const TwinCoherence()),
-            ),
-            _RoutineButton(
-              icon: Icons.electric_bolt,
-              label: "Mirror-Aura",
-              sublabel: "2 min  •  Don d'énergie",
-              color: const Color(0xFFD9CCE8),
-              onTap: () => _push(context, const MirrorAura()),
-            ),
-            _RoutineButton(
-              icon: Icons.water,
-              label: "Silent-Presence",
-              sublabel: "5 min  •  Silence partagé",
-              color: const Color(0xFF0DAABA),
-              onTap: () => _push(context, const SilentPresence()),
-            ),
-            _RoutineButton(
-              icon: Icons.flash_on,
-              label: "Pulse Match",
-              sublabel: "1 min 30  •  Contact à distance",
-              color: const Color(0xFFE8B86E),
-              onTap: () => _push(context, const PulseMatch()),
             ),
             const SizedBox(height: 28),
             _SectionHeader(label: "SQUAD", color: const Color(0xFF065963)),
@@ -228,16 +255,9 @@ class _HomePageState extends State<HomePage> {
             _RoutineButton(
               icon: Icons.group,
               label: "Mon Squad",
-              sublabel: "Gérer ton groupe • Inviter des amies",
+              sublabel: "7 routines  •  Invitations • Lobby",
               color: const Color(0xFF065963),
               onTap: () => _push(context, const SquadScreen()),
-            ),
-            _RoutineButton(
-              icon: Icons.shield,
-              label: "Collective Shield",
-              sublabel: "2 min  •  Protection groupée",
-              color: const Color(0xFF065963),
-              onTap: () => _push(context, const CollectiveShield()),
             ),
             _RoutineButton(
               icon: Icons.headphones,
@@ -245,13 +265,6 @@ class _HomePageState extends State<HomePage> {
               sublabel: "30 sec  •  Murmure de sécurité",
               color: const Color(0xFFE8B86E),
               onTap: () => _push(context, const AudioCapsule()),
-            ),
-            _RoutineButton(
-              icon: Icons.people,
-              label: "Squad Pulse",
-              sublabel: "1 min  •  Partage d'énergie",
-              color: const Color(0xFF0DAABA),
-              onTap: () => _push(context, const SquadPulse()),
             ),
             _RoutineButton(
               icon: Icons.wb_sunny,

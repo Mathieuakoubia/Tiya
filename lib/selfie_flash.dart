@@ -24,8 +24,9 @@ class SelfieFlash extends StatefulWidget {
 
 class _SelfieFlashState extends State<SelfieFlash>
     with SingleTickerProviderStateMixin {
-  String _step = 'camera'; // 'camera' | 'voice' | 'processing' | 'done' | 'error'
+  String _step = 'camera'; // 'camera' | 'processing' | 'done' | 'error'
   AuraResult? _result;
+  String _errorMsg = '';
 
   late AnimationController _pulseCtrl;
   late Animation<double>   _pulse;
@@ -179,6 +180,12 @@ class _SelfieFlashState extends State<SelfieFlash>
       Text('Analyse indisponible.\nVotre routine continue normalement.',
           textAlign: TextAlign.center,
           style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 14, height: 1.5)),
+      if (_errorMsg.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        Text(_errorMsg,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.20), fontSize: 11)),
+      ],
       const SizedBox(height: 24),
       ElevatedButton(
         onPressed: widget.onComplete,

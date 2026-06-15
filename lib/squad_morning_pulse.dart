@@ -1,16 +1,10 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:vibration/vibration.dart';
 
-class _Ico {
-  static const String _f = 'icomoon';
-  static const IconData sun    = IconData(0xe968, fontFamily: _f);
-  static const IconData users  = IconData(0xe976, fontFamily: _f);
-  static const IconData sparkle = IconData(0xe964, fontFamily: _f);
-}
 
 const _bg   = Color(0xFF121212);
 const _teal = Color(0xFF0DAABA);
@@ -21,7 +15,7 @@ const _auraColors = [
   Color(0xFF0DAABA),
   Color(0xFFE8B86E),
   Color(0xFFD9CCE8),
-  Color(0xFFF2631D),
+  Color(0xFFF8F1E9),
   Color(0xFF065963),
 ];
 
@@ -176,12 +170,12 @@ class _SquadMorningPulseState extends State<SquadMorningPulse>
                   width: 56, height: 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: _dark.withValues(alpha: 0.60),
+                    color: _dark.withOpacity(0.60),
                     border: Border.all(
-                        color: _teal.withValues(alpha: 0.30), width: 1),
+                        color: _teal.withOpacity(0.30), width: 1),
                   ),
-                  child: Icon(_Ico.users,
-                      color: Colors.white.withValues(alpha: 0.50), size: 24),
+                  child: Icon(Icons.group,
+                      color: Colors.white.withOpacity(0.50), size: 24),
                 ),
                 // 5 Auras en anneau
                 ..._buildAuraRing(),
@@ -196,7 +190,7 @@ class _SquadMorningPulseState extends State<SquadMorningPulse>
                 : 'Appuyez longtemps sur une Aura\npour envoyer un Signal',
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.30),
+                color: Colors.white.withOpacity(0.30),
                 fontSize: 13),
           ),
           const SizedBox(height: 32),
@@ -292,16 +286,16 @@ class _AuraBubble extends StatelessWidget {
           width: 56, height: 56,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: color.withValues(alpha: active ? 0.18 : 0.05),
+            color: color.withOpacity(active ? 0.18 : 0.05),
             boxShadow: active
                 ? [BoxShadow(
-                    color: color.withValues(alpha: 0.30),
+                    color: color.withOpacity(0.30),
                     blurRadius: 18, spreadRadius: 3)]
                 : null,
             border: Border.all(
               color: active
-                  ? color.withValues(alpha: 0.60)
-                  : color.withValues(alpha: 0.15),
+                  ? color.withOpacity(0.60)
+                  : color.withOpacity(0.15),
               width: isMe ? 2.0 : 1.2,
             ),
           ),
@@ -310,7 +304,7 @@ class _AuraBubble extends StatelessWidget {
                 style: TextStyle(
                     color: active
                         ? color
-                        : color.withValues(alpha: 0.30),
+                        : color.withOpacity(0.30),
                     fontSize: 18,
                     fontWeight: FontWeight.w700)),
           ),

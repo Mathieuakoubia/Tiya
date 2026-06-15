@@ -1,7 +1,7 @@
 // Service biométrique SOZIA — On-Device — 100% local
-// Pipeline : Caméra (6s) → Face Emotion (TFLite) → Voix (3s) → Fusion → Aura
+// Pipeline : Caméra (6s) → Face Emotion (TFLite) → Aura
 // RGPD : seul le résultat final (AuraResult) est sauvegardé dans Firestore.
-//        Aucune donnée brute (image, audio, embedding) ne quitte l'appareil.
+//        Aucune donnée brute (image, embedding) ne quitte l'appareil.
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -53,8 +53,8 @@ class BiometricService {
     _initialized = true;
   }
 
-  /// Pipeline complet : 6s caméra + 3s voix → AuraResult.
-  /// [onProgress] reçoit les étapes : 'camera', 'voice', 'processing', 'done'
+  /// Pipeline complet : 6s caméra → AuraResult.
+  /// [onProgress] reçoit les étapes : 'camera', 'processing', 'done'
   Future<AuraResult> runFullAnalysis({
     void Function(String step)? onProgress,
   }) async {
@@ -75,7 +75,6 @@ class BiometricService {
         cam = CameraController(front, ResolutionPreset.medium, enableAudio: false);
         await cam.initialize();
 
-        // Capture une frame par seconde pendant 6s, garde le meilleur résultat
         for (int i = 0; i < 6; i++) {
           try {
             final frame = await cam.takePicture();
@@ -83,13 +82,12 @@ class BiometricService {
             final result = await _faceAnalyzer.analyze(inputImage);
             if (result.faceDetected) {
               faceResult = result;
-              break; // On a un bon résultat, pas besoin de continuer
+              break;
             }
           } catch (_) {}
           await Future.delayed(const Duration(seconds: 1));
         }
 
-        // Fermeture IMMÉDIATE de la caméra (économie batterie)
         await cam.dispose();
         cam = null;
       }
@@ -97,10 +95,6 @@ class BiometricService {
       cam?.dispose();
       cam = null;
     }
-
-    // ── Fallback : si pas de visage → voix seule avec poids 100% ───
-    final faceWeight = faceResult.faceDetected ? 0.60 : 0.0;
-    final voiceWeight = faceResult.faceDetected ? 0.40 : 1.0;
 
     // ── Phase 2 : Voix (3 secondes) ────────────────────────────
     onProgress?.call('voice');
@@ -112,43 +106,36 @@ class BiometricService {
     // ── Phase 3 : Fusion et génération de l'Aura ───────────────
     onProgress?.call('processing');
 
-    double valence, arousal;
-    bool faceUsed = faceResult.faceDetected;
-    bool voiceUsed = voiceResult.captured;
+    final bool faceUsed  = faceResult.faceDetected;
+    final bool voiceUsed = voiceResult.captured;
 
+    double valence, arousal;
     if (!faceUsed && !voiceUsed) {
-      // Aucune donnée → Aura neutre
       valence = 0.0; arousal = 0.0;
     } else if (!faceUsed) {
       valence = voiceResult.valence; arousal = voiceResult.arousal;
     } else if (!voiceUsed) {
       valence = faceResult.valence; arousal = faceResult.arousal;
     } else {
-      // Fusion pondérée : 60% visage + 40% voix
-      valence = faceWeight * faceResult.valence + voiceWeight * voiceResult.valence;
-      arousal = faceWeight * faceResult.arousal + voiceWeight * voiceResult.arousal;
+      valence = (0.60 * faceResult.valence + 0.40 * voiceResult.valence).clamp(-1.0, 1.0);
+      arousal = (0.60 * faceResult.arousal + 0.40 * voiceResult.arousal).clamp( 0.0, 1.0);
     }
 
-    valence = valence.clamp(-1.0, 1.0);
-    arousal = arousal.clamp( 0.0, 1.0);
-
-    final state    = _toAuraState(valence, arousal);
+    final state    = _toAuraState(valence.clamp(-1.0, 1.0), arousal.clamp(0.0, 1.0));
     final hexColor = _auraHex(state);
     final result   = AuraResult(
-      valence: valence, arousal: arousal,
+      valence: valence.clamp(-1.0, 1.0),
+      arousal: arousal.clamp( 0.0, 1.0),
       state: state, hexColor: hexColor,
       faceUsed: faceUsed, voiceUsed: voiceUsed,
     );
 
-    // ── Sauvegarde Firestore : résultat uniquement (RGPD) ───────
     await _persistAuraResult(result);
 
     onProgress?.call('done');
     return result;
   }
 
-  /// Sauvegarde UNIQUEMENT le score Valence/Arousal et la couleur Aura.
-  /// Aucune donnée brute (image, audio) n'est transmise.
   Future<void> _persistAuraResult(AuraResult result) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
@@ -160,6 +147,42 @@ class BiometricService {
           'auraScore'  : result.auraScore,
           'lastAuraAt' : FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
+  }
+
+  /// Capture et analyse la voix (public pour BiometricTestScreen).
+  Future<VoiceEmotionResult> analyzeVoice({int durationSeconds = 3}) =>
+      _voiceAnalyzer.captureAndAnalyze(durationSeconds: durationSeconds);
+
+  /// Fusionne le résultat facial, sauvegarde en Firestore et retourne l'AuraResult.
+  Future<AuraResult> fuseAndSave({
+    required FaceEmotionResult face,
+    required VoiceEmotionResult voice,
+  }) async {
+    final faceUsed  = face.faceDetected;
+    final voiceUsed = voice.captured;
+
+    double valence, arousal;
+    if (!faceUsed && !voiceUsed) {
+      valence = 0.0; arousal = 0.0;
+    } else if (!faceUsed) {
+      valence = voice.valence; arousal = voice.arousal;
+    } else if (!voiceUsed) {
+      valence = face.valence; arousal = face.arousal;
+    } else {
+      valence = (0.60 * face.valence + 0.40 * voice.valence).clamp(-1.0, 1.0);
+      arousal = (0.60 * face.arousal + 0.40 * voice.arousal).clamp( 0.0, 1.0);
+    }
+
+    final state  = _toAuraState(valence.clamp(-1.0, 1.0), arousal.clamp(0.0, 1.0));
+    final hex    = _auraHex(state);
+    final result = AuraResult(
+      valence: valence.clamp(-1.0, 1.0),
+      arousal: arousal.clamp( 0.0, 1.0),
+      state: state, hexColor: hex,
+      faceUsed: faceUsed, voiceUsed: voiceUsed,
+    );
+    await _persistAuraResult(result);
+    return result;
   }
 
   void dispose() {

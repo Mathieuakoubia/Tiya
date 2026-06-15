@@ -8,6 +8,7 @@
 - Limiter la longueur des champs texte utilisateur (max 500 chars par defaut)
 - Requetes Firestore : toujours utiliser des parametres, jamais de concatenation de chaines
 - Cibles : Android + iOS uniquement (pas de web)
+- il faut catch les erreur quand tu cree une fonctionnalité 
 
 ## SECURITE FIRESTORE — REGLES METIER
 
@@ -54,3 +55,7 @@ Aucune couleur hors palette autorisee sans justification explicite dans le spec 
 - Titres / phrases Aria : Gelica
 - Corps de texte : Poppins
 - Texte secondaire italique : Playfair
+
+## AUTRE 
+
+- Ce n'est pas un MVP que l'on developpe mais la solution finale

@@ -31,7 +31,7 @@ class VoiceStressAnalyzer {
   final _recorder = AudioRecorder();
 
   /// Capture 3 secondes de voix en PCM 16kHz mono puis analyse.
-  Future<VoiceEmotionResult> captureAndAnalyze() async {
+  Future<VoiceEmotionResult> captureAndAnalyze({int durationSeconds = 3}) async {
     final hasPermission = await _recorder.hasPermission();
     if (!hasPermission) return VoiceEmotionResult.noVoice;
 
@@ -48,7 +48,7 @@ class VoiceStressAnalyzer {
         ),
         path: path,
       );
-      await Future.delayed(const Duration(seconds: 3));
+      await Future.delayed(Duration(seconds: durationSeconds));
       await _recorder.stop();
 
       final result = await _analyzeWavFile(path);

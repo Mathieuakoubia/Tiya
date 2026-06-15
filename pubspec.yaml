@@ -30,25 +30,25 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  camera: ^0.10.5
-  google_mlkit_face_detection: ^0.9.0
-  audioplayers: ^5.2.0
-  permission_handler: ^11.0.0
-  vibration: ^1.9.0
-  firebase_core: ^3.0.0
-  cloud_firestore: ^5.0.0
-  firebase_database: ^11.0.0
-  firebase_auth: ^5.0.0
-  firebase_messaging: ^15.0.0
-  firebase_storage: ^12.0.0
-  google_fonts: ^6.2.1
-  just_audio: ^0.9.40
-  audio_session: ^0.1.21
-  record: ^5.1.2
-  sensors_plus: ^5.0.1
+  camera: ^0.10.5                    # garder — 0.11+ change l'API InputImage
+  google_mlkit_face_detection: ^0.9.0 # garder — inputImage.bytes supprimé en 0.11+
+  audioplayers: ^5.2.0               # garder — setUrl() supprimé en 6.x
+  permission_handler: ^11.0.0        # garder — 12.x a des breaking changes
+  vibration: ^3.0.0                  # ok — Vibration.vibrate() API stable
+  firebase_core: ^4.0.0              # suite Firebase upgradée ensemble
+  cloud_firestore: ^6.0.0
+  firebase_database: ^12.0.0
+  firebase_auth: ^6.0.0
+  firebase_messaging: ^16.0.0
+  firebase_storage: ^13.0.0
+  google_fonts: ^6.2.1               # garder — 8.x change le système de cache
+  just_audio: ^0.9.40                # garder — lié à audio_session 0.1.x
+  audio_session: ^0.1.21             # garder — lié à audioplayers 5.x
+  record: ^5.1.2                     # garder — overrides complexes en place
+  sensors_plus: ^7.0.0               # ok — accelerometerEventStream() stable
   noise_meter: ^5.0.0
   path_provider: ^2.1.0
-  tflite_flutter: ^0.10.4
+  tflite_flutter: ^0.10.4            # garder — API Interpreter change en 0.12+
   image: ^4.2.0
   proximity_sensor: ^1.0.2
 
@@ -60,6 +60,11 @@ dependencies:
 # record_platform_interface 1.6.0 a ajouté startStream non implémenté par record_linux 0.7.2
 dependency_overrides:
   record_platform_interface: 1.5.0
+  record_linux:
+    path: patches/record_linux
+  # tflite_flutter 0.10.4 utilise UnmodifiableUint8ListView retiré en Dart 3.4+
+  tflite_flutter:
+    path: patches/tflite_flutter
 
 dev_dependencies:
   flutter_test:

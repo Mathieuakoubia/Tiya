@@ -28,11 +28,12 @@ class _ResetFlashState extends State<ResetFlash>
   static const int _inhaleSec = 5;
   static const int _totalSec  = 180;
 
-  _Phase _phase       = _Phase.countdown;
-  int    _countdown   = 3;
-  int    _elapsed     = 0;
-  bool   _isInhaling  = true;
-  String _phaseLabel  = 'Inspirez...';
+  _Phase _phase      = _Phase.countdown;
+  int    _countdown  = 3;
+  int    _elapsed    = 0;
+  bool   _isInhaling = true;
+  bool   _isPressed  = false;
+  String _phaseLabel = 'Posez votre doigt sur le cercle';
 
   late AnimationController _ctrl;
   late Animation<double>   _auraScale;
@@ -60,12 +61,15 @@ class _ResetFlashState extends State<ResetFlash>
   }
 
   void _onTick() {
+    if (_phase != _Phase.exercise || !_isPressed) return;
     final inhale = _ctrl.value < (_inhaleSec / _cycleSec);
     if (inhale != _isInhaling) {
       setState(() {
         _isInhaling = inhale;
         _phaseLabel = inhale ? 'Inspirez...' : 'Expirez...';
       });
+      // Légère impulsion à chaque transition de phase (toutes les 5s)
+      Vibration.vibrate(duration: 80, amplitude: 150);
     }
   }
 
@@ -85,13 +89,35 @@ class _ResetFlashState extends State<ResetFlash>
   }
 
   void _startExercise() {
-    setState(() => _phase = _Phase.exercise);
+    setState(() {
+      _phase      = _Phase.exercise;
+      _phaseLabel = 'Posez votre doigt sur le cercle';
+    });
+  }
+
+  void _startRoutine() {
+    if (_phase != _Phase.exercise || _isPressed) return;
+    setState(() {
+      _isPressed  = true;
+      _isInhaling = true;
+      _phaseLabel = 'Inspirez...';
+    });
     _ctrl.repeat();
-    Vibration.vibrate(pattern: [70, 72, 70, 72], repeat: 0);
     _exTimer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) { t.cancel(); return; }
+      if (!mounted || !_isPressed) { t.cancel(); return; }
       setState(() => _elapsed++);
       if (_elapsed >= _totalSec) { t.cancel(); _complete(); }
+    });
+  }
+
+  void _stopRoutine() {
+    if (!_isPressed) return;
+    _ctrl.stop();
+    _exTimer?.cancel();
+    Vibration.cancel();
+    setState(() {
+      _isPressed  = false;
+      _phaseLabel = 'Posez votre doigt pour reprendre';
     });
   }
 
@@ -118,6 +144,7 @@ class _ResetFlashState extends State<ResetFlash>
   String _fmt(int s)    => '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
 
   double get _barProgress {
+    if (!_isPressed) return 0.0;
     const inhaleEnd = _inhaleSec / _cycleSec;
     final v = _ctrl.value;
     if (v <= inhaleEnd) return v / inhaleEnd;
@@ -170,37 +197,46 @@ class _ResetFlashState extends State<ResetFlash>
       const Positioned.fill(child: ColoredBox(color: _teal)),
       Positioned.fill(child: CustomPaint(
           painter: _BarPainter(progress: _barProgress, color: _light))),
-      Center(child: Stack(alignment: Alignment.center, children: [
-        SizedBox(
-          width: 164, height: 164,
-          child: CircularProgressIndicator(
-            value: _progress,
-            strokeWidth: 4,
-            backgroundColor: _light.withValues(alpha: 0.12),
-            valueColor: const AlwaysStoppedAnimation<Color>(_light),
-          ),
-        ),
-        Transform.scale(
-          scale: _auraScale.value,
-          child: Container(
-            width: 114, height: 114,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _light.withValues(alpha: 0.10),
-              boxShadow: [BoxShadow(
-                color: _light.withValues(alpha: 0.28),
-                blurRadius: 42, spreadRadius: 6)],
+      Center(
+        child: GestureDetector(
+          onTapDown:  (_) => _startRoutine(),
+          onTapUp:    (_) => _stopRoutine(),
+          onTapCancel: () => _stopRoutine(),
+          child: Stack(alignment: Alignment.center, children: [
+            SizedBox(
+              width: 164, height: 164,
+              child: CircularProgressIndicator(
+                value: _progress,
+                strokeWidth: 4,
+                backgroundColor: _light.withValues(alpha: 0.12),
+                valueColor: const AlwaysStoppedAnimation<Color>(_light),
+              ),
             ),
-          ),
+            Transform.scale(
+              scale: _isPressed ? _auraScale.value : 1.0,
+              child: Container(
+                width: 114, height: 114,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _light.withValues(alpha: _isPressed ? 0.14 : 0.06),
+                  boxShadow: [BoxShadow(
+                    color: _light.withValues(alpha: _isPressed ? 0.32 : 0.14),
+                    blurRadius: _isPressed ? 48 : 22,
+                    spreadRadius: _isPressed ? 8 : 2)],
+                ),
+              ),
+            ),
+            Icon(_Ico.sunDim, color: _light, size: 38),
+          ]),
         ),
-        Icon(_Ico.sunDim, color: _light, size: 38),
-      ])),
+      ),
       Align(
         alignment: Alignment.topCenter,
         child: SafeArea(child: Padding(
           padding: const EdgeInsets.only(top: 42),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text(_phaseLabel,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontFamily: 'Gelica',
                     color: Colors.white,
@@ -208,8 +244,9 @@ class _ResetFlashState extends State<ResetFlash>
                     fontWeight: FontWeight.w200,
                     fontStyle: FontStyle.italic)),
             const SizedBox(height: 8),
-            Text(_fmt(_remaining),
-                style: const TextStyle(color: _gold, fontSize: 14)),
+            if (_isPressed)
+              Text(_fmt(_remaining),
+                  style: const TextStyle(color: _gold, fontSize: 14)),
           ]),
         )),
       ),

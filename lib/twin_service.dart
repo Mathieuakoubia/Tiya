@@ -213,4 +213,40 @@ class TwinService {
   // Stream temps réel d'une session
   static Stream<DocumentSnapshot> sessionStream(String sessionId) =>
       _db.collection('twin_sessions').doc(sessionId).snapshots();
+
+  // ── Sessions de routine (nouveau flow Lobby) ──────────────────────
+
+  static Future<String> createRoutineSession({
+    required String twinUid,
+    required String inviteId,
+    required String routineKey,
+    required String routineTitle,
+    required String initiatorName,
+    required String twinName,
+  }) async {
+    final ref = await _db.collection('twin_sessions').add({
+      'routineKey':       routineKey,
+      'routineTitle':     routineTitle,
+      'twinInvitationId': inviteId,
+      'users':            [currentUid, twinUid],
+      'launchedBy':       currentUid,
+      'initiatorName':    initiatorName,
+      'twinName':         twinName,
+      'status':           'waiting',
+      'acceptedBy':       [currentUid],
+      'extraData':        {},
+      'createdAt':        FieldValue.serverTimestamp(),
+    });
+    return ref.id;
+  }
+
+  // Stream des sessions en attente reçues (pour le twin qui n'est pas initiateur)
+  static Stream<QuerySnapshot> incomingRoutineSessionsStream() {
+    if (currentUid.isEmpty) return const Stream.empty();
+    return _db
+        .collection('twin_sessions')
+        .where('users', arrayContains: currentUid)
+        .where('status', whereIn: ['waiting', 'accepted'])
+        .snapshots();
+  }
 }

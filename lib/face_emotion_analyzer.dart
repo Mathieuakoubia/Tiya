@@ -7,7 +7,9 @@
 // Note sur la version integer_quant :
 //   - Entrée  : uint8 [0, 255]  (pas float [0.0, 1.0])
 //   - Sortie  : uint8 → dequantifier → softmax → probabilités
+import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
@@ -95,12 +97,14 @@ class FaceEmotionAnalyzer {
 
     final box = faces.first.boundingBox;
 
-    // 2. Décoder l'image depuis les bytes bruts
-    final bytes = inputImage.bytes;
-    final meta  = inputImage.metadata;
-    if (bytes == null || meta == null) return FaceEmotionResult.noFace;
+    // 2. Décoder l'image — bytes direct ou lecture fichier si InputImage.fromFilePath
+    Uint8List? rawBytes = inputImage.bytes;
+    if (rawBytes == null && inputImage.filePath != null) {
+      rawBytes = await File(inputImage.filePath!).readAsBytes();
+    }
+    if (rawBytes == null) return FaceEmotionResult.noFace;
 
-    img.Image? fullImage = img.decodeImage(bytes);
+    img.Image? fullImage = img.decodeImage(rawBytes);
     if (fullImage == null) return FaceEmotionResult.noFace;
 
     // 3. Crop du visage avec marge 20%
