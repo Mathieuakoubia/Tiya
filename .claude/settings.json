@@ -20,7 +20,16 @@
       "Read(//c/Users/mathi/AppData/Local/Pub/Cache/hosted/pub.dev/tflite_flutter-0.10.4/**)",
       "Bash(dart pub *)",
       "Bash(grep -v \"patches/tflite_flutter/example\\\\|patches\\\\\\\\\\\\\\\\tflite_flutter\\\\\\\\\\\\\\\\example\")",
-      "Bash(dart analyze *)"
+      "Bash(dart analyze *)",
+      "Bash(grep -v \"patches\\\\\\\\\")",
+      "Bash(grep \"lib\\\\\\\\\")",
+      "Bash(flutter devices *)",
+      "Bash(flutter clean *)",
+      "Bash(cat \"c:/Users/mathi/AppData/Local/Pub/Cache/hosted/pub.dev/tflite_flutter-0.12.1/android/build.gradle\" 2>/dev/null)",
+      "Read(//c/Users/mathi/AppData/Local/Pub/Cache/hosted/pub.dev/tflite_flutter-0.12.1/android/**)",
+      "Bash(cat \"c:/Users/mathi/AppData/Local/Pub/Cache/hosted/pub.dev/tflite_flutter-0.12.1/example/audio_classification/android/app/build.gradle\" 2>/dev/null)",
+      "Read(//c/Users/mathi/AppData/Local/Pub/Cache/hosted/pub.dev/tflite_flutter-0.12.1/example/audio_classification/android/app/**)",
+      "Bash(dart run *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\mathi\\.claude\\projects\\c--Users-mathi-Documents-Pierre-tiyia-mvp\\memory"

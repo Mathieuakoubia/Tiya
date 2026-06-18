@@ -105,8 +105,9 @@ class _AuthScreenState extends State<AuthScreen> {
   void _goToStep2() {
     final email = _emailCtrl.text.trim();
     final pw = _pwCtrl.text.trim();
-    if (email.isEmpty || !email.contains('@')) {
-      setState(() => _error = 'Email invalide.');
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (email.isEmpty || !emailRegex.hasMatch(email)) {
+      setState(() => _error = 'Email invalide (ex: prenom@gmail.com).');
       return;
     }
     if (pw.length < 6) {
@@ -144,12 +145,16 @@ class _AuthScreenState extends State<AuthScreen> {
 
   String _friendlyError(String code) {
     switch (code) {
-      case 'user-not-found': return 'Aucun compte avec cet email.';
-      case 'wrong-password': return 'Mot de passe incorrect.';
+      case 'user-not-found':
+      case 'wrong-password':
+      case 'invalid-credential':
+        return 'Email ou mot de passe incorrect.';
       case 'email-already-in-use': return 'Cet email est déjà utilisé.';
       case 'weak-password': return 'Mot de passe trop faible (6 caractères min).';
-      case 'invalid-email': return 'Email invalide.';
-      default: return 'Erreur : $code';
+      case 'invalid-email': return 'Email invalide (ex: prenom@gmail.com).';
+      case 'too-many-requests': return 'Trop de tentatives. Réessaie dans quelques minutes.';
+      case 'network-request-failed': return 'Pas de connexion internet.';
+      default: return 'Erreur ($code). Vérifie ta connexion.';
     }
   }
 

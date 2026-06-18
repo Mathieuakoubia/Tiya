@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:image_picker/image_picker.dart';
 import 'biometric_service.dart';
 import 'face_emotion_analyzer.dart';
 import 'voice_stress_analyzer.dart';
@@ -22,28 +23,25 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
   static const _gold  = Color(0xFFE8B86E);
   static const _ivory = Color(0xFFF8F1E9);
 
-  late AnimationController _scanCtrl;
   late AnimationController _pulseCtrl;
 
   CameraController? _cam;
-  // idle | camera | processing | done | error
+  // idle | camera | face_checking | camera_no_face
+  // voice_prep | voice | processing | done | error
   String _step = 'idle';
   AuraResult? _result;
   String _error = '';
-  int  _camCountdown = 6;
   int  _voiceCountdown = _voiceDuration;
-  bool _faceDetected  = false;
   Timer? _voiceTimer;
 
-  FaceEmotionResult _faceResult = FaceEmotionResult.noFace;
-
-  final _faceAnalyzer = FaceEmotionAnalyzer();
+  FaceEmotionResult  _faceResult    = FaceEmotionResult.noFace;
+  VoiceEmotionResult _voiceResult   = VoiceEmotionResult.noVoice;
+  String?            _lastPhotoPath;
+  bool               _photoFromGallery = false;
 
   @override
   void initState() {
     super.initState();
-    _scanCtrl  = AnimationController(vsync: this,
-        duration: const Duration(milliseconds: 2400));
     _pulseCtrl = AnimationController(vsync: this,
         duration: const Duration(milliseconds: 950))
       ..repeat(reverse: true);
@@ -51,81 +49,81 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
 
   @override
   void dispose() {
+    _clearLastPhoto();
     _cam?.dispose();
     _voiceTimer?.cancel();
-    _scanCtrl.dispose();
     _pulseCtrl.dispose();
-    _faceAnalyzer.close();
     super.dispose();
   }
 
-  // ─── PHASE CAMÉRA ────────────────────────────────────────────
-  Future<void> _start() async {
-    setState(() {
-      _step         = 'camera';
-      _result       = null;
-      _error        = '';
-      _camCountdown = 6;
-      _faceDetected = false;
-      _faceResult   = FaceEmotionResult.noFace;
-    });
-
-    try {
-      await _faceAnalyzer.init();
-      final cameras = await availableCameras();
-      if (cameras.isNotEmpty) {
-        final front = cameras.firstWhere(
-          (c) => c.lensDirection == CameraLensDirection.front,
-          orElse: () => cameras.first,
-        );
-        final cam = CameraController(
-            front, ResolutionPreset.medium, enableAudio: false);
-        await cam.initialize();
-        if (!mounted) { await cam.dispose(); return; }
-        setState(() => _cam = cam);
-        _scanCtrl.repeat();
-
-        for (int i = 0; i < 6; i++) {
-          if (!mounted) break;
-          setState(() => _camCountdown = 6 - i);
-          try {
-            final frame  = await cam.takePicture();
-            final result = await _faceAnalyzer
-                .analyze(InputImage.fromFilePath(frame.path));
-            if (result.faceDetected && !_faceResult.faceDetected) {
-              _faceResult = result;
-              if (mounted) setState(() => _faceDetected = true);
-            }
-          } catch (_) {}
-          await Future.delayed(const Duration(seconds: 1));
-        }
-
-        _scanCtrl.stop();
-        _scanCtrl.reset();
-        setState(() => _cam = null);
-        await cam.dispose();
-      }
-    } catch (e) {
-      await _cam?.dispose();
-      if (mounted) setState(() { _cam = null; _error = e.toString(); });
+  void _clearLastPhoto() {
+    final path        = _lastPhotoPath;
+    final fromGallery = _photoFromGallery;
+    _lastPhotoPath    = null;
+    _photoFromGallery = false;
+    if (path != null && !fromGallery) {
+      File(path).delete().ignore();
     }
-
-    if (!mounted) return;
-
-    // ─── Transition vers la phase voix ───────────────────────
-    setState(() => _step = 'voice_prep');
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-    await _startVoice();
   }
 
-  // ─── PHASE VOIX ───────────────────────────────────────────────
-  Future<void> _startVoice() async {
-    setState(() {
-      _step           = 'voice';
-      _voiceCountdown = _voiceDuration;
-    });
+  // ── Ouvrir la caméra ─────────────────────────────────────────────
 
+  Future<void> _openCamera() async {
+    _clearLastPhoto();
+    setState(() {
+      _step        = 'camera';
+      _result      = null;
+      _error       = '';
+      _faceResult  = FaceEmotionResult.noFace;
+      _voiceResult = VoiceEmotionResult.noVoice;
+    });
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) { setState(() => _step = 'voice_prep'); return; }
+      final front = cameras.firstWhere(
+        (c) => c.lensDirection == CameraLensDirection.front,
+        orElse: () => cameras.first,
+      );
+      // medium = ~1280x720 — suffisant pour ML Kit et EfficientNet 260x260
+      // high sur Samsung S21 FE génère des frames NV21 de ~24MB → OOM
+      final cam = CameraController(front, ResolutionPreset.medium, enableAudio: false);
+      await cam.initialize();
+      if (!mounted) { await cam.dispose(); return; }
+      setState(() => _cam = cam);
+    } catch (e) {
+      if (mounted) setState(() { _step = 'error'; _error = e.toString(); });
+    }
+  }
+
+  // ── Photo avec la caméra ─────────────────────────────────────────
+
+  Future<void> _takePhoto() async {
+    final cam = _cam;
+    if (cam == null || !cam.value.isInitialized) return;
+    setState(() => _step = 'face_checking');
+    try {
+      final file = await cam.takePicture();
+      setState(() => _cam = null);
+      await cam.dispose();
+
+      _faceResult = await biometricService.analyzeFaceFromPath(file.path);
+      // RGPD : fichier temporaire supprime immediatement apres inference.
+      File(file.path).delete().ignore();
+
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+
+      if (!mounted) return;
+      // Toujours passer par voice_prep : l'utilisatrice demarre l'enregistrement manuellement.
+      setState(() => _step = _faceResult.faceDetected ? 'voice_prep' : 'camera_no_face');
+    } catch (e) {
+      if (mounted) setState(() { _step = 'error'; _error = e.toString(); });
+    }
+  }
+
+  void _startVoiceCountdown() {
+    _voiceTimer?.cancel();
+    _voiceCountdown = _voiceDuration;
     _voiceTimer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) { t.cancel(); return; }
       setState(() {
@@ -133,6 +131,75 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
         if (_voiceCountdown <= 0) t.cancel();
       });
     });
+  }
+
+  // ── Choisir depuis la galerie ────────────────────────────────────
+
+  Future<void> _pickFromGallery() async {
+    try {
+      // maxWidth/maxHeight : reduit immediatement le fichier avant decode RAM.
+      // Sans cette limite, une photo galerie 12MP (36 MB RGB) peut provoquer un OOM.
+      final xfile = await ImagePicker().pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 90,
+          maxWidth: 800,
+          maxHeight: 800);
+      if (xfile == null) return;
+
+      await _cam?.dispose();
+      _clearLastPhoto();
+
+      _lastPhotoPath    = xfile.path;
+      _photoFromGallery = true;
+
+      setState(() { _cam = null; _step = 'face_checking'; });
+
+      // ML Kit + EfficientNet — InputImage.fromFilePath gere l'EXIF nativement
+      _faceResult = await biometricService.analyzeFaceFromPath(xfile.path);
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+      if (!mounted) return;
+      if (_faceResult.faceDetected) {
+        // _lastPhotoPath est un fichier galerie (photoFromGallery=true) : ne pas supprimer
+        setState(() => _step = 'voice_prep');
+      } else {
+        // Garder _lastPhotoPath pour le fallback "Analyser quand meme"
+        setState(() => _step = 'camera_no_face');
+      }
+    } catch (_) {
+      if (mounted) setState(() => _step = 'camera_no_face');
+    }
+  }
+
+  // ── Analyser sans détection ML Kit (fallback biais) ──────────────
+
+  Future<void> _analyzeWithoutDetection() async {
+    final path = _lastPhotoPath;
+    setState(() => _step = 'face_checking');
+    try {
+      if (path != null) {
+        _faceResult = await biometricService.analyzeFaceNoDetect(path);
+      } else {
+        _faceResult = FaceEmotionResult.noFace;
+      }
+    } catch (_) {
+      _faceResult = FaceEmotionResult.noFace;
+    }
+    _clearLastPhoto();
+    if (mounted) setState(() => _step = 'voice_prep');
+  }
+
+  void _skipFace() {
+    _clearLastPhoto();
+    _faceResult = FaceEmotionResult.noFace;
+    setState(() => _step = 'voice_prep');
+  }
+
+  // ── Enregistrement voix ──────────────────────────────────────────
+
+  Future<void> _startVoice() async {
+    setState(() => _step = 'voice');
+    _startVoiceCountdown();
 
     VoiceEmotionResult voiceResult;
     try {
@@ -141,10 +208,10 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
     } catch (_) {
       voiceResult = VoiceEmotionResult.noVoice;
     }
+    _voiceResult = voiceResult;
 
     if (!mounted) return;
     setState(() => _step = 'processing');
-
     try {
       final result = await biometricService.fuseAndSave(
           face: _faceResult, voice: voiceResult);
@@ -154,7 +221,8 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
     }
   }
 
-  // ─────────────────────────────────────────────────────────────
+  // ── Build ────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: _dark,
@@ -170,16 +238,19 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
   );
 
   Widget _buildBody() => switch (_step) {
-    'camera'     => _buildCamera(),
-    'voice_prep' => _buildVoicePrep(),
-    'voice'      => _buildVoice(),
-    'processing' => _buildProcessing(),
-    'done'       => _buildDone(_result!),
-    'error'      => _buildError(),
-    _            => _buildIdle(),
+    'camera'          => _buildCamera(),
+    'face_checking'   => _buildFaceChecking(),
+    'camera_no_face'  => _buildNoFace(),
+    'voice_prep'      => _buildVoicePrep(),
+    'voice'           => _buildVoice(),
+    'processing'      => _buildProcessing(),
+    'done'            => _buildDone(_result!),
+    'error'           => _buildError(),
+    _                 => _buildIdle(),
   };
 
-  // ─── IDLE ────────────────────────────────────────────────────
+  // ── Idle ─────────────────────────────────────────────────────────
+
   Widget _buildIdle() => Center(child: Padding(
     padding: const EdgeInsets.symmetric(horizontal: 40),
     child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -204,13 +275,13 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
           style: TextStyle(fontFamily: 'Gelica', color: _ivory,
               fontSize: 19, letterSpacing: 2, fontWeight: FontWeight.w200)),
       const SizedBox(height: 10),
-      Text('6s caméra   +   ${_voiceDuration}s voix',
+      Text('Photo   +   ${_voiceDuration}s voix',
           textAlign: TextAlign.center,
           style: TextStyle(color: Colors.white.withValues(alpha: 0.28),
               fontSize: 12, letterSpacing: 1)),
       const SizedBox(height: 48),
       GestureDetector(
-        onTap: _start,
+        onTap: _openCamera,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 44, vertical: 15),
           decoration: BoxDecoration(
@@ -226,132 +297,175 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
     ]),
   ));
 
-  // ─── CAMÉRA ──────────────────────────────────────────────────
+  // ── Caméra — preview + bouton ────────────────────────────────────
+
   Widget _buildCamera() {
     final cam = _cam;
     return Column(children: [
-      Expanded(child: Stack(
-        fit: StackFit.expand,
-        children: [
+      Expanded(child: Stack(fit: StackFit.expand, children: [
 
-          if (cam != null && cam.value.isInitialized)
-            Center(
-              child: AspectRatio(
-                aspectRatio: 1 / cam.value.aspectRatio,
-                child: CameraPreview(cam),
-              ),
-            )
-          else
-            Container(color: const Color(0xFF080808)),
+        if (cam != null && cam.value.isInitialized)
+          Center(child: AspectRatio(
+            aspectRatio: 1 / cam.value.aspectRatio,
+            child: CameraPreview(cam),
+          ))
+        else
+          Container(color: const Color(0xFF080808)),
 
-          IgnorePointer(child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment.center, radius: 0.85,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withValues(alpha: 0.60),
-                ],
-              ),
+        IgnorePointer(child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment.center, radius: 0.85,
+              colors: [Colors.transparent, Colors.black.withValues(alpha: 0.55)],
             ),
-          )),
-
-          if (cam != null)
-            LayoutBuilder(builder: (_, box) => AnimatedBuilder(
-              animation: _scanCtrl,
-              builder: (_, __) {
-                final y = _scanCtrl.value * box.maxHeight;
-                return Positioned(
-                  top: y - 35, left: 0, right: 0,
-                  child: Container(
-                    height: 70,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          _teal.withValues(alpha: 0.04),
-                          _teal.withValues(alpha: 0.65),
-                          _teal.withValues(alpha: 0.04),
-                          Colors.transparent,
-                        ],
-                        stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            )),
-
-          AnimatedBuilder(
-            animation: _pulseCtrl,
-            builder: (_, __) {
-              final a = _faceDetected
-                  ? 0.55 + _pulseCtrl.value * 0.45
-                  : 0.28 + _pulseCtrl.value * 0.20;
-              return CustomPaint(
-                painter: _ScanBrackets(color: _teal.withValues(alpha: a)),
-                child: const SizedBox.expand(),
-              );
-            },
           ),
+        )),
 
-          if (_faceDetected)
-            Positioned(
-              top: 18, left: 0, right: 0,
-              child: Center(child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+        AnimatedBuilder(
+          animation: _pulseCtrl,
+          builder: (_, __) => CustomPaint(
+            painter: _ScanBrackets(
+                color: _teal.withValues(alpha: 0.35 + _pulseCtrl.value * 0.30)),
+            child: const SizedBox.expand(),
+          ),
+        ),
+
+        Positioned(
+          bottom: 22, left: 22,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('ANALYSE FACIALE',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.40),
+                    fontSize: 9, letterSpacing: 2.5)),
+            const SizedBox(height: 3),
+            Text(cam == null ? 'INIT...' : 'PRET',
+                style: TextStyle(color: _teal.withValues(alpha: 0.65),
+                    fontSize: 9, letterSpacing: 2)),
+          ]),
+        ),
+
+        Positioned(
+          bottom: 22, right: 22,
+          child: Text('Centrez votre visage',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.35),
+                  fontSize: 10, letterSpacing: 0.5)),
+        ),
+      ])),
+
+      Container(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+        child: Column(children: [
+          SizedBox(
+            width: double.infinity,
+            child: GestureDetector(
+              onTap: _takePhoto,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
                   color: _teal.withValues(alpha: 0.12),
-                  border: Border.all(
-                      color: _teal.withValues(alpha: 0.45), width: 0.8),
-                  borderRadius: BorderRadius.circular(2),
+                  border: Border.all(color: _teal.withValues(alpha: 0.60), width: 1),
+                  borderRadius: BorderRadius.circular(3),
                 ),
-                child: const Text('VISAGE DETECTE',
-                    style: TextStyle(color: _teal, fontSize: 10,
-                        letterSpacing: 2.5, fontWeight: FontWeight.w500)),
-              )),
-            ),
-
-          Positioned(
-            bottom: 20, right: 22,
-            child: AnimatedBuilder(
-              animation: _pulseCtrl,
-              builder: (_, __) => Text('$_camCountdown',
-                  style: TextStyle(
-                    color: _teal.withValues(alpha: 0.50 + _pulseCtrl.value * 0.40),
-                    fontSize: 52, fontFamily: 'Gelica', fontWeight: FontWeight.w100,
-                  )),
+                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  const Icon(Icons.camera_alt_outlined, color: _teal, size: 20),
+                  const SizedBox(width: 10),
+                  const Text('PRENDRE UNE PHOTO',
+                      style: TextStyle(color: _teal, fontSize: 12,
+                          letterSpacing: 3, fontWeight: FontWeight.w500)),
+                ]),
+              ),
             ),
           ),
-
-          Positioned(
-            bottom: 22, left: 22,
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('ANALYSE FACIALE',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.40),
-                      fontSize: 9, letterSpacing: 2.5)),
-              const SizedBox(height: 3),
-              Text(cam == null ? 'INIT...' : 'EN COURS',
-                  style: TextStyle(color: _teal.withValues(alpha: 0.65),
-                      fontSize: 9, letterSpacing: 2)),
-            ]),
+          const SizedBox(height: 10),
+          GestureDetector(
+            onTap: _pickFromGallery,
+            child: Text('Choisir depuis la galerie',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.32),
+                    fontSize: 11, letterSpacing: 0.5)),
           ),
-        ],
-      )),
-
-      LinearProgressIndicator(
-        value: (6 - _camCountdown) / 6.0,
-        backgroundColor: Colors.white.withValues(alpha: 0.06),
-        valueColor: const AlwaysStoppedAnimation(_teal),
-        minHeight: 2,
+        ]),
       ),
-      const SizedBox(height: 14),
     ]);
   }
 
-  // ─── VOICE PREP ──────────────────────────────────────────────
+  // ── Analyse visage en cours ──────────────────────────────────────
+
+  Widget _buildFaceChecking() => Center(child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const SizedBox(width: 40, height: 40,
+          child: CircularProgressIndicator(strokeWidth: 1.5,
+              valueColor: AlwaysStoppedAnimation(_teal))),
+      const SizedBox(height: 20),
+      Text('DETECTION DU VISAGE...',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.35),
+              fontSize: 10, letterSpacing: 2.5)),
+    ],
+  ));
+
+  // ── Aucun visage détecté ─────────────────────────────────────────
+
+  Widget _buildNoFace() {
+    final diag = biometricService.tfliteError;
+    return Center(child: Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 36),
+    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      Icon(Icons.face_retouching_off,
+          color: Colors.white.withValues(alpha: 0.40), size: 52),
+      const SizedBox(height: 24),
+      const Text('AUCUN VISAGE DETECTE',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontFamily: 'Gelica', color: _ivory,
+              fontSize: 16, letterSpacing: 2, fontWeight: FontWeight.w300)),
+      const SizedBox(height: 12),
+      Text(
+        'Assurez-vous d\'être bien face à la caméra\n'
+        'dans un endroit correctement éclairé.',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.white.withValues(alpha: 0.35),
+            fontSize: 12, letterSpacing: 0.3, height: 1.6),
+      ),
+      if (diag != null) ...[
+        const SizedBox(height: 12),
+        Text(diag,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.redAccent.withValues(alpha: 0.65),
+                fontSize: 9, fontFamily: 'monospace', height: 1.4)),
+      ],
+      const SizedBox(height: 36),
+      GestureDetector(
+        onTap: _openCamera,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+          decoration: BoxDecoration(
+            border: Border.all(color: _teal.withValues(alpha: 0.55), width: 1),
+            borderRadius: BorderRadius.circular(3),
+            color: _teal.withValues(alpha: 0.08),
+          ),
+          child: const Text('REESSAYER',
+              style: TextStyle(color: _teal, fontSize: 11,
+                  letterSpacing: 3, fontWeight: FontWeight.w500)),
+        ),
+      ),
+      const SizedBox(height: 14),
+      GestureDetector(
+        onTap: _analyzeWithoutDetection,
+        child: Text('Analyser quand meme',
+            style: TextStyle(color: _teal.withValues(alpha: 0.50),
+                fontSize: 11, letterSpacing: 0.3)),
+      ),
+      const SizedBox(height: 14),
+      GestureDetector(
+        onTap: _skipFace,
+        child: Text('Continuer sans visage',
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.28),
+                fontSize: 11, letterSpacing: 0.3)),
+      ),
+    ]),
+  ));
+  }
+
+  // ── Voice prep — instructions + bouton ──────────────────────────
+
   Widget _buildVoicePrep() => Center(child: Padding(
     padding: const EdgeInsets.symmetric(horizontal: 40),
     child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -369,15 +483,59 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
           textAlign: TextAlign.center,
           style: TextStyle(fontFamily: 'Gelica', color: _ivory,
               fontSize: 17, letterSpacing: 2.5, fontWeight: FontWeight.w200)),
-      const SizedBox(height: 10),
-      Text('Préparez-vous\nà parler ou respirer',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.30),
-              fontSize: 12, letterSpacing: 0.5, height: 1.6)),
+      const SizedBox(height: 20),
+      Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.white.withValues(alpha: 0.07), width: 0.5),
+          borderRadius: BorderRadius.circular(3),
+          color: Colors.white.withValues(alpha: 0.03),
+        ),
+        child: Column(children: [
+          _voiceTip('Parlez normalement pendant $_voiceDuration secondes'),
+          const SizedBox(height: 8),
+          _voiceTip('Prononcez une phrase ou comptez jusqu\'à 10'),
+          const SizedBox(height: 8),
+          _voiceTip('Ni chuchoter, ni crier — voix naturelle'),
+        ]),
+      ),
+      const SizedBox(height: 32),
+      SizedBox(
+        width: double.infinity,
+        child: GestureDetector(
+        onTap: _startVoice,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: _gold.withValues(alpha: 0.12),
+            border: Border.all(color: _gold.withValues(alpha: 0.55), width: 1),
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Icon(Icons.mic, color: _gold, size: 18),
+            const SizedBox(width: 10),
+            const Text('COMMENCER L\'ENREGISTREMENT',
+                style: TextStyle(color: _gold, fontSize: 11,
+                    letterSpacing: 2, fontWeight: FontWeight.w500)),
+          ]),
+        ),
+      )),
     ]),
   ));
 
-  // ─── VOICE ENREGISTREMENT ─────────────────────────────────────
+  Widget _voiceTip(String text) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text('— ', style: TextStyle(
+          color: _gold.withValues(alpha: 0.60), fontSize: 12)),
+      Expanded(child: Text(text, style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.45),
+          fontSize: 12, height: 1.5, letterSpacing: 0.2))),
+    ],
+  );
+
+  // ── Voice enregistrement ─────────────────────────────────────────
+
   Widget _buildVoice() => Center(child: Padding(
     padding: const EdgeInsets.symmetric(horizontal: 40),
     child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -412,17 +570,14 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
     ]),
   ));
 
-  // ─── PROCESSING ──────────────────────────────────────────────
+  // ── Processing ───────────────────────────────────────────────────
+
   Widget _buildProcessing() => Center(child: Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      const SizedBox(
-        width: 36, height: 36,
-        child: CircularProgressIndicator(
-          strokeWidth: 1.2,
-          valueColor: AlwaysStoppedAnimation(_teal),
-        ),
-      ),
+      const SizedBox(width: 36, height: 36,
+          child: CircularProgressIndicator(strokeWidth: 1.2,
+              valueColor: AlwaysStoppedAnimation(_teal))),
       const SizedBox(height: 20),
       Text("CALCUL DE L'AURA...",
           style: TextStyle(color: Colors.white.withValues(alpha: 0.28),
@@ -430,7 +585,8 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
     ],
   ));
 
-  // ─── RÉSULTAT ────────────────────────────────────────────────
+  // ── Résultat ─────────────────────────────────────────────────────
+
   Widget _buildDone(AuraResult r) {
     final color = BiometricService.auraColor(r.hexColor);
     final score = (r.auraScore * 100).round();
@@ -440,11 +596,9 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
       AuraState.tense     => 'TENDUE',
       AuraState.veryTense => 'TRES TENDUE',
     };
-
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
       child: Column(children: [
-
         AnimatedBuilder(
           animation: _pulseCtrl,
           builder: (_, __) => Container(
@@ -457,8 +611,7 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
                   width: 1.5),
               boxShadow: [BoxShadow(
                 color: color.withValues(alpha: 0.20 + _pulseCtrl.value * 0.18),
-                blurRadius: 28 + _pulseCtrl.value * 16,
-                spreadRadius: 2,
+                blurRadius: 28 + _pulseCtrl.value * 16, spreadRadius: 2,
               )],
             ),
           ),
@@ -471,9 +624,7 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
         Text(r.hexColor,
             style: TextStyle(color: color.withValues(alpha: 0.30),
                 fontSize: 10, fontFamily: 'monospace', letterSpacing: 1.5)),
-
         const SizedBox(height: 24),
-
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 20),
@@ -492,29 +643,21 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text('$score',
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 56,
-                        fontFamily: 'Gelica',
-                        fontWeight: FontWeight.w200,
-                        height: 1,
-                      )),
+                      style: TextStyle(color: color, fontSize: 56,
+                          fontFamily: 'Gelica', fontWeight: FontWeight.w200,
+                          height: 1)),
                   const SizedBox(width: 4),
                   Text('/ 100',
-                      style: TextStyle(
-                        color: color.withValues(alpha: 0.45),
-                        fontSize: 14, fontFamily: 'Gelica',
-                      )),
+                      style: TextStyle(color: color.withValues(alpha: 0.45),
+                          fontSize: 14, fontFamily: 'Gelica')),
                 ]),
           ]),
         ),
-
         const SizedBox(height: 16),
-        _buildMetrics(r, color),
+        _buildMetrics(r),
         const SizedBox(height: 30),
-
         GestureDetector(
-          onTap: _start,
+          onTap: _openCamera,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
             decoration: BoxDecoration(
@@ -529,49 +672,81 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
     );
   }
 
-  Widget _buildMetrics(AuraResult r, Color color) => Container(
-    decoration: BoxDecoration(
-      border: Border.all(color: Colors.white.withValues(alpha: 0.07), width: 0.5),
-      borderRadius: BorderRadius.circular(3),
-    ),
-    child: Column(children: [
-      _row('VALENCE', _signed(r.valence)),
-      _sep(),
-      _row('AROUSAL', r.arousal.toStringAsFixed(3)),
-      _sep(),
-      _row('VISAGE',  r.faceUsed  ? 'DETECTE' : 'NON'),
-      _sep(),
-      _row('VOIX',   r.voiceUsed ? 'CAPTEE'  : 'NON'),
-    ]),
-  );
+  Widget _buildMetrics(AuraResult r) {
+    final tfliteErr = biometricService.tfliteError;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.white.withValues(alpha: 0.07), width: 0.5),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: Column(children: [
+        _row('VALENCE', _signed(r.valence)),
+        _sep(),
+        _row('AROUSAL', r.arousal.toStringAsFixed(3)),
+        _sep(),
+        _row('EMOTION FACIALE',
+            r.faceUsed ? _emotionFr(_faceResult.topEmotion) : 'ABSENTE'),
+        _sep(),
+        _row('STRESS VOCAL',
+            r.voiceUsed ? _stressLabel(_voiceResult.arousal) : 'NON CAPTE'),
+        if (!r.faceUsed && tfliteErr != null) ...[
+          _sep(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Text(tfliteErr,
+                style: TextStyle(color: Colors.redAccent.withValues(alpha: 0.70),
+                    fontSize: 9, fontFamily: 'monospace', height: 1.4)),
+          ),
+        ],
+      ]),
+    );
+  }
 
-  Widget _row(String label, String value, [Color? vc]) => Padding(
+  Widget _row(String label, String value) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label, style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.28),
+      Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.28),
           fontSize: 10, letterSpacing: 2)),
-      Text(value, style: TextStyle(
-          color: vc ?? Colors.white.withValues(alpha: 0.70),
+      Text(value, style: TextStyle(color: Colors.white.withValues(alpha: 0.70),
           fontSize: 12, fontFamily: 'monospace', letterSpacing: 0.5)),
     ]),
   );
 
-  Widget _sep() => Container(height: 0.5, color: Colors.white.withValues(alpha: 0.06));
+  Widget _sep() =>
+      Container(height: 0.5, color: Colors.white.withValues(alpha: 0.06));
 
   String _signed(double v) =>
       v >= 0 ? '+${v.toStringAsFixed(3)}' : v.toStringAsFixed(3);
 
-  // ─── ERREUR ──────────────────────────────────────────────────
+  String _emotionFr(String emotion) => switch (emotion) {
+    'anger'     => 'Colere',
+    'contempt'  => 'Mepris',
+    'disgust'   => 'Degout',
+    'fear'      => 'Peur',
+    'happiness' => 'Joie',
+    'neutral'   => 'Neutre',
+    'sadness'   => 'Tristesse',
+    'surprise'  => 'Surprise',
+    _           => emotion,
+  };
+
+  String _stressLabel(double arousal) {
+    if (arousal < 0.25) return 'Calme';
+    if (arousal < 0.50) return 'Modere';
+    if (arousal < 0.75) return 'Eleve';
+    return 'Intense';
+  }
+
+  // ── Erreur ───────────────────────────────────────────────────────
+
   Widget _buildError() => Center(child: Padding(
     padding: const EdgeInsets.all(36),
     child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
       Icon(Icons.error_outline,
           color: Colors.white.withValues(alpha: 0.25), size: 44),
       const SizedBox(height: 16),
-      Text('ANALYSE IMPOSSIBLE',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 13, letterSpacing: 2)),
+      const Text('ANALYSE IMPOSSIBLE',
+          style: TextStyle(color: Colors.white60, fontSize: 13, letterSpacing: 2)),
       if (_error.isNotEmpty) ...[
         const SizedBox(height: 10),
         Text(_error, textAlign: TextAlign.center,
@@ -580,11 +755,12 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
       ],
       const SizedBox(height: 30),
       GestureDetector(
-        onTap: _start,
+        onTap: _openCamera,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.white.withValues(alpha: 0.20), width: 1),
+            border: Border.all(
+                color: Colors.white.withValues(alpha: 0.20), width: 1),
             borderRadius: BorderRadius.circular(3),
           ),
           child: Text('REESSAYER',
@@ -596,7 +772,7 @@ class _BiometricTestScreenState extends State<BiometricTestScreen>
   ));
 }
 
-// ─── BRACKETS DE CIBLAGE ─────────────────────────────────────────────────────
+// ── Scan brackets ─────────────────────────────────────────────────────────────
 
 class _ScanBrackets extends CustomPainter {
   final Color color;
