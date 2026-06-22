@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Tiyia (dev)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=GOOGLE_API_KEY=COLLE_TA_CLE_ICI"
+      ]
+    }
+  ]
+}
