@@ -1,4 +1,18 @@
-# Intégration du système de routines d'équipe dans FlutterFlow
+# Intégration du système de routines d'équipe dans FlutterFlow (Sozia)
+
+## Contexte projet
+
+L'application FlutterFlow s'appelle **Sozia** (package `sozia`, version 0.0.1+35).
+Les pages Twin et Cercle existent déjà. L'objectif est d'intégrer les routines
+dans ces pages existantes — pas de créer de nouvelles pages.
+
+| Terminologie code custom | Terminologie FlutterFlow/Sozia |
+|---|---|
+| Squad | Cercle |
+| SquadScreen | `cercle/a_cercle_dashboard` |
+| TwinScreen | `twin/a_twin_dashboard` |
+
+---
 
 ## Principe général
 
@@ -8,36 +22,91 @@ widgets custom). Il faut donc diviser le travail en deux :
 
 | Ce que FlutterFlow gère | Ce qui reste en code custom |
 |---|---|
-| UI des pages Twin et Squad (listes, cartes, boutons) | `TwinService` et `SquadService` (Custom Actions) |
+| UI des pages Twin et Cercle (listes, cartes, boutons) | `TwinService` et `SquadService` (Custom Actions) |
 | Requêtes Firestore simples (membres, invitations) | `RoutineLobby` (Custom Widget complet) |
 | Navigation entre pages FF | Toutes les routines elles-mêmes (déjà custom) |
 | App State / Page State | Stream d'écoute de session |
 
 ---
 
-## 1. Fichiers custom à importer dans FlutterFlow
+## 1. Fichiers custom dans FlutterFlow
 
-Dans FlutterFlow > **Custom Code > Custom Files**, importer (ou coller) :
+### 1.1 Fichiers déjà en place
+
+Ces fichiers sont déjà présents dans le code téléchargé depuis FlutterFlow :
 
 ```
-lib/twin_service.dart
-lib/squad_service.dart
-lib/routine_lobby.dart
-lib/rtdb_session.dart
+custom_code/services/twin_service.dart     ← déjà là
+custom_code/services/squad_service.dart    ← déjà là
+custom_code/services/rtdb_session.dart     ← déjà là
+custom_code/routine_lobby.dart             ← déjà là
 ```
 
-Ainsi que tous les fichiers de routines déjà existants
-(`twin_coherence_rt.dart`, `duo_morning.dart`, etc.).
+### 1.2 Fichiers de routines à ajouter
 
-Ces fichiers apparaissent ensuite comme des imports disponibles dans
-les Custom Actions et Custom Widgets.
+Dans FlutterFlow > **Custom Code > Custom Files**, ajouter chaque fichier de
+routine dans `custom_code/widgets/` :
+
+```
+custom_code/widgets/twin_coherence.dart
+custom_code/widgets/twin_coherence_rt.dart
+custom_code/widgets/mirror_aura.dart
+custom_code/widgets/silent_presence.dart
+custom_code/widgets/pulse_match.dart
+custom_code/widgets/duo_morning.dart
+custom_code/widgets/debrief_duo.dart
+custom_code/widgets/night_tandem.dart
+custom_code/widgets/savoring_duo.dart
+custom_code/widgets/bio_ambient_duo.dart
+custom_code/widgets/collective_shield.dart
+custom_code/widgets/squad_pulse.dart
+custom_code/widgets/squad_morning_pulse.dart
+custom_code/widgets/squad_gratitude_garden.dart
+custom_code/widgets/squad_celebration_wave.dart
+custom_code/widgets/squad_resonance.dart
+custom_code/widgets/squad_night_watch.dart
+```
+
+### 1.3 Correction des imports dans routine_lobby.dart
+
+Dans `routine_lobby.dart`, les imports relatifs doivent pointer vers les bons chemins :
+
+```dart
+// Services
+import '/custom_code/services/twin_service.dart';
+import '/custom_code/services/squad_service.dart';
+
+// Routines twin
+import '/custom_code/widgets/twin_coherence.dart';
+import '/custom_code/widgets/twin_coherence_rt.dart';
+import '/custom_code/widgets/mirror_aura.dart';
+import '/custom_code/widgets/silent_presence.dart';
+import '/custom_code/widgets/pulse_match.dart';
+import '/custom_code/widgets/duo_morning.dart';
+import '/custom_code/widgets/debrief_duo.dart';
+import '/custom_code/widgets/night_tandem.dart';
+import '/custom_code/widgets/savoring_duo.dart';
+import '/custom_code/widgets/bio_ambient_duo.dart';
+
+// Routines squad/cercle
+import '/custom_code/widgets/collective_shield.dart';
+import '/custom_code/widgets/squad_pulse.dart';
+import '/custom_code/widgets/squad_morning_pulse.dart';
+import '/custom_code/widgets/squad_gratitude_garden.dart';
+import '/custom_code/widgets/squad_celebration_wave.dart';
+import '/custom_code/widgets/squad_resonance.dart';
+import '/custom_code/widgets/squad_night_watch.dart';
+```
 
 ---
 
-## 2. Variables App State à créer
+## 2. Variables App State à ajouter
 
-Dans FlutterFlow > **App State**, créer ces variables persistantes
-(elles survivent à la navigation entre pages) :
+`FFAppState` existe déjà dans le projet Sozia avec les champs :
+`guardianModeActive`, `googleCalendarToken`, `microsoftGraphToken`, `pendingActions`.
+
+Dans FlutterFlow > **App State**, **ajouter** ces 7 nouvelles variables
+(ne pas toucher aux variables existantes) :
 
 | Nom | Type | Description |
 |---|---|---|
@@ -45,12 +114,12 @@ Dans FlutterFlow > **App State**, créer ces variables persistantes
 | `twinUid` | String | UID du twin matché |
 | `twinInviteId` | String | ID du document twinInvitation |
 | `twinName` | String | Prénom du twin |
-| `squadId` | String | ID du squad courant |
-| `squadMemberUids` | List\<String\> | UIDs des membres du squad |
-| `squadMemberNames` | List\<String\> | Prénoms des membres du squad |
+| `squadId` | String | ID du cercle courant |
+| `squadMemberUids` | List\<String\> | UIDs des membres du cercle |
+| `squadMemberNames` | List\<String\> | Prénoms des membres du cercle |
 
-Charger ces valeurs au démarrage de l'app via une Custom Action
-`initAppState()` (voir section 3).
+Charger ces valeurs au démarrage via la Custom Action `initAppState()`
+appelée dans **On App Load** de la page principale.
 
 ---
 
@@ -61,14 +130,12 @@ FlutterFlow > **Custom Code > Custom Actions**.
 
 ### 3.1 initAppState
 
-Charge le profil utilisateur, le twin et le squad au démarrage.
 Appelée dans l'action **On App Load** de la page principale.
 
 ```dart
-import 'package:tiyia_mvp/custom_code/actions/index.dart';
-import 'package:tiyia_mvp/flutter_flow/flutter_flow_util.dart';
-import '/custom_code/twin_service.dart';
-import '/custom_code/squad_service.dart';
+import 'package:sozia/flutter_flow/flutter_flow_util.dart';
+import '/custom_code/services/twin_service.dart';
+import '/custom_code/services/squad_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -76,13 +143,11 @@ Future initAppState() async {
   final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
   if (uid.isEmpty) return;
 
-  // Prénom
   final myDoc = await FirebaseFirestore.instance
       .collection('users').doc(uid).get();
   FFAppState().myName =
       myDoc.data()?['prenom'] as String? ?? '';
 
-  // Twin
   final invite = await TwinService.getMyMatchedTwin();
   if (invite != null) {
     final users = List<String>.from(invite['users'] ?? []);
@@ -95,7 +160,6 @@ Future initAppState() async {
         twinDoc.data()?['prenom'] as String? ?? '';
   }
 
-  // Squad
   final squad = await SquadService.getMySquad();
   if (squad != null) {
     FFAppState().squadId = squad['id'] as String? ?? '';
@@ -114,16 +178,17 @@ Future initAppState() async {
 
 ### 3.2 launchTwinRoutine
 
-Appelée quand l'utilisateur appuie sur une tuile de routine twin.
-Retourne le widget `RoutineLobby` via `Navigator.push`.
+Appelée quand l'utilisateur appuie sur une tuile de routine twin dans
+`twin/a_twin_dashboard`.
 
-**Paramètres d'entrée (à définir dans FF) :**
+**Paramètres d'entrée :**
 - `routineKey` (String)
 - `routineTitle` (String)
 
 ```dart
 import '/custom_code/routine_lobby.dart';
 import 'package:flutter/material.dart';
+import 'package:sozia/flutter_flow/flutter_flow_util.dart';
 
 Future launchTwinRoutine(
   BuildContext context,
@@ -147,7 +212,7 @@ Future launchTwinRoutine(
 
 ### 3.3 launchSquadRoutine
 
-Même principe pour les routines squad.
+Appelée depuis `cercle/a_cercle_dashboard`.
 
 **Paramètres d'entrée :**
 - `routineKey` (String)
@@ -156,6 +221,7 @@ Même principe pour les routines squad.
 ```dart
 import '/custom_code/routine_lobby.dart';
 import 'package:flutter/material.dart';
+import 'package:sozia/flutter_flow/flutter_flow_util.dart';
 
 Future launchSquadRoutine(
   BuildContext context,
@@ -191,6 +257,7 @@ de session entrante.
 ```dart
 import '/custom_code/routine_lobby.dart';
 import 'package:flutter/material.dart';
+import 'package:sozia/flutter_flow/flutter_flow_util.dart';
 
 Future joinRoutineSession(
   BuildContext context,
@@ -216,6 +283,8 @@ Future joinRoutineSession(
 
 ```dart
 // sendTwinRequest — paramètre : toUid (String)
+import '/custom_code/services/twin_service.dart';
+
 Future sendTwinRequest(String toUid) async {
   await TwinService.sendTwinRequest(toUid);
 }
@@ -223,7 +292,7 @@ Future sendTwinRequest(String toUid) async {
 // acceptTwinRequest — paramètre : inviteId (String)
 Future acceptTwinRequest(String inviteId) async {
   await TwinService.acceptTwinRequest(inviteId);
-  await initAppState(); // recharge l'App State
+  await initAppState();
 }
 
 // declineTwinRequest — paramètre : inviteId (String)
@@ -235,6 +304,9 @@ Future declineTwinRequest(String inviteId) async {
 ### 3.6 sendSquadInvite / acceptSquadInvite / declineSquadInvite / leaveSquad
 
 ```dart
+import '/custom_code/services/squad_service.dart';
+import 'package:sozia/flutter_flow/flutter_flow_util.dart';
+
 // sendSquadInvite — paramètre : toUid (String)
 Future sendSquadInvite(String toUid) async {
   await SquadService.sendInvite(toUid);
@@ -262,12 +334,12 @@ Future leaveSquad() async {
 
 ### 3.7 searchUsers
 
-Retourne une liste JSON pour alimenter une ListView dans FF.
-
 **Paramètre :** `query` (String)
 **Retour :** `List<dynamic>` (chaque item : `{uid, prenom, email}`)
 
 ```dart
+import '/custom_code/services/twin_service.dart';
+
 Future<List<dynamic>> searchUsers(String query) async {
   return await TwinService.searchUsers(query);
 }
@@ -275,33 +347,26 @@ Future<List<dynamic>> searchUsers(String query) async {
 
 ---
 
-## 4. Structure des pages FlutterFlow
+## 4. Intégration dans les pages existantes
 
-### Page TwinScreen
+Les pages Twin et Cercle **existent déjà** dans Sozia. On les enrichit.
 
-Conditions d'affichage à gérer via **Conditional Visibility** dans FF :
+### Page `twin/a_twin_dashboard`
+
+Ajouter un bloc conditionnel **dans la page existante** :
 
 ```
-Si AppState.twinUid est vide
-  → Afficher le bloc "Pas de twin" (recherche + invitations reçues)
+Si AppState.twinUid n'est pas vide
+  → Afficher la section routines twin (liste + bannière sessions)
 Sinon
-  → Afficher le bloc "Twin matché" (carte twin + routines)
+  → (La page gère déjà l'état "pas de twin" via les pages invitation_twin)
 ```
 
-**Bloc "Pas de twin" :**
-- TextField de recherche → action `searchUsers(query)` → ListView de résultats
-- Chaque résultat : bouton "Inviter" → action `sendTwinRequest(uid)`
-- StreamBuilder sur `twinInvitation` (collection FF) filtré par
-  `users arrayContains currentUserUid AND status == 'pending'`
-  → cards Accepter/Refuser → actions `acceptTwinRequest` / `declineTwinRequest`
-
-**Bloc "Twin matché" :**
-- Carte profil du twin (texte depuis AppState.twinName)
+**Section routines twin à ajouter :**
 - **Bannière sessions entrantes** (voir section 5)
-- Liste des 10 routines twin (voir tableau ci-dessous)
-  → chaque tuile appelle `launchTwinRoutine(context, routineKey, routineTitle)`
+- Liste des 10 routines twin → action `launchTwinRoutine(context, routineKey, routineTitle)`
 
-**Tableau des routines twin à créer comme items de liste :**
+**Tableau des routines twin :**
 
 | Icône | routineKey | routineTitle |
 |---|---|---|
@@ -316,26 +381,16 @@ Sinon
 | waves | bio_ambient_duo | Bio Ambient Duo |
 | favorite | twin_coherence | Twin Cohérence |
 
-### Page SquadScreen
+### Page `cercle/a_cercle_dashboard`
 
-Même logique de conditional visibility :
+Même principe dans la page Cercle existante :
 
 ```
-Si AppState.squadId est vide
-  → Bloc "Pas de squad" (créer / rejoindre)
-Sinon
-  → Bloc "Squad matché" (membres + routines)
+Si AppState.squadId n'est pas vide
+  → Afficher la section routines cercle (liste + bannière sessions)
 ```
 
-**Bloc "Squad matché" :**
-- Header avec nom du squad
-- **Bannière sessions entrantes** (voir section 5)
-- StreamBuilder sur `squads/{squadId}` → liste des membres
-- Liste des 7 routines squad → action `launchSquadRoutine`
-- Recherche pour inviter → action `sendSquadInvite`
-- Bouton quitter → action `leaveSquad`
-
-**Tableau des routines squad :**
+**Tableau des routines cercle :**
 
 | Icône | routineKey | routineTitle |
 |---|---|---|
@@ -351,36 +406,30 @@ Sinon
 
 ## 5. Bannière de sessions entrantes
 
-C'est le composant qui affiche "Quelqu'un t'invite à une routine".
+Créer un **Component** réutilisable `IncomingSessionBanner`.
 
-Dans FlutterFlow, créer un **Component** réutilisable `IncomingSessionBanner`.
-
-**Query Firestore à configurer dans le composant :**
-
-Pour twin :
+**Query Firestore pour twin :**
 ```
 Collection : twin_sessions
 Filtre 1 : users arrayContains [currentUserUid]
 Filtre 2 : status in ['waiting', 'accepted']
 ```
 
-Pour squad :
+**Query Firestore pour cercle :**
 ```
 Collection : squad_sessions
 Filtre 1 : squadId == AppState.squadId
 Filtre 2 : status in ['waiting', 'accepted']
 ```
 
-**Filtrage côté Flutter** (dans le builder) — afficher uniquement les documents
-où `launchedBy != currentUserUid` ET `acceptedBy` ne contient pas `currentUserUid`.
-
-Ce filtre n'est pas possible nativement dans FF (FF ne supporte pas les filtres
-`!=` sur des arrays). Il faut donc une Custom Function :
+Le filtre `launchedBy != currentUid` n'est pas possible nativement dans FF.
+Créer une **Custom Function** :
 
 ```dart
 // Custom Function : isIncomingSession
 // Paramètres : launchedBy (String), acceptedBy (List<String>)
 // Retour : bool
+import 'package:firebase_auth/firebase_auth.dart';
 
 bool isIncomingSession(String launchedBy, List<String> acceptedBy) {
   final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -388,19 +437,17 @@ bool isIncomingSession(String launchedBy, List<String> acceptedBy) {
 }
 ```
 
-Appliquer cette fonction dans la **Conditional Visibility** de chaque card.
+Appliquer dans la **Conditional Visibility** de chaque card.
 
-Chaque card affiche :
-- `routineTitle` (champ du document)
-- `initiatorName` (champ du document)
-- Bouton "Rejoindre" → action `joinRoutineSession(context, sessionId, routineKey, routineTitle, routineType)`
+Chaque card affiche `routineTitle`, `initiatorName` et un bouton "Rejoindre"
+→ action `joinRoutineSession(context, sessionId, routineKey, routineTitle, routineType)`
 
 ---
 
 ## 6. Navigation : schéma complet
 
 ```
-FlutterFlow Page (TwinScreen / SquadScreen)
+FlutterFlow Page (a_twin_dashboard / a_cercle_dashboard)
   │
   ├── Tuile routine tapée
   │     └── Custom Action launchTwinRoutine / launchSquadRoutine
@@ -413,57 +460,61 @@ FlutterFlow Page (TwinScreen / SquadScreen)
   │                 ├── Phase "countdown" 3-2-1
   │                 └── Navigator.pushReplacement → Routine Widget
   │
-  └── Bannière "Rejoindre"
+  └── Bannière "Rejoindre" (IncomingSessionBanner)
         └── Custom Action joinRoutineSession
               └── Navigator.push → RoutineLobby (mode destinataire)
-                    └── (même flux que ci-dessus)
+                    └── (même flux)
 ```
 
-`RoutineLobby` utilise `Navigator.pushReplacement` pour naviguer vers
-la routine : quand l'utilisateur appuie sur Back depuis la routine,
-il revient directement à la page FF (pas au lobby).
+`RoutineLobby` utilise `Navigator.pushReplacement` : depuis la routine,
+Back revient à la page FF (pas au lobby).
 
 ---
 
-## 7. Dépendances pubspec à vérifier dans FF
+## 7. Dépendances pubspec à vérifier
 
-Dans FlutterFlow > **Settings > Pubspec Dependencies**, s'assurer que ces
-packages sont présents (ils le sont déjà dans le projet code) :
+Dans FlutterFlow > **Settings > Pubspec Dependencies**, vérifier la présence de :
 
 ```yaml
-cloud_firestore: ^5.x.x
-firebase_auth: ^5.x.x
-firebase_database: ^11.x.x   # pour RTDB (routines RT)
+cloud_firestore: ^5.x.x     # déjà présent (5.6.9)
+firebase_auth: ^5.x.x       # déjà présent (5.6.0)
+firebase_database: ^11.x.x  # A AJOUTER — utilisé par rtdb_session.dart
+                             # pour les routines temps réel (twin_coherence_rt, etc.)
 ```
+
+**Important :** `firebase_database` n'est pas dans le projet Sozia actuel.
+Il faut l'ajouter manuellement dans pubspec avant de tester les routines RT.
 
 ---
 
 ## 8. Checklist de mise en place dans FlutterFlow
 
-- [ ] Importer les fichiers custom (twin_service, squad_service, routine_lobby, rtdb_session + tous les fichiers routines)
-- [ ] Créer les 6 variables App State (myName, twinUid, twinInviteId, twinName, squadId, squadMemberUids, squadMemberNames)
+- [ ] Corriger les imports dans `routine_lobby.dart` (chemins `/custom_code/services/` et `/custom_code/widgets/`)
+- [ ] Ajouter les 17 fichiers de routines dans `custom_code/widgets/`
+- [ ] Ajouter `firebase_database: ^11.x.x` dans pubspec
+- [ ] Ajouter les 7 variables App State (myName, twinUid, twinInviteId, twinName, squadId, squadMemberUids, squadMemberNames)
 - [ ] Créer la Custom Action `initAppState` et l'appeler dans **On App Load**
 - [ ] Créer les Custom Actions : `launchTwinRoutine`, `launchSquadRoutine`, `joinRoutineSession`
 - [ ] Créer les Custom Actions de gestion : `sendTwinRequest`, `acceptTwinRequest`, `declineTwinRequest`, `sendSquadInvite`, `acceptSquadInvite`, `declineSquadInvite`, `leaveSquad`, `searchUsers`
 - [ ] Créer la Custom Function `isIncomingSession`
-- [ ] Construire la page TwinScreen avec conditional visibility twin/pas-de-twin
-- [ ] Construire la page SquadScreen avec conditional visibility squad/pas-de-squad
-- [ ] Créer le composant `IncomingSessionBanner` (twin + squad) avec la query Firestore et la Custom Function de filtre
-- [ ] Brancher chaque tuile de routine sur `launchTwinRoutine` / `launchSquadRoutine`
-- [ ] Brancher le bouton "Rejoindre" sur `joinRoutineSession`
-- [ ] Tester le flux complet : initiateur lance → destinataire reçoit la bannière → accepte → initiateur voit "Prêt" → clique Commencer → countdown → routine
+- [ ] Intégrer la section routines dans la page `twin/a_twin_dashboard` existante
+- [ ] Intégrer la section routines dans la page `cercle/a_cercle_dashboard` existante
+- [ ] Créer le composant `IncomingSessionBanner` (twin + cercle) avec la Custom Function de filtre
+- [ ] Brancher chaque tuile sur `launchTwinRoutine` / `launchSquadRoutine`
+- [ ] Brancher "Rejoindre" sur `joinRoutineSession`
+- [ ] Tester le flux complet : initiateur lance → destinataire reçoit bannière → accepte → initiateur voit "Prêt" → Commencer → countdown → routine
 
 ---
 
 ## 9. Ce que RoutineLobby gère automatiquement
 
-Une fois lancé via les Custom Actions, `RoutineLobby` gère de façon
-autonome tout le flux temps réel. FlutterFlow n'a pas à intervenir :
+Une fois lancé via les Custom Actions, `RoutineLobby` gère tout le flux temps réel.
+FlutterFlow n'intervient pas :
 
 - Création du document de session dans Firestore
 - Écoute temps réel du document (stream)
 - Acceptation et mise à jour du statut
-- Affichage de la liste des membres avec état accepté/en attente
+- Affichage des membres avec état accepté/en attente
 - Activation du bouton "Commencer" quand au moins 1 autre membre a accepté
 - Déclenchement du countdown 3-2-1 quand `status == 'started'`
 - Navigation vers la bonne routine selon `routineKey`

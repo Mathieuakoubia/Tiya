@@ -75,7 +75,9 @@ class TwinService {
         users.firstWhere((uid) => uid != currentUid, orElse: () => '');
     if (twinUid.isEmpty) return null;
     final doc = await _db.collection('users').doc(twinUid).get();
-    return doc.exists ? {'uid': doc.id, ...doc.data()!} : null;
+    if (doc.exists) return {'uid': doc.id, ...doc.data()!};
+    // Compte sans profil Firestore (ex: compte test émulateur) — profil minimal
+    return {'uid': twinUid, 'prenom': 'Twin'};
   }
 
   // Envoie une invitation de matching à quelqu'un

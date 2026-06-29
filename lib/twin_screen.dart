@@ -204,6 +204,24 @@ class _NoTwinViewState extends State<_NoTwinView> {
           Text('Aucun résultat.',
               style: GoogleFonts.poppins(color: Colors.white38)),
         ],
+        const SizedBox(height: 32),
+        const Divider(color: Colors.white12),
+        const SizedBox(height: 20),
+        Text('ROUTINES DISPONIBLES',
+            style: GoogleFonts.poppins(
+                color: Colors.white38,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5)),
+        const SizedBox(height: 6),
+        Text('Invite un twin pour les débloquer.',
+            style: GoogleFonts.poppins(color: Colors.white24, fontSize: 12)),
+        const SizedBox(height: 14),
+        ..._HasTwinView._routines.map((r) => _LockedRoutineTile(
+              icon: r['icon'] as IconData,
+              routineTitle: r['routineTitle'] as String,
+              sublabel: r['sublabel'] as String,
+            )),
       ],
     );
   }
@@ -316,6 +334,59 @@ class _PendingMatchRequests extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _LockedRoutineTile extends StatelessWidget {
+  final IconData icon;
+  final String routineTitle;
+  final String sublabel;
+  const _LockedRoutineTile({
+    required this.icon,
+    required this.routineTitle,
+    required this.sublabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.03),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        ),
+        child: Row(children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.05)),
+            child: Icon(icon, color: Colors.white24, size: 22),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+              child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(routineTitle,
+                  style: GoogleFonts.poppins(
+                      color: Colors.white38,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600)),
+              const SizedBox(height: 2),
+              Text(sublabel,
+                  style: GoogleFonts.poppins(
+                      color: Colors.white24, fontSize: 11)),
+            ],
+          )),
+          const Icon(Icons.lock_outline, color: Colors.white24, size: 16),
+        ]),
+      ),
     );
   }
 }

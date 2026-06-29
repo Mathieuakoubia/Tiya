@@ -198,6 +198,8 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _AccountCard(),
+            const SizedBox(height: 28),
             _SectionHeader(label: "DIAGNOSTIC", color: const Color(0xFF0DAABA)),
             const SizedBox(height: 14),
             _RoutineButton(
@@ -485,6 +487,54 @@ class _RoutineButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AccountCard extends StatelessWidget {
+  const _AccountCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final email = user?.email ?? '';
+    final uid   = user?.uid ?? '';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Row(children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFF0DAABA).withValues(alpha: 0.15)),
+          child: const Icon(Icons.person_outline,
+              color: Color(0xFF0DAABA), size: 22),
+        ),
+        const SizedBox(width: 14),
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(email,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600),
+                overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 2),
+            Text(uid,
+                style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.30),
+                    fontSize: 10),
+                overflow: TextOverflow.ellipsis),
+          ],
+        )),
+      ]),
     );
   }
 }
